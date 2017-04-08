@@ -1,0 +1,9 @@
+SELECT A.UserID,A.expiration_dt,A.plan_cd 
+FROM Access AS A, UserAccount AS UA
+WHERE A.status_cd='A'
+AND UA.AutoRenew='Yes'
+AND A.UserID=UA.UserID
+
+#66309 -- Not been billed, wrong year
+#73674 -- Wrong billing date. Changed to today (3 Apr). Will get billed tomorrow AM.
+#73726 -- Wrong billing date. Changed to today (3 Apr). Will get billed tomorrow AM.

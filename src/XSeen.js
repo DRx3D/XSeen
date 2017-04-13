@@ -166,67 +166,11 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			// Need to replace with code that reference THREE
             x_canvas = new THREE.Scene(); // May need addtl info if multiple: xseen.X3DCanvas(x_element, xseen.canvases.length);
             xseen.canvases.push(x_canvas);
-
-			// This is when WebGL/THREE fail to initialize
-/*
-            if (x_canvas.gl === null) {
-                altDiv = document.createElement("div");
-                altDiv.setAttribute("class", "xseen-nox3d");
-                altDiv.setAttribute("id", "xseen-nox3d");
-
-                altP = document.createElement("p");
-                altP.appendChild(document.createTextNode("WebGL is not yet supported in your browser. "));
-                aLnk = document.createElement("a");
-                aLnk.setAttribute("href","http://www.x3dom.org/?page_id=9");
-                aLnk.appendChild(document.createTextNode("Follow link for a list of supported browsers... "));
-                
-                altDiv.appendChild(altP);
-                altDiv.appendChild(aLnk);
-                
-                x_canvas.x3dElem.appendChild(altDiv);
-
-                // remove the stats div (it's not added when WebGL doesn't work)
-                if (x_canvas.stateViewer) { 
-                    x_element.removeChild(x_canvas.stateViewer.viewer);
-                }
-                continue;
-            }
- */
+			// Need to handle failure to initialize?
             
             t0 = new Date().getTime();
 
-			// These may not apply as THREE is used underneath...
-/*
-            xscenes[i].runtime = new xseen.Runtime(xscenes[i], x_canvas);
-            xscenes[i].runtime.initialize(xscenes[i], x_canvas);
 
-            if (xseen.runtime.ready) {
-                xscenes[i].runtime.ready = xseen.runtime.ready;
-            }
-            
-            // no backend found method system wide call
-            if (x_canvas.backend == '') {
-                xseen.runtime.noBackendFound();
-            }
-            
-            x_canvas.load(xscenes[i], i, settings);
-
-            // show or hide statistics based on param/x3d attribute settings
-            if (settings.getProperty('showStat') === 'true') {
-                xscenes[i].runtime.statistics(true);
-            } else {
-                xscenes[i].runtime.statistics(false);
-            }
-
-            if (settings.getProperty('showProgress') === 'true') {
-                if (settings.getProperty('showProgress') === 'bar'){
-                    x_canvas.progressDiv.setAttribute("class", "xseen-progress bar");
-                }
-                xscenes[i].runtime.processIndicator(true);
-            } else {
-                xscenes[i].runtime.processIndicator(false);
-            }
- */
 			var divWidth = 640;
 			var divHeight = 480;
 			var divWidth = window.innerWidth/3;
@@ -237,7 +181,6 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			x_element.appendChild (x_renderer.domElement);
 			
 			xseen.sceneInfo.push ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : x_camera, 'element' : x_element});
-//			xseen.sceneInfo.push ({'scene' : 0, 'renderer' : 0, 'camera' : 0, 'element' : x_element});
 
 			t1 = new Date().getTime() - t0;
             xseen.debug.logInfo("Time for setup and init of GL element no. " + i + ": " + t1 + " ms.");
@@ -258,6 +201,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
         })('load');
 		xseen.render();
 		
+		// for each X-Scene tag, parse and load the contents
+		for (i=0; i<xseen.sceneInfo.length; i++) {
+			xseen.Parse (xseen.sceneInfo[i].element, xseen.sceneInfo[i]);
+		}
 		window.setTimeout (function() { 
 							loadContent(xseen.sceneInfo[0].scene, xseen.sceneInfo[0].camera); 
 							}, 20 );

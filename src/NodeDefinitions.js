@@ -20,6 +20,7 @@
 // Since these are HTML tags in development, lower-case tag names can be proceeded with 'x-'. That is automatically handled
 
 xseen.nodeDefinitions = [
+		{node : 'canvas',		action : 'core_NOOP'},
 		{node : 'WorldInfo',	action : 'core_WorldInfo'},
 		{node : 'Box',			action : 'geometry3D_Box'},
 		{node : 'Cone',			action : 'geometry3D_Cone'},

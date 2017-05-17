@@ -15,34 +15,32 @@
  * - Flash
  * 
  */
- 
 
 xseen.Parse = function (element, parent, sceneInfo) {
 	var nodeName = element.localName.toLowerCase();
-	//xseen.debug.logInfo("Parse " + nodeName);
-	if (typeof(element._xseen) == 'undefined') {
-		element._xseen = {};
-		element._xseen.children = [];
-	}
-	if (typeof(xseen.parseTable[nodeName]) == 'undefined') {
-		xseen.debug.logInfo("Unknown node: " + nodeName);
+	xseen.debug.logInfo("Parse " + nodeName);
+	element._xseen = new Object();
+	var t = xseen.nodeDefinitions[nodeName].method;
+	if (typeof(xseen.node[xseen.nodeDefinitions[nodeName].method].init) !== 'undefined') {
+		//xseen.debug.logInfo("..parsing attributes of |" + nodeName + "|");
+		xseen.node[xseen.nodeDefinitions[nodeName].method].init (element, parent);
 	} else {
-		xseen.nodes._parseFields (element, xseen.parseTable[nodeName]);
-		xseen.node[xseen.parseTable[nodeName].method].init (element, parent);
+		//xseen.debug.logInfo("..no parse init action routine for " + nodeName);
 	}
-	
+
 	for (element._xseen.parsingCount=0; element._xseen.parsingCount<element.childElementCount; element._xseen.parsingCount++) {
-		element.children[element._xseen.parsingCount]._xseen = {};
-		element.children[element._xseen.parsingCount]._xseen.children = [];
-		element.children[element._xseen.parsingCount]._xseen.sceneInfo = element._xseen.sceneInfo;
 		this.Parse (element.children[element._xseen.parsingCount], element, sceneInfo);
 		//xseen.debug.logInfo(".return from Parse with current node |" + element.children[element._xseen.parsingCount].localName + "|");
 	}
 
-	if (typeof(xseen.parseTable[nodeName]) !== 'undefined') {
-		xseen.node[xseen.parseTable[nodeName].method].fin (element, parent);
+	if (typeof(xseen.node[xseen.nodeDefinitions[nodeName].method].endParse) !== 'undefined') {
 		//xseen.debug.logInfo("..parsing children data of |" + nodeName + "|");
-		// --> xseen.node[xseen.nodeDefinitions[nodeName].method].endParse (element, parent);
+		xseen.node[xseen.nodeDefinitions[nodeName].method].endParse (element, parent);
+	} else {
+		//xseen.debug.logInfo("..no endParse action routine for " + nodeName);
 	}
 	//xseen.debug.logInfo("  reached bottom, heading back up from |" + nodeName + "|");
+	if (nodeName == 'scene') {
+		//xseen.debug.logInfo("Check Scene node");
+	}
 }

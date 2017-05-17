@@ -16,12 +16,28 @@
 var xseen = {
     canvases : [],
 	sceneInfo: [],
+	nodeDefinitions: {},
+	parseTable: {},
+	
+	timeStart	: (new Date()).getTime(),
+	timeNow		: (new Date()).getTime(),
 
+	versionInfo	: [],
     x3dNS    : 'http://www.web3d.org/specifications/x3d-namespace',
     x3dextNS : 'http://philip.html5.org/x3d/ext',
     xsltNS   : 'http://www.w3.org/1999/XSL/x3dom.Transform',
     xhtmlNS  : 'http://www.w3.org/1999/xhtml'
 };
+
+xseen.versionInfo = {
+	major	: 0,
+	minor	: 1,
+	revision	: 0,
+	version	: '',
+	date	: '2017-05-15',
+	splashText		: "XSeen 3D Language parser.<br>\nLimited pre-defined shapes, fixed camera, directional light, no rotation/scale, Material texture only",
+};
+xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 
 /**
  * Function to add nodes to parser
@@ -30,6 +46,7 @@ var xseen = {
  * This function can be called multiple times. Duplicate entries overwrite previous ones.
  * */
 
+/*
 xseen.NodeActions = {};		// Nodes as defined
 xseen.NodeActionsLC = {};	// Lowercase node names
 xseen.NodeActionsD = {};	// Development lowercase node names
@@ -42,7 +59,15 @@ xseen.addNodes = function (nodes)
 			xseen.NodeActionsD['x-'+(nodes[ii].node).toLowerCase()] = nodes[ii].action;
 		}
 	};
+*/
 
+// Define function for adding node to parsing tables
+//	May need to verify 'newNode' is a legitamite JS property
+xseen._defineNode = function (newNode, nodeMethod) {
+	var namelc = newNode.toLowerCase();
+	xseen.nodeDefinitions[namelc] = {'name' : newNode, 'namelc' : namelc, 'method' : nodeMethod};
+}
+//xseen._nodeDefinitions();
 
 
 /**

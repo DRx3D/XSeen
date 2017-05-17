@@ -50,12 +50,12 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         // Search all X-Scene elements in the page
 		//alert ('Finding all x-scene tags...');
-        var xseens_unfiltered = document.getElementsByTagName('x-scene');
+        var xseens_unfiltered = document.getElementsByTagName('scene');
         var xseens = [];
 		var sceneInfo
 
         // check if element already has been processed
-        for (i=0; i < xseens_unfiltered.length; i++) {
+        for (var i=0; i < xseens_unfiltered.length; i++) {
             if (xseens_unfiltered[i].hasRuntime === undefined)
                 xseens.push(xseens_unfiltered[i]);
         }
@@ -83,7 +83,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		var showLoggingConsole = false;
 
         // for each XSeens element
-        for (i=0; i < xseens.length; i++) {
+        for (var i=0; i < xseens.length; i++) {
 
             // default parameters
             settings.setProperty("showLog", xseens[i].getAttribute("showLog") || 'false');
@@ -95,7 +95,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
             // for each param element inside the X3D element
             // add settings to properties object
             params = xseens[i].getElementsByTagName('PARAM');
-            for (j=0; j < params.length; j++) {
+            for (var j=0; j < params.length; j++) {
                 if (params[j].getAttribute('name') in validParams) {
                     settings.setProperty(params[j].getAttribute('name'), params[j].getAttribute('value'));
                 } else {
@@ -145,13 +145,14 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         if (xseen.versionInfo !== undefined) {
             xseen.debug.logInfo("X3DOM version " + xseen.versionInfo.version + ", " +
-                                "Revison <a href='https://github.com/x3dom/x3dom/tree/"+ xseen.versionInfo.revision +"'>"
-                                + xseen.versionInfo.revision + "</a>, " +
+                                "Revison " + xseen.versionInfo.revision + ", " +
                                 "Date " + xseen.versionInfo.date);
+            xseen.debug.logInfo(xseen.versionInfo.splashText);
         }
         
         xseen.debug.logInfo("Found " + xseen.length + " XSeen nodes");
-        
+        	
+		
         // Create a HTML canvas for every XSeen scene and wrap it with
         // an X3D canvas and load the content
         var x_element;
@@ -159,7 +160,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
         var altDiv, altP, aLnk, altImg;
         var t0, t1;
 
-        for (i=0; i < xseens.length; i++)
+        for (var i=0; i < xseens.length; i++)
         {
             x_element = xseens[i];
 
@@ -176,11 +177,17 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			var divWidth = window.innerWidth/3;
 			var divHeight =  window.innerHeight/3;
 			var x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
+			x_camera.position.x = 0;
+			x_camera.position.z = 10;
 			var x_renderer = new THREE.WebGLRenderer();
 			x_renderer.setSize (divWidth, divHeight);
 			x_element.appendChild (x_renderer.domElement);
 			
-			xseen.sceneInfo.push ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : x_camera, 'element' : x_element});
+			xseen.sceneInfo.push ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
+			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
+			x_element._xseen = {};
+			x_element._xseen.children = [];
+			x_element._xseen.sceneInfo = xseen.sceneInfo[xseen.sceneInfo.length-1];
 
 			t1 = new Date().getTime() - t0;
             xseen.debug.logInfo("Time for setup and init of GL element no. " + i + ": " + t1 + " ms.");
@@ -199,20 +206,42 @@ xseen.rerouteSetAttribute = function(node, browser) {
                 document.body.fireEvent('on' + eventType, evt);   
             }
         })('load');
-		xseen.render();
+		//xseen.render();
 		
 		// for each X-Scene tag, parse and load the contents
-		for (i=0; i<xseen.sceneInfo.length; i++) {
+		for (var i=0; i<xseen.sceneInfo.length; i++) {
+			console.log("Processing 'scene' element #" + i);
+			xseen.debug.logInfo("Processing 'scene' element #" + i);
 			xseen.Parse (xseen.sceneInfo[i].element, xseen.sceneInfo[i]);
 		}
+/*
 		window.setTimeout (function() { 
 							loadContent(xseen.sceneInfo[0].scene, xseen.sceneInfo[0].camera); 
 							}, 20 );
+ */
     };
-
+/*
+ *
+ * Need to animate camera in a circle while looking at origin. use <camera>.lookAt(xseen.types.Vector([0,0,0])
+ * while updating the position with Y=0 and (x,z) a circle of radius 4 (for now)
+ *
+ */
 	xseen.render = function () {
 								requestAnimationFrame (xseen.render);
-								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].camera);
+						// This is not the way to do animation. Code should not be in the loop
+						// Various objects needing animation should register for an event ... or something
+						// Animate circling camera with a period of 4 second (4000 milliseconds)
+								var deltaT, radians, x, z;
+								xseen.timeNow = (new Date()).getTime();
+								deltaT = xseen.timeNow - xseen.timeStart;
+								radians = deltaT/4000 * 2 * Math.PI;
+								x = 4 * Math.sin(radians);
+								z = 4 * Math.cos(radians);
+								xseen.sceneInfo[0].element._xseen.renderer.camera.position.x = x;
+								xseen.sceneInfo[0].element._xseen.renderer.camera.position.z = z;
+								xseen.sceneInfo[0].element._xseen.renderer.camera.lookAt(xseen.types.Vector3([0,0,0]));
+						// End of animation
+								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
 								};
     
 	// Replace with code that calls THREE's unload methods

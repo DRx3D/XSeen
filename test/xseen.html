@@ -19,23 +19,29 @@
 		<script src="../src/nodes/nodes.js"></script>
 	</head>
 	<body>
-		<x-scene id='xscene'>
-<x-camera></x-camera>
+		<scene id='xscene'>
+<camera position='0 0 4'></camera>
 <WorldInfo></WorldInfo>
-<light></light>
-<transform>
+<light intentsity='.5' direction='0 0 -1'></light>
+<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
+<transform translation='0 2 0'>
 	<shape>
 		<box></box>
-		<material diffuseColor='1 0 0' emisiveColor='0 1 0'></material>
+		<appearance>
+			<material diffusecolor='1 0 0' specularcolor='0 .5 0'></material>
+		</appearance>
 	</shape>
 </transform>
-<x-transform>
-	<x-shape>
-		<x-cone></x-cone>
-		<x-material></x-material>
-	</x-shape>
-</x-transform>
-		</x-scene>
+<transform>
+	<light color='1 .5 0' direction='-1 0 0'></light>
+	<shape>
+		<cone></cone>
+		<appearance>
+			<material diffusecolor='0 .5 1'></material>
+		</appearance>
+	</shape>
+</transform>
+		</scene>
 		<script>
 			// Our Javascript will go here.
 			//alert ('Processing closing script...');
@@ -54,7 +60,7 @@ function loadContent1() {
 }
 function render() {
 	requestAnimationFrame( render );
-	x_renderer.render( x_canvas, x_camera );
+	//x_renderer.render( x_canvas, x_camera );
 }
 function loadContent(scene, camera) {
 	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -65,8 +71,8 @@ function loadContent(scene, camera) {
 	camera.position.x = 1;
 	camera.position.z = 5;
 }
-loadContent1();
-render();
+//loadContent1();
+//render();
 
 		</script>
 	</body>

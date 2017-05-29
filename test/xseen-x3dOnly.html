@@ -53,11 +53,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>My first three.js app</title>
+		<title>XSeen - General Test</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
-			#xscene {width:800px; height:450px; border:1px red dashed; }
+			#xscene {width:642px; height:482px; border:1px red dashed; }
 		</style>
 		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>
 		<script src="../ExternalLibraries/three.js"></script>
@@ -77,33 +77,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src="../src/nodes/nodes.js"></script>
 		<script src="../src/nodes/nodes-af.js"></script>
 -->
-
 	</head>
 	<body>
-		<scene id='xscene' height='450' width='800'>
+		<scene id='xscene'>
 <camera position='0 0 4'></camera>
 <WorldInfo></WorldInfo>
 <light intentsity='.5' direction='0 0 -1'></light>
 <light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
 <Inline id='inline4' url='inline.x3d'></Inline>
-<transform id='aframe_nodes' translation='0 0 15'>
-	<transform id='af_box' translation='0 -3 0'>
-		<a-box height='.2' depth='12' width='8'></a-box>
-	</transform>
-	<transform id='af_cone' translation='0 3 0'>
-		<a-cone height='8' radius='2'></a-cone>
-	</transform>
-	<transform id='af_cylinder' translation='4 0 0'>
-		<a-cylinder height='3' radius-bottom='.8' radius-top='1'></a-cylinder>
-	</transform>
-	<transform id='af_sphere' translation='4 0 3'>
-		<a-sphere radius='.8'></a-sphere>
-	</transform>
-	<transform id='af_torus' translation='0 5 0' rotation='1 0 0 1.57'>
-		<a-torus segments-tubular='16'></a-torus>
-	</transform>
-	<Inline id='inlineAF' url='PlatonicSolids.x3d'></Inline>
-</transform>
 <transform id='SceneParent_1' translation='0 0 -2' rotation='0 0 1 1.57'>
 	<transform id='SceneBox' translation='0 2 0' rotation='1 0 0 1'>
 		<shape>

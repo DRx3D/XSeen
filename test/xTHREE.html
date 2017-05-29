@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 67%; height: 67% }
+			#xscene {width:642px; height:482px; border:1px red dashed; }
+		</style>
+		<script src='jquery-3.2.1.min.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css'>
+		<script src="../../lib/three.js"></script>
+		<script src='../src/utils/LoadManager.js'></script>
+		<script src="../src/Internals.js"></script>
+		<script src="../src/debug.js"></script>
+		<script src="../src/XSeen.js"></script>
+		<script src="../src/Parse.js"></script>
+		<script src="../src/utils/Properties.js"></script>
+		<script src="../src/NodeDefinitions.js"></script>
+		<script src="../src/nodes/nodes.js"></script>
+	</head>
+	<body>
+<h1>Test of THREE with delayed nodes added to script</h1>
+		<script>
+			// Our Javascript will go here.
+			//alert ('Processing closing script...');
+var x_renderer, x_canvas, x_camera, xGroup;
+function loadContent1() {
+	x_canvas = new THREE.Scene();
+	var divWidth = window.innerWidth/3;
+	var divHeight =  window.innerHeight/3;
+	x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
+	x_renderer = new THREE.WebGLRenderer();
+	x_renderer.setSize (divWidth, divHeight);
+	document.body.appendChild (x_renderer.domElement);
+
+	xGroup = new THREE.Group();
+	loadContent (x_canvas, x_camera);
+}
+function render() {
+	requestAnimationFrame( render );
+	x_renderer.render( x_canvas, x_camera );
+}
+function loadContent(scene, camera) {
+	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+	var cube = new THREE.Mesh( geometry, material );
+	xGroup.add (cube);
+
+	scene.add(xGroup);
+	camera.position.x = 1;
+	camera.position.z = 5;
+}
+loadContent1();
+render();
+
+var gSphere = new THREE.SphereGeometry( 2, 32, 32 );
+var mYellow = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+var sphere = new THREE.Mesh( gSphere, mYellow );
+sphere.position.x = 4;
+sphere.position.y = 1;
+sphere.position.z = -2;
+group = new THREE.Group();
+xGroup.add (group);
+
+group.add (sphere);
+
+		</script>
+	</body>
+</html>

@@ -12,21 +12,52 @@
 /**
  * The Namespace container for x3dom objects.
  * @namespace x3dom
+ *
+ *	Removed THREE loaders
+	loaders:	{
+					'file'	: new THREE.FileLoader(),
+					'image'	: 0,
+				},
+
  * */
 var xseen = {
-    canvases : [],
-	sceneInfo: [],
-	nodeDefinitions: {},
-	parseTable: {},
-	
-	timeStart	: (new Date()).getTime(),
-	timeNow		: (new Date()).getTime(),
+    canvases		: [],
+	sceneInfo		: [],
+	nodeDefinitions	: {},
+	parseTable		: {},
+	node			: {},
 
-	versionInfo	: [],
-    x3dNS    : 'http://www.web3d.org/specifications/x3d-namespace',
-    x3dextNS : 'http://philip.html5.org/x3d/ext',
-    xsltNS   : 'http://www.w3.org/1999/XSL/x3dom.Transform',
-    xhtmlNS  : 'http://www.w3.org/1999/xhtml'
+	loadMgr			: new LoadManager(),
+	loadProgress	: function (xhr) {
+						if (xhr.total != 0) {
+							console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+						}
+					},
+	loadError		: function (userdata, xhr) {
+						console.error( 'An error happened on '+userdata.e.id);
+					},
+
+	
+	timeStart		: (new Date()).getTime(),
+	timeNow			: (new Date()).getTime(),
+
+	versionInfo		: [],
+    x3dNS    		: 'http://www.web3d.org/specifications/x3d-namespace',
+    x3dextNS 		: 'http://philip.html5.org/x3d/ext',
+    xsltNS   		: 'http://www.w3.org/1999/XSL/x3dom.Transform',
+    xhtmlNS  		: 'http://www.w3.org/1999/xhtml',
+
+	dumpChildren	: function (obj, indent, addstr)
+						{
+							console.log (indent + '> ' + obj.type + ' (' + obj.name + ')');
+							for (var i=0; i<obj.children.length; i++) {
+								var child = obj.children[i];
+								this.dumpChildren(child, indent+addstr, addstr);
+							}
+						},
+
+	dumpSceneGraph	: function () {this.dumpChildren (xseen.sceneInfo[0].scene, ' +', '--');},
+
 };
 
 xseen.versionInfo = {
@@ -34,10 +65,26 @@ xseen.versionInfo = {
 	minor	: 1,
 	revision	: 0,
 	version	: '',
-	date	: '2017-05-15',
-	splashText		: "XSeen 3D Language parser.<br>\nLimited pre-defined shapes, fixed camera, directional light, no rotation/scale, Material texture only",
+	date	: '2017-05-26',
+	splashText		: "XSeen 3D Language parser.<br>\nAll X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only<br>\nNext work<ul><li>Internal Documentation</li><li>Event Model/Animation</li><li>A-Frame Entities</li></ul>",
 };
 xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
+
+
+
+
+
+/**
+ * Important future work (not listed above)
+ *	- Animations
+ *	- A-Frame entities (limited)
+ *	- Navigation
+ *	- External geometry
+ *	- Internal geometry (IndexedFaceSet, IndexedTriangleSet, ...)
+ *
+ */
+
+
 
 /**
  * Function to add nodes to parser

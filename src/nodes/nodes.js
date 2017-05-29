@@ -14,8 +14,6 @@
  // Node definition code (just stubs right now...)
 
 
-xseen.node = {};
-
 xseen.node.core_NOOP = {
 	'init'	: function (e,p) {},
 	'fin'	: function (e,p) {}
@@ -32,14 +30,6 @@ function parsing (s, e) {
 xseen.node.unk_Camera = {
 	'init'	: function (e,p)
 		{	// This should really go in a separate push-down list for Viewpoints
-			var divWidth = window.innerWidth/3;
-			var divHeight =  window.innerHeight/3;
-			var camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
-			camera.position.x = e._xseen.fields.position[0];
-			camera.position.y = e._xseen.fields.position[1];
-			camera.position.z = e._xseen.fields.position[2];
-			e._xseen.sceneInfo.camera.push (camera);
-			p._xseen.children.push(camera);
 		},
 	'fin'	: function (e,p) {}
 };
@@ -56,6 +46,22 @@ xseen.node.geometry3D_Cone = {
 	'init'	: function (e,p)
 		{
 			p._xseen.geometry = new THREE.ConeGeometry(e._xseen.fields.bottomradius, e._xseen.fields.height, 24, false, 0, 2*Math.PI);
+		},
+	'fin'	: function (e,p) {}
+};
+xseen.node.geometry3D_Sphere = {
+	'init'	: function (e,p)
+		{
+			p._xseen.geometry = new THREE.SphereGeometry(e._xseen.fields.radius, 32, 32, 0, Math.PI*2, 0, Math.PI);
+		},
+	'fin'	: function (e,p) {}
+};
+	
+xseen.node.geometry3D_Cylinder = {
+	'init'	: function (e,p)
+		{
+			var noCaps = !(e._xseen.fields.bottom || e._xseen.fields.top);
+			p._xseen.geometry = new THREE.CylinderGeometry(e._xseen.fields.radius, e._xseen.fields.radius, e._xseen.fields.height, 32, 1, noCaps, 0, Math.PI*2);
 		},
 	'fin'	: function (e,p) {}
 };
@@ -86,7 +92,6 @@ xseen.node.appearance_Appearance = {
 	'fin'	: function (e,p)
 		{
 			p._xseen.appearance = e._xseen.material;
-			xseen.debug.logInfo ('Creating Appearance from Material');
 		}
 };
 xseen.node.unk_Shape = {
@@ -105,16 +110,26 @@ xseen.node.grouping_Transform = {
 	'fin'	: function (e,p)
 		{
 			// Apply transform to all objects in e._xseen.children
-			var offset = e._xseen.fields.translation;
-			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
+			var group = new THREE.Group();
+			group.name = 'Transform children [' + e.id + ']';
+			group.position.x	= e._xseen.fields.translation[0];
+			group.position.y	= e._xseen.fields.translation[1];
+			group.position.z	= e._xseen.fields.translation[2];
+			group.scale.x		= e._xseen.fields.scale[0];
+			group.scale.y		= e._xseen.fields.scale[1];
+			group.scale.z		= e._xseen.fields.scale[2];
+			group.quaternion.x	= rotation.x;
+			group.quaternion.y	= rotation.y;
+			group.quaternion.z	= rotation.z;
+			group.quaternion.w	= rotation.w;
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
-					child.position.x = offset[0];
-					child.position.y = offset[1];
-					child.position.z = offset[2];
-					this.children.push(child);
-				}, p._xseen);
-			offset = null;
+					group.add(child);
+				});
+			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			p._xseen.children.push(group);
+			e._xseen.object = group;
 		}
 };
 
@@ -137,11 +152,70 @@ xseen.node.unk_Light = {
 		}
 };
 
+xseen.node.networking_Inline = {
+	'init'	: function (e,p) 
+		{
+			if (typeof(e._xseen.processedUrl) === 'undefined' || !e._xseen.requestedUrl) {
+				e._xseen.loadGroup = new THREE.Group();
+				e._xseen.loadGroup.name = 'Inline content [' + e.id + ']';
+				console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+				xseen.loadMgr.loadXml (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, {'e':e, 'p':p});
+				e._xseen.requestedUrl = true;
+			}
+			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			p._xseen.children.push(e._xseen.loadGroup);
+			console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+		},
+	'fin'	: function (e,p)
+		{
+		},
+
+	'loadSuccess' :
+				function (response, userdata, xhr) {
+					userdata.e._xseen.processedUrl = true;
+					userdata.e._xseen.loadText = response;
+					console.log("download successful for "+userdata.e.id);
+					var start = {'_xseen':0};
+					var findSceneTag = function (response) {
+						if (typeof(response._xseen) === 'undefined') {response._xseen = {'childCount': -1};}
+						if (response.nodeName == 'scene') {
+							start = response;
+							return;
+						} else if (response.children.length > 0) {
+							for (response._xseen.childCount=0; response._xseen.childCount<response.children.length; response._xseen.childCount++) {
+								findSceneTag(response.children[response._xseen.childCount]);
+								if (start._xseen !== 0) {return;}
+							}
+						} else {
+							return;
+						}
+					}
+					findSceneTag (response);	// done this way because function is recursive
+					if (start._xseen !== 0) {	// Found 'scene' tag. Need to parse and insert
+						console.log("Found legal X3D file with 'scene' tag");
+						while (start.children.length > 0) {
+							userdata.e.appendChild(start.children[0]);
+						}
+						xseen.Parse(userdata.e, userdata.p, userdata.p._xseen.sceneInfo);
+						userdata.e._xseen.children.forEach (function (child, ndx, wholeThing)
+							{
+								userdata.e._xseen.loadGroup.add(child);
+console.log ('...Adding ' + child.type + ' (' + child.name + ') to Inline Group? with UUID ' + userdata.e._xseen.loadGroup.uuid + ' (' + userdata.e._xseen.loadGroup.name + ')');
+							});
+						userdata.p._xseen.sceneInfo.scene.updateMatrixWorld();
+						//xseen.debug.logInfo("Complete work on Inline...");
+					} else {
+						console.log("Found illegal X3D file -- no 'scene' tag");
+					}
+					// Parse (start, userdata.p)...	
+				}
+};
+
 xseen.node.core_Scene = {
 	'init'	: function (e,p)
 		{
-			var width = window.innerWidth/3;
-			var height = window.innerHeight/3;
+			var width = e._xseen.sceneInfo.size.width;
+			var height = e._xseen.sceneInfo.size.height;
 			e._xseen.renderer = {
 						'canvas' 	: e._xseen.sceneInfo.scene,
 						'width'		: width,
@@ -150,103 +224,35 @@ xseen.node.core_Scene = {
 						'renderer'	: e._xseen.sceneInfo.renderer,
 						};
 			e._xseen.renderer.renderer.setSize (width, height);
+			var camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+			camera.position.x = 0;		// hardwired for now...
+			camera.position.y = 0;
+			camera.position.z = 4;
+			e._xseen.renderer.camera = camera;
 		},
+
+/*
+ * This appears now to be working!!!
+ *
+ * Late loading content is not getting inserted into the scene graph for rendering. Need to read
+ * THREE docs about how to do that.
+ * Camera will need to be redone. Existing camera is treated as a special child. A separate camera
+ * should be established and Viewpoint nodes define "photostops" rather than a camera. The camera is 
+ * in effect, parented to the "photostop". This probably needs to list of Viewpoints discussed in the
+ * X3D specification.
+ */
 	'fin'	: function (e,p)
 		{
 			// Render all Children
-
-			var firstCamera = true;
-			for (var i=0; i<e._xseen.children.length; i++) {
-				if (e._xseen.children[i].type != 'PerspectiveCamera') {
-					e._xseen.renderer.canvas.add(e._xseen.children[i]);
-				} else if (firstCamera && e._xseen.children[i].isCamera) {
-					xseen.debug.logInfo("..Using child #"+i+" as camera");
-					e._xseen.renderer.camera = e._xseen.children[i];
-				}
-			}
-
+			//xseen.renderNewChildren (e._xseen.children, e._xseen.renderer.canvas);
+			e._xseen.children.forEach (function (child, ndx, wholeThing)
+				{
+					console.log('Adding child of type ' + child.type + ' (' + child.name + ')');
+					e._xseen.renderer.canvas.add(child);
+				});
+			xseen.dumpSceneGraph ();
 			e._xseen.renderer.renderer.render( e._xseen.renderer.canvas, e._xseen.renderer.camera );
 			xseen.debug.logInfo("Rendered all elements -- Starting animation");
 			xseen.render();
 		}
-};
-
-
-
-/*
- * xseen.types contains the datatype and conversion utilities. These convert one format to another.
- * Any method ending in 'toX' where 'X' is some datatype is a conversion to that type
- * Other methods convert from string with space-spearated values
- */
-xseen.types = {
-	'SFFloat'	: function (value, def)
-		{
-			if (value === null) {value = def;}
-			if (Number.isNaN(value)) {return def};
-			return value;
-		},
-
-	'SFBool'	: function (value, def)
-		{
-			if (value === null) {value = def;}
-			if (value) {return true;}
-			if (!value) {return false;}
-			return def;
-		},
-
-	'SFVec3f'	: function (value, def)
-		{
-			if (value === null) {value = def;}
-			var v3 = value.split(' ');
-			if (v3.length != 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
-				value = def;
-				v3 = value.split(' ');
-			}
-			return [v3[0]-0, v3[1]-0, v3[2]-0];
-		},
-
-	'SFColor'	: function (value, defaultString)
-		{
-			var v3 = this.SFVec3f(value, defaultString);
-			v3[0] = Math.min(Math.max(v3[0], 0.0), 1.0);
-			v3[1] = Math.min(Math.max(v3[1], 0.0), 1.0);
-			v3[2] = Math.min(Math.max(v3[2], 0.0), 1.0);
-			return v3;
-		},
-	
-	'Scalar'	: function (value, defaultString)
-		{
-			return this.SFFloat(value, defaultString);
-		},
-
-	'Vector3'	: function (value)
-		{
-			return new THREE.Vector3(value[0], value[1], value[2]);
-		},
-
-	'Color3'	: function (value, defaultString)
-		{
-			return this.SFColor(value, defaultString);
-		},
-	
-	'Color3toHex' : function (c3)
-		{
-			var hr = Math.round(255*c3[0]).toString(16);
-			var hg = Math.round(255*c3[1]).toString(16);
-			var hb = Math.round(255*c3[2]).toString(16);
-			if (hr.length < 2) {hr = "0" + hr;}
-			if (hg.length < 2) {hg = "0" + hg;}
-			if (hb.length < 2) {hb = "0" + hb;}
-			var hex = '0x' + hr + hg + hb;
-			return hex;
-		},
-
-	'Color3toInt' : function (c3)
-		{
-			var hr = Math.round(255*c3[0]) << 16;
-			var hg = Math.round(255*c3[1]) << 8;
-			var hb = Math.round(255*c3[2])
-			return hr + hg + hb;
-		}
-	
 };

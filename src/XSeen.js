@@ -150,7 +150,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
             xseen.debug.logInfo(xseen.versionInfo.splashText);
         }
         
-        xseen.debug.logInfo("Found " + xseen.length + " XSeen nodes");
+        //xseen.debug.logInfo("Found " + xseen.length + " XSeen nodes");
         	
 		
         // Create a HTML canvas for every XSeen scene and wrap it with
@@ -172,10 +172,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
             t0 = new Date().getTime();
 
 
-			var divWidth = 640;
-			var divHeight = 480;
-			var divWidth = window.innerWidth/3;
-			var divHeight =  window.innerHeight/3;
+			var divWidth = x_element.getAttribute('width');
+			var divHeight =  x_element.getAttribute('height');
+			//var divWidth = window.innerWidth;
+			//var divHeight =  window.innerHeight;
 			var x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
 			x_camera.position.x = 0;
 			x_camera.position.z = 10;
@@ -183,7 +183,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			x_renderer.setSize (divWidth, divHeight);
 			x_element.appendChild (x_renderer.domElement);
 			
-			xseen.sceneInfo.push ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
+			xseen.sceneInfo.push ({'size':{'width':divWidth, 'height':divHeight}, 'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};
 			x_element._xseen.children = [];
@@ -209,10 +209,15 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		//xseen.render();
 		
 		// for each X-Scene tag, parse and load the contents
+		var t=[];
 		for (var i=0; i<xseen.sceneInfo.length; i++) {
 			console.log("Processing 'scene' element #" + i);
 			xseen.debug.logInfo("Processing 'scene' element #" + i);
+			t[i] = new Date().getTime();
 			xseen.Parse (xseen.sceneInfo[i].element, xseen.sceneInfo[i]);
+			t1 = new Date().getTime() - t[i];
+            xseen.debug.logInfo('Time for initial pass #' + i + ' parsing: ' + t1 + " ms.");
+		
 		}
 /*
 		window.setTimeout (function() { 
@@ -220,26 +225,23 @@ xseen.rerouteSetAttribute = function(node, browser) {
 							}, 20 );
  */
     };
-/*
- *
- * Need to animate camera in a circle while looking at origin. use <camera>.lookAt(xseen.types.Vector([0,0,0])
- * while updating the position with Y=0 and (x,z) a circle of radius 4 (for now)
- *
- */
 	xseen.render = function () {
 								requestAnimationFrame (xseen.render);
 						// This is not the way to do animation. Code should not be in the loop
 						// Various objects needing animation should register for an event ... or something
-						// Animate circling camera with a period of 4 second (4000 milliseconds)
-								var deltaT, radians, x, z;
+						// Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
+								var deltaT, radians, x, z, P;
+								var nodeAframe = document.getElementById ('aframe_nodes');
+								P = 16000;
 								xseen.timeNow = (new Date()).getTime();
 								deltaT = xseen.timeNow - xseen.timeStart;
-								radians = deltaT/4000 * 2 * Math.PI;
-								x = 4 * Math.sin(radians);
-								z = 4 * Math.cos(radians);
+								radians = deltaT/P * 2 * Math.PI;
+								x = 8 * Math.sin(radians);
+								z = 8 * Math.cos(radians);
 								xseen.sceneInfo[0].element._xseen.renderer.camera.position.x = x;
 								xseen.sceneInfo[0].element._xseen.renderer.camera.position.z = z;
 								xseen.sceneInfo[0].element._xseen.renderer.camera.lookAt(xseen.types.Vector3([0,0,0]));
+								nodeAframe._xseen.object.position.x = -x;
 						// End of animation
 								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
 								};

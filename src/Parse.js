@@ -20,10 +20,8 @@
 xseen.Parse = function (element, parent, sceneInfo) {
 	var nodeName = element.localName.toLowerCase();
 	//xseen.debug.logInfo("Parse " + nodeName);
-	if (typeof(element._xseen) == 'undefined') {
-		element._xseen = {};
-		element._xseen.children = [];
-	}
+	if (typeof(element._xseen) == 'undefined') {element._xseen = {};}
+	if (typeof(element._xseen.children) == 'undefined') {element._xseen.children = [];}
 	if (typeof(xseen.parseTable[nodeName]) == 'undefined') {
 		xseen.debug.logInfo("Unknown node: " + nodeName);
 	} else {

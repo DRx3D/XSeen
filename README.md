@@ -30,6 +30,9 @@ and replaced as needed. This directory includes
 Three.js is used for all rendering and scene graph management
 jQuery is only used to assist in the AJAX download of files
 
+The XSeen license and copyrights do not apply to those files. They retain they copyright and license
+as originally released at the above URLs.
+
 
 XSeen runs as local files in Firefox. Other browsers may not allow local files to be loaded
 at run-time. It can run as a client in any server environment (Python SimpleServer, Node.js. Apache, etc.). 

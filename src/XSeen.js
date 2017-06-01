@@ -46,6 +46,8 @@ xseen.rerouteSetAttribute = function(node, browser) {
     "use strict";
 
     var onload = function() {
+		xseen.updateOnLoad();
+
         var i,j;  // counters
 
         // Search all X-Scene elements in the page
@@ -144,7 +146,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
         });
 
         if (xseen.versionInfo !== undefined) {
-            xseen.debug.logInfo("X3DOM version " + xseen.versionInfo.version + ", " +
+            xseen.debug.logInfo("XSeen version " + xseen.versionInfo.version + ", " +
                                 "Revison " + xseen.versionInfo.revision + ", " +
                                 "Date " + xseen.versionInfo.date);
             xseen.debug.logInfo(xseen.versionInfo.splashText);
@@ -241,7 +243,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 								xseen.sceneInfo[0].element._xseen.renderer.camera.position.x = x;
 								xseen.sceneInfo[0].element._xseen.renderer.camera.position.z = z;
 								xseen.sceneInfo[0].element._xseen.renderer.camera.lookAt(xseen.types.Vector3([0,0,0]));
-								nodeAframe._xseen.object.position.x = -x;
+								if (nodeAframe !== null) {nodeAframe._xseen.object.position.x = -x;}
 						// End of animation
 								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
 								};

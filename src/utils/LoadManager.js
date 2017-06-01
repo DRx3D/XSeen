@@ -65,7 +65,7 @@ function LoadManager () {
 
 	this.failure = function (xhr) {
 		if (typeof(xhr._loadManager.failure) !== undefined) {
-			xhr._loadManager.failure (xhr._loadManager.userdata, xhr);
+			xhr._loadManager.failure (xhr, xhr._loadManager.userdata);
 		}
 	}
 

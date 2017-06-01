@@ -28,13 +28,28 @@ var xseen = {
 	node			: {},
 
 	loadMgr			: new LoadManager(),
+	loader			: {
+						'Null'			: '',
+						'ColladaLoader'	: '',
+						'GltfLoader'	: '',
+						'ObjLoader'		: '',
+						'X3dLoader'		: new LoadManager(),
+					},
 	loadProgress	: function (xhr) {
 						if (xhr.total != 0) {
 							console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 						}
 					},
-	loadError		: function (userdata, xhr) {
+	loadError		: function (xhr, userdata) {
 						console.error( 'An error happened on '+userdata.e.id);
+					},
+	loadMime		: {
+						''		: {name: 'Null', loader: 'Null'},
+						'dae'	: {name: 'Collada', loader: 'ColladaLoader'},
+						'glb'	: {name: 'glTF Binary', loader: 'GltfLoader'},
+						'gltf'	: {name: 'glTF JSON', loader: 'GltfLoader'},
+						'obj'	: {name: 'OBJ', loader: 'ObjLoader'},
+						'x3d'	: {name: 'X3D XML', loader: 'X3dLoader'},
 					},
 
 	
@@ -46,6 +61,49 @@ var xseen = {
     x3dextNS 		: 'http://philip.html5.org/x3d/ext',
     xsltNS   		: 'http://www.w3.org/1999/XSL/x3dom.Transform',
     xhtmlNS  		: 'http://www.w3.org/1999/xhtml',
+
+	updateOnLoad	: function ()
+						{
+							this.loader.Null			= this.loader.X3dLoader;
+							this.loader.ColladaLoader	= new THREE.ColladaLoader();
+							this.loader.GltfLoader		= new THREE.GLTF2Loader();
+							this.loader.ObjLoader		= new THREE.OBJLoader2();
+						},
+
+// Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
+	parseUrl		: function (url)
+						{
+							var parser = document.createElement('a'),
+							        searchObject = {},
+        							queries, split, i, pathFile, path, file, extension;
+    							// Let the browser do the work
+    							parser.href = url;
+    							// Convert query string to object
+    							queries = parser.search.replace(/^\?/, '').split('&');
+    							for( i = 0; i < queries.length; i++ ) {
+        							split = queries[i].split('=');
+        							searchObject[split[0]] = split[1];
+    							}
+								pathFile = parser.pathname.split('/');
+								file = pathFile[pathFile.length-1];
+								pathFile.length --;
+								path = '/' + pathFile.join('/');
+								extension = file.split('.');
+								extension = extension[extension.length-1];
+    							return {
+        							protocol:		parser.protocol,
+        							host:			parser.host,
+        							hostname:		parser.hostname,
+        							port:			parser.port,
+        							pathname:		parser.pathname,
+									path:			path,
+									file:			file,
+									extension:		extension,
+        							search:			parser.search,
+        							searchObject:	searchObject,
+        							hash:			parser.hash
+    							};
+						},
 
 	dumpChildren	: function (obj, indent, addstr)
 						{

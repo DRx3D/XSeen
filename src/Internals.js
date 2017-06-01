@@ -121,10 +121,10 @@ var xseen = {
 xseen.versionInfo = {
 	major	: 0,
 	minor	: 1,
-	revision	: 0,
+	revision	: 1,
 	version	: '',
-	date	: '2017-05-26',
-	splashText		: "XSeen 3D Language parser.<br>\nAll X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only<br>\nNext work<ul><li>Internal Documentation</li><li>Event Model/Animation</li><li>A-Frame Entities</li></ul>",
+	date	: '2017-06-01',
+	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only. glTF model loader<br>\nNext work<ul><li>A-Frame Assets and Entities</li><li>Viewpoints and Navigation</li><li>Event Model/Animation</li></ul>",
 };
 xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 

@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>glTF Loading</title>
+		<title>glTF Animation</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
@@ -91,11 +91,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <WorldInfo></WorldInfo>
 <light intentsity='.5' direction='0 0 -1'></light>
 <light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
-<transform translation='3 0 0'>
-	<model id='gltf_CesiumMilkTruck' src='CesiumMilkTruck.glb'></model>
-</transform>
-<transform translation='-3 1 0' scale='.5 .5 .5'>
-	<model id='gltf_RiggedAnimation' src='RiggedSimple.glbl'></model>
+
+<transform translation='-5 -2 0' scale='.2 .2 .2'>
+	<model id='gltf_RiggedAnimation' src='Monster.glbl' playonload='*' duration='3.0'></model>
 </transform>
 
 		</scene>

@@ -123,5 +123,14 @@ node = xseen.nodes._defineNode('a-torus', 'A-Frame', 'af_Torus')
 					.addField('segments-tubular', 'SFInt', 6);
 xseen._addAframeAppearance (node);
 
-// Dump parse table
-//xseen.nodes._dumpTable();
+/*
+ * Asset management system nodes
+ */
+xseen.nodes._defineNode('a-assets', 'A-Frame', 'af_Assets')
+					.addNode();
+xseen.nodes._defineNode('a-asset-item', 'A-Frame', 'af_AssetItem')
+					.addField('src', 'SFString', '')
+					.addNode();
+xseen.nodes._defineNode('a-mixin', 'A-Frame', 'af_Mixin')
+					.addField('*', 'SFString', '')
+					.addNode();

@@ -44,12 +44,27 @@ xseen.node.x_Model = {
 							e._xseen.loadText = response;
 							console.log("download successful for "+e.id);
 							e._xseen.loadGroup.add(response.scene);		// This works for glTF
-//							e._xseen.children.forEach (function (child, ndx, wholeThing)
-//							{
-//								e._xseen.loadGroup.add(child);
-//	console.log ('...Adding ' + child.type + ' (' + child.name + ') to Inline Group? with UUID ' + userdata.e._xseen.loadGroup.uuid + ' (' + e._xseen.loadGroup.name + ')');
-//							});
 							p._xseen.sceneInfo.scene.updateMatrixWorld();
+							if (response.animations !== null) {				// This is probably glTF specific
+								e._xseen.mixer = new THREE.AnimationMixer (response.scene);
+								e._xseen.sceneInfo.mixers.push (e._xseen.mixer);
+							} else {
+								e._xseen.mixer = null;
+							}
+
+							if (e._xseen.fields.playonload != '' && e._xseen.mixer !== null) {			// separate method?
+								if (e._xseen.fields.playonload == '*') {			// Play all animations
+									response.animations.forEach( function ( clip ) {
+										//console.log('  starting animation for '+clip.name);
+										if (e._xseen.fields.duration > 0) {clip.duration = e._xseen.fields.duration;}
+										e._xseen.mixer.clipAction( clip ).play();
+									} );
+								} else {											// Play a specific animation
+									var clip = THREE.AnimationClip.findByName(response.animations, e._xseen.fields.playonload);
+									var action = e._xseen.mixer.clipAction (clip);
+									action.play();
+								}
+							}
 						}
 					}
 };

@@ -29,24 +29,26 @@ xseen.node.af_Entity = {
 		},
 	'fin'	: function (e,p) {}
 };
+xseen.node.af_Assets = {
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p) {}
+};
+xseen.node.af_AssetItem = {
+	'init'	: function (e,p) 		// Only field is SRC.
+		{
+		},
+	'fin'	: function (e,p) {}
+};
+xseen.node.af_Mixin = {
+	'init'	: function (e,p) 		// Lots of fields -- all nebelous until used
+		{
+		},
+	'fin'	: function (e,p) {}
+};
+
+
 
 xseen.node.af_Appearance = function (e) {
-	console.log ('a-node Appearance: ' + e._xseen.fields);
-/*
-	var material = new THREE.MeshPhongMaterial( {
-					'aoMap'					: e._xseen.fields['ambient-occlusion-map'],
-					'aoMapIntensity'		: e._xseen.fields['ambient-occlusion-map-intensity'],
-					'color'					: e._xseen.fields['color'],
-					'displacementMap'		: e._xseen.fields['displacement-map'],
-					'displacementScale'		: e._xseen.fields['displacement-scale'],
-					'displacementBias'		: e._xseen.fields['displacement-bias'],
-					'envMap'				: e._xseen.fields['env-map'],
-					'normalMap'				: e._xseen.fields['normal-map'],
-					'normalScale'			: e._xseen.fields['normal-scale'],
-					'wireframe'				: e._xseen.fields['wireframe'],
-					'wireframeLinewidth'	: e._xseen.fields['wireframe-linewidth'],
-						} );
- */
 	var parameters = {
 					'aoMap'					: e._xseen.fields['ambient-occlusion-map'],
 					'aoMapIntensity'		: e._xseen.fields['ambient-occlusion-map-intensity'],

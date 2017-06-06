@@ -22,6 +22,8 @@
 
 xseen.nodes._defineNode('model', 'XSeen', 'x_Model')
 	.addField('src', 'SFString', '')
+	.addField('playonload', 'SFString', '')
+	.addField('duration', 'SFFloat', '-1')
 	.addNode();
 
 

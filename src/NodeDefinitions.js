@@ -56,14 +56,38 @@ xseen.nodes = {
 		}
 		return node;
 	},
+/*
+ *	Parse fields of an HTML tag (called element) using the field information from the defined 'node'
+ *	If the first character of the field value is '#', then the remainder is treated as an ID and the
+ *	field value is obtained from that HTML tag prior to parsing. The referenced tag's attribute name
+ *	is the same name as the attribute of the parsed 'node'.
+ *	If the field value is '*', then all attributes of the HTML tag are parsed as strings. Typically this is 
+ *	only used for mixin assets.
+ */
 	'_parseFields' : function(element, node) {
 		element._xseen.fields = [];
+		element._xseen.parseAll = false;
 		node.fields.forEach (function (field, ndx, wholeThing)
 			{
-				value = this.getAttribute(field.fieldlc);
-				value = xseen.types[field.type] (value, field.default);
-				this._xseen.fields[field.fieldlc] = value;
+				if (field.field == '*') {
+					this._xseen.parseAll = true;
+				} else {
+					var value = this.getAttribute(field.fieldlc);
+					if (value !== null && value.substr(0,1) == '#') {		// Asset reference
+						var re = document.getElementById(value.substr(1,value.length));
+						value = re._xseen.fields[field.fieldlc] || '';
+					}
+					value = xseen.types[field.type] (value, field.default);
+					this._xseen.fields[field.fieldlc] = value;
+				}
 			}, element);
+		if (element._xseen.parseAll) {
+			for (var i=0; i<element.attributes.length; i++) {
+				if (typeof(element._xseen.fields[element.attributes[i].name]) === 'undefined') {
+					element._xseen.fields[element.attributes[i].name.toLowerCase()] = element.attributes[i].value;
+				}
+			}
+		}
 	},
 
 	'_dumpTable' : function() {

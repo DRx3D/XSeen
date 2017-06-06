@@ -185,7 +185,15 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			x_renderer.setSize (divWidth, divHeight);
 			x_element.appendChild (x_renderer.domElement);
 			
-			xseen.sceneInfo.push ({'size':{'width':divWidth, 'height':divHeight}, 'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
+			xseen.sceneInfo.push ({
+									'size'		: {'width':divWidth, 'height':divHeight},
+									'scene'		: x_canvas, 
+									'renderer'	: x_renderer,
+									'camera'	: [x_camera],
+									'mixers'	: [],
+									'clock'		: new THREE.Clock(),
+									'element'	: x_element
+								});
 			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};
 			x_element._xseen.children = [];
@@ -227,6 +235,14 @@ xseen.rerouteSetAttribute = function(node, browser) {
 							}, 20 );
  */
     };
+
+/*
+ * Animation/render function loop
+ *
+ *	Run each animation frame. This is not well done as everything is tossed in here
+ *	Most of the stuff belongs, but perhaps in separate functions/methods
+ *	Camera animation should not be in here at all. That should be animated separately in XSeen code
+ */
 	xseen.render = function () {
 								requestAnimationFrame (xseen.render);
 						// This is not the way to do animation. Code should not be in the loop
@@ -235,8 +251,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 								var deltaT, radians, x, z, P;
 								var nodeAframe = document.getElementById ('aframe_nodes');
 								P = 16000;
-								xseen.timeNow = (new Date()).getTime();
-								deltaT = xseen.timeNow - xseen.timeStart;
+								deltaT = xseen.sceneInfo[0].clock.getDelta();
+								for (var i=0; i<xseen.sceneInfo[0].mixers.length; i++) {
+									xseen.sceneInfo[0].mixers[i].update(deltaT);
+								}
 								radians = deltaT/P * 2 * Math.PI;
 								x = 8 * Math.sin(radians);
 								z = 8 * Math.cos(radians);

@@ -11,9 +11,14 @@ the best features of A-Frame and X3D.
 
 Getting started
 ---------------
-Documentation not yet developed. 
+Documentation started at http://tools.realism.com/specification/xseen. It includes all 
+developed nodes and features.
 
-This initial release supports a few static structures from X3D and A-Frame, 
+This release supports glTF models with aniamtion (including deformed skin from joint
+animation) and A-Frame's asset management. glTF models are included with the **model** tag. 
+Asset managment nodes are the same as A-Frame's. Not all asset management nodes are supported.
+
+The initial release supports a few static structures from X3D and A-Frame, 
 mostly consisting of the pre-defined solid shapes in each language and
 some appearance and grouping structures from X3D.
 
@@ -26,6 +31,14 @@ External libraries are kept for convienence in /ExternalLibraries. These can be 
 and replaced as needed. This directory includes
  * jquery-3.2.1.min.js -- from http://jquery.com/download/
  * three.js -- from https://threejs.org/
+
+The * *utils* * directory contains various utilities, including example loaders from THREE, including
+ * GLTFLoader
+ * GLTF2Loader
+ * LoadManager
+
+These may or may not be replaced in a future release. 
+
 
 Three.js is used for all rendering and scene graph management
 jQuery is only used to assist in the AJAX download of files

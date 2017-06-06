@@ -124,7 +124,7 @@ var xseen = {
 xseen.versionInfo = {
 	major	: 0,
 	minor	: 1,
-	revision	: 2,
+	revision	: 3,
 	version	: '',
 	date	: '2017-06-05',
 	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse<br>\nNext work<ul><li>Viewpoints and Navigation</li><li>Event Model/Animation</li><li>Backgrounds</li></ul>",

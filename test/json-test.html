@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>glTF Assets</title>
+		<title>JSON Test</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
@@ -85,30 +85,83 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 	</head>
-	<body>
-		<scene id='xscene' height='450' width='800'>
-<camera position='0 0 4'></camera>
-<WorldInfo></WorldInfo>
-<light intentsity='.5' direction='0 0 -1'></light>
-<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
+	<body onload='dumpJson();'>
+<scene id='content_3d' height='500' width='1000'>
+  <group>
+    <shape>
+      <box></box>
+      <appearance>
+        <material diffuseColor='1 1 0'></material>
+      </appearance>
+    </shape>
+    <group>
+      <model src='test.gltf'></model>
+      <a-cone height='8' radius='2'></a-cone>
+    </group>
+    <shape>
+      <sphere></sphere>
+      <appearance>
+        <material diffuseColor='1 .5 0'></material>
+      </appearance>
+    </shape>
+    <light color='.5 .5 1' intensity='.4'></light>
+  </group>
+</scene>
+<script>
+function dumpJson() {
+	// Serialize a portion of the DOM and dump it out
+	var s = new XMLSerializer();
+	var e = document.getElementById('content_3d');
+	var str = s.serializeToString(e);
+	console.log('serialized XML:\n'+str);
 
-<a-assets>
-	<a-asset-item id='asset_gltf' src='Monster.glbl'/>
-	<a-mixin id='asset_mixin' diffuseColor='.1 .6 .1' translation='30 10 -20' size='30 10 20' duration='3.0'></a-mixin>
-</a-assets>
-<transform translation='-5 -2 0' scale='.2 .2 .2'>
-	<!-- model id='gltf_RiggedAnimation' src='Monster.glbl' playonload='*' duration='3.0'></model -->
-	<model id='gltf_RiggedAnimation' src='#asset_gltf' playonload='*' duration='#asset_mixin'></model>
-	<transform translation='#asset_mixin'>
-		<shape>
-			<box size='#asset_mixin'></box>
-			<appearance>
-				<material diffuseColor='#asset_mixin' />
-			</appearance>
-		</shape>
-	</transform>
-</transform>
+	// Convert the XML text to an XML (DOM) Object, then convert that to JSON
+	var oParser = new DOMParser();
+	var xml = oParser.parseFromString(str, "text/xml");
+	var jsonObject = xmlToJson (xml);
+	var jsonstr = JSON.stringify ({'xseen': jsonObject}, null, '  ');
+	console.log('Serialized JSON:\n' + jsonstr);
+}
 
-		</scene>
+// Changes XML to JSON
+//	From https://davidwalsh.name/convert-xml-json
+function xmlToJson(xml) {
+	
+	// Create the return object
+	var obj = {};
+
+	if (xml.nodeType == 1) { // element
+		// do attributes
+		if (xml.attributes.length > 0) {
+		obj["@attributes"] = {};
+			for (var j = 0; j < xml.attributes.length; j++) {
+				var attribute = xml.attributes.item(j);
+				obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+			}
+		}
+	} else if (xml.nodeType == 3) { // text
+		obj = xml.nodeValue;
+	}
+
+	// do children
+	if (xml.hasChildNodes()) {
+		for(var i = 0; i < xml.childNodes.length; i++) {
+			var item = xml.childNodes.item(i);
+			var nodeName = item.nodeName;
+			if (typeof(obj[nodeName]) == "undefined") {
+				obj[nodeName] = xmlToJson(item);
+			} else {
+				if (typeof(obj[nodeName].push) == "undefined") {
+					var old = obj[nodeName];
+					obj[nodeName] = [];
+					obj[nodeName].push(old);
+				}
+				obj[nodeName].push(xmlToJson(item));
+			}
+		}
+	}
+	return obj;
+};
+</script>
 	</body>
 </html>

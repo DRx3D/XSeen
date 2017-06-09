@@ -10,7 +10,7 @@
 #	The version information is extracted from the file $versionFile by looking for the string 'xseen.versionInfo'
 #		It is assumed that this string defines an object with the fields: 'major', 'minor', 'revision', and 'date'
 use strict;
-my @directoryOrder = ('utils', 'init', 'nodes', '.');
+my @directoryOrder = ('utils', 'init', '.', 'nodes');
 my $versionFile = 'init/Internals.js';
 my $releaseDirectory = '../Release/';
 my $preambleFile = '../LICENSE';
@@ -36,6 +36,7 @@ foreach my $dir (@directoryOrder) {
 	foreach my $file (@files) {
 		open (FILE, "<$dir/$file") or die "Unable to open $dir/$file\n$!\n";
 		print "Reading $dir/$file\n";
+		push @output, "// File: $dir/$file";
 		while (<FILE>) {
 			chomp;
 			push @output, $_;

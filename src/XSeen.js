@@ -192,7 +192,9 @@ xseen.rerouteSetAttribute = function(node, browser) {
 									'camera'	: [x_camera],
 									'mixers'	: [],
 									'clock'		: new THREE.Clock(),
-									'element'	: x_element
+									'element'	: x_element,
+									'stacks'	: [],
+									'tmp'		: {activeViewpoint:false},
 								});
 			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};
@@ -221,6 +223,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		// for each X-Scene tag, parse and load the contents
 		var t=[];
 		for (var i=0; i<xseen.sceneInfo.length; i++) {
+			xseen.sceneInfo[i].stacks['Viewpoints'] = new xseen.utils.StackHandler('Viewpoints');
 			console.log("Processing 'scene' element #" + i);
 			xseen.debug.logInfo("Processing 'scene' element #" + i);
 			t[i] = new Date().getTime();
@@ -248,19 +251,25 @@ xseen.rerouteSetAttribute = function(node, browser) {
 						// This is not the way to do animation. Code should not be in the loop
 						// Various objects needing animation should register for an event ... or something
 						// Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
-								var deltaT, radians, x, z, P;
+								var deltaT, radians, x, y, z, P, radius, vp;
 								var nodeAframe = document.getElementById ('aframe_nodes');
 								P = 16000;
 								deltaT = xseen.sceneInfo[0].clock.getDelta();
 								for (var i=0; i<xseen.sceneInfo[0].mixers.length; i++) {
 									xseen.sceneInfo[0].mixers[i].update(deltaT);
 								}
+								deltaT = (new Date()).getTime() - xseen.timeStart;
 								radians = deltaT/P * 2 * Math.PI;
-								x = 8 * Math.sin(radians);
-								z = 8 * Math.cos(radians);
-								xseen.sceneInfo[0].element._xseen.renderer.camera.position.x = x;
-								xseen.sceneInfo[0].element._xseen.renderer.camera.position.z = z;
-								xseen.sceneInfo[0].element._xseen.renderer.camera.lookAt(xseen.types.Vector3([0,0,0]));
+								vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
+								radius = vp._xseen.fields._radius0;
+								x = radius * Math.sin(radians);
+								z = radius * Math.cos(radians);
+								y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
+								var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
+								currentCamera.position.x = x;
+								currentCamera.position.y = y;
+								currentCamera.position.z = z;
+								currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
 								if (nodeAframe !== null) {nodeAframe._xseen.object.position.x = -x;}
 						// End of animation
 								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);

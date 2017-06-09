@@ -32,7 +32,7 @@ xseen.types = {
 		{
 			if (value === null) {value = def;}
 			var v3 = value.split(' ');
-			if (v3.length != 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
+			if (v3.length >= 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
 				value = def;
 				v3 = value.split(' ');
 			}
@@ -103,6 +103,7 @@ xseen.types = {
 			if (hg.length < 2) {hg = "0" + hg;}
 			if (hb.length < 2) {hb = "0" + hb;}
 			var hex = '0x' + hr + hg + hb;
+			hex = hex;
 			return hex;
 		},
 

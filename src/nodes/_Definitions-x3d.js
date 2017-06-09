@@ -63,8 +63,9 @@ xseen.nodes._defineNode ('Light', 'unknown', 'unk_Light')
 	.addField('intensity', 'SFFloat', '1')
 	.addNode();
 
-xseen.nodes._defineNode ('Camera', 'Unknown', 'unk_Camera')
+xseen.nodes._defineNode ('Camera', 'Unknown', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', '0 0 10')
+	.addField('orientation', 'SFRotation', '0 1 0 0')
 	.addNode();
 
 xseen.nodes._defineNode ('Inline', 'Networking', 'networking_Inline')
@@ -81,5 +82,17 @@ xseen.nodes._defineNode ('Appearance', 'Appearance', 'appearance_Appearance')
 	.addNode();
 xseen.nodes._defineNode ('Shape', 'Shape', 'unk_Shape')
 	.addNode();
-xseen.nodes._defineNode ('Viewpoint', 'Unknown', 'unk_Camera')
+xseen.nodes._defineNode ('Viewpoint', 'Unknown', 'unk_Viewpoint')
+	.addField('position', 'SFVec3f', '0 0 10')
+	.addField('orientation', 'SFRotation', '0 1 0 0')
+	.addNode();
+xseen.nodes._defineNode('Background', 'Environmental', 'env_Background')
+	.addField('skyColor', 'SFColor', '0 0 0')
+	.addField('srcFront', 'SFString', '')
+	.addField('srcBack', 'SFString', '')
+	.addField('srcTop', 'SFString', '')
+	.addField('srcBottom', 'SFString', '')
+	.addField('srcLeft', 'SFString', '')
+	.addField('srcRight', 'SFString', '')
+	.addField('backgroundIsCube', 'SFBool', 'true')
 	.addNode();

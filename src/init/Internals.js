@@ -26,6 +26,7 @@ var xseen = {
 	nodeDefinitions	: {},
 	parseTable		: {},
 	node			: {},
+	utils			: {},
 
 	loadMgr			: new LoadManager(),
 	loader			: {
@@ -57,6 +58,8 @@ var xseen = {
 	
 	timeStart		: (new Date()).getTime(),
 	timeNow			: (new Date()).getTime(),
+
+	tmp				: {},			// misc. out of the way storage
 
 	versionInfo		: [],
     x3dNS    		: 'http://www.web3d.org/specifications/x3d-namespace',
@@ -108,26 +111,24 @@ var xseen = {
     							};
 						},
 
-	dumpChildren	: function (obj, indent, addstr)
+	dumpSceneGraph	: function () {this._dumpChildren (xseen.sceneInfo[0].scene, ' +', '--');},
+	_dumpChildren	: function (obj, indent, addstr)
 						{
 							console.log (indent + '> ' + obj.type + ' (' + obj.name + ')');
 							for (var i=0; i<obj.children.length; i++) {
 								var child = obj.children[i];
-								this.dumpChildren(child, indent+addstr, addstr);
+								this._dumpChildren(child, indent+addstr, addstr);
 							}
 						},
-
-	dumpSceneGraph	: function () {this.dumpChildren (xseen.sceneInfo[0].scene, ' +', '--');},
-
 };
 
 xseen.versionInfo = {
 	major	: 0,
 	minor	: 1,
-	revision	: 3,
+	revision	: 5,
 	version	: '',
-	date	: '2017-06-05',
-	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse<br>\nNext work<ul><li>Viewpoints and Navigation</li><li>Event Model/Animation</li><li>Backgrounds</li></ul>",
+	date	: '2017-06-09',
+	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background<br>\nNext work<ul><li>Image Texture</li><li>Lights</li><li>Triangle Geometry</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
 };
 xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 

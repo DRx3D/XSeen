@@ -27,9 +27,16 @@ function parsing (s, e) {
 	xseen.debug.logInfo ('Parsing init details stub for ' + s);
 }
 
-xseen.node.unk_Camera = {
+xseen.node.unk_Viewpoint = {
 	'init'	: function (e,p)
 		{	// This should really go in a separate push-down list for Viewpoints
+			e._xseen.fields._radius0 = Math.sqrt(	e._xseen.fields.position[0]*e._xseen.fields.position[0] + 
+													e._xseen.fields.position[1]*e._xseen.fields.position[1] + 
+													e._xseen.fields.position[2]*e._xseen.fields.position[2]);
+			if (!e._xseen.sceneInfo.tmp.activeViewpoint) {
+				e._xseen.sceneInfo.stacks.Viewpoints.pushDown(e);
+				e._xseen.sceneInfo.tmp.activeViewpoint = true;
+			}
 		},
 	'fin'	: function (e,p) {}
 };
@@ -255,4 +262,73 @@ xseen.node.core_Scene = {
 			xseen.debug.logInfo("Rendered all elements -- Starting animation");
 			xseen.render();
 		}
+};
+
+xseen.node.env_Background = {
+	'init'	: function (e,p) 
+		{
+			var color = new THREE.Color(e._xseen.fields.skycolor[0], e._xseen.fields.skycolor[1], e._xseen.fields.skycolor[2]);
+			var textureCube = new THREE.CubeTextureLoader()
+									.load ([e._xseen.fields.srcright,
+											e._xseen.fields.srcleft,
+											e._xseen.fields.srctop,
+											e._xseen.fields.srcbottom,
+											e._xseen.fields.srcfront,
+											e._xseen.fields.srcback],
+											this.loadSuccess({'e':e, 'p':p})
+										);
+			e._xseen.sceneInfo.scene.background = color;
+/*
+			var material = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureCube } );
+			var size = 1;
+			//var geometry = new THREE.BoxGeometry(200, 200, 2);
+			var geometry = new THREE.Geometry();
+			geometry.vertices.push (
+							new THREE.Vector3(-size, -size,  size),
+							new THREE.Vector3( size, -size,  size),
+							new THREE.Vector3( size, -size, -size),
+							new THREE.Vector3(-size, -size, -size),
+							new THREE.Vector3(-size,  size,  size),
+							new THREE.Vector3( size,  size,  size),
+							new THREE.Vector3( size,  size, -size),
+							new THREE.Vector3(-size,  size, -size)
+									);
+
+			geometry.faces.push (	// external facing geometry
+							new THREE.Face3(0, 1, 5),
+							new THREE.Face3(0, 5, 4),
+							new THREE.Face3(1, 2, 6),
+							new THREE.Face3(1, 6, 5),
+							new THREE.Face3(2, 3, 7),
+							new THREE.Face3(2, 7, 6),
+							new THREE.Face3(3, 0, 4),
+							new THREE.Face3(3, 4, 7),
+							new THREE.Face3(4, 5, 6),
+							new THREE.Face3(4, 6, 7),
+							new THREE.Face3(0, 2, 1),
+							new THREE.Face3(0, 3, 2),
+									);
+			geometry.computeBoundingSphere();
+			var mesh = new THREE.Mesh (geometry, material);
+			e._xseen.sceneInfo.element._xseen.renderer.canvas.add(mesh);
+*/
+		},
+
+	'fin'	: function (e,p)
+		{
+			p._xseen.appearance = e._xseen.material;
+		},
+
+	'loadSuccess' : function (userdata)
+		{
+			var e = userdata.e;
+			var p  = userdata.p;
+			return function (textureCube)
+			{
+				e._xseen.processedUrl = true;
+				e._xseen.loadTexture = textureCube;
+				e._xseen.sceneInfo.scene.background = textureCube;
+			}
+		},
+
 };

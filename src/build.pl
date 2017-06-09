@@ -21,7 +21,7 @@ my @releaseFile = ($outputFilename . '.' . $version, $outputFilename);
 my (@files, @output, @preamble);
 open (FILE, "<$preambleFile") or die "Unable to open $preambleFile\n$!\n";
 print "Reading $preambleFile\n";
-push @preamble, "/*\n";
+push @preamble, ("/*", " *  XSeen V$version", " *  Built " . localtime(), " *\n");
 while (<FILE>) {
 	chomp;
 	push @preamble, $_;

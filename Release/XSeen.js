@@ -1,9 +1,12 @@
 /*
+ *  XSeen V0.1.5
+ *  Built Fri Jun  9 16:04:37 2017
+ *
 
 Dual licensed under the MIT and GPL licenses.
 
 ==[MIT]====================================================================
-Copyright (c) 2017 XSeen
+Copyright (c) 2017, Daly Realism
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +31,7 @@ THE SOFTWARE.
 
 XSeen - Declarative 3D for HTML
 
-Copyright (C) 2017 XSeen
+Copyright (C) 2017, Daly Realism
                                                                        
 This program is free software: you can redistribute it and/or modify   
 it under the terms of the GNU General Public License as published by   
@@ -42,6 +45,17 @@ GNU General Public License for more details.
                                                                        
 You should have received a copy of the GNU General Public License      
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+=== COPYRIGHT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Copyright (C) 2017, Daly Realism for XSeen
+Copyright, Fraunhofer for X3DOM
+Copyright, Mozilla for A-Frame
+Copyright, THREE and Khronos for various parts of THREE.js
+
+===  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
  */
 // File: utils/ColladaLoader.js
 /**

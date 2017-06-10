@@ -140,18 +140,41 @@ xseen.node.grouping_Transform = {
 		}
 };
 
-xseen.node.unk_Light = {
+xseen.node.lighting_Light = {
 	'init'	: function (e,p) 
 		{
 			var color = xseen.types.Color3toInt (e._xseen.fields.color);
 			var intensity = e._xseen.fields.intensity - 0;
-			var l = new THREE.DirectionalLight (color, intensity);
-			l.position.x = 0-e._xseen.fields.direction[0];
-			l.position.y = 0-e._xseen.fields.direction[1];
-			l.position.z = 0-e._xseen.fields.direction[2];
-			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
-			p._xseen.children.push(l);
-			l = null;
+			var lamp, type=e._xseen.fields.type.toLowerCase();
+/*
+			if (typeof(p._xseen.children) == 'undefined') {
+				console.log('Parent of Light does not have children...');
+				p._xseen.children = [];
+			}
+ */
+
+			if (type == 'point') {
+				// Ignored field -- e._xseen.fields.location
+				lamp = new THREE.PointLight (color, intensity);
+				lamp.distance = Math.max(0.0, e._xseen.fields.radius - 0);
+				lamp.decay = Math.max (.1, e._xseen.fields.attenuation[1]/2 + e._xseen.fields.attenuation[2]);
+
+			} else if (type == 'spot') {
+				lamp = new THREE.SpotLight (color, intensity);
+				lamp.position.set(0-e._xseen.fields.direction[0], 0-e._xseen.fields.direction[1], 0-e._xseen.fields.direction[2]);
+				lamp.distance = Math.max(0.0, e._xseen.fields.radius - 0);
+				lamp.decay = Math.max (.1, e._xseen.fields.attenuation[1]/2 + e._xseen.fields.attenuation[2]);
+				lamp.angle = Math.max(0.0, Math.min(1.5707963267948966192313216916398, e._xseen.fields.cutoffangle));
+				lamp.penumbra = 1 - Math.max(0.0, Math.min(lamp.angle, e._xseen.fields.beamwidth)) / lamp.angle;
+
+			} else {											// DirectionalLight (by default)
+				lamp = new THREE.DirectionalLight (color, intensity);
+				lamp.position.x = 0-e._xseen.fields.direction[0];
+				lamp.position.y = 0-e._xseen.fields.direction[1];
+				lamp.position.z = 0-e._xseen.fields.direction[2];
+			}
+			p._xseen.children.push(lamp);
+			lamp = null;
 		}
 		,
 	'fin'	: function (e,p)

@@ -32,7 +32,7 @@ xseen.types = {
 		{
 			if (value === null) {value = def;}
 			var v3 = value.split(' ');
-			if (v3.length >= 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
+			if (v3.length < 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
 				value = def;
 				v3 = value.split(' ');
 			}

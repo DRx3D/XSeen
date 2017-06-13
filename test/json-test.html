@@ -68,12 +68,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src='../src/utils/GLTF2Loader.js'></script>
 		<script src='../src/utils/OBJLoader2.js'></script>
 		<script src='../src/utils/LoadManager.js'></script>
+		<script src="../src/utils/JSONParser.js"></script>
 
 		<script src="../src/Internals.js"></script>
 		<script src="../src/debug.js"></script>
 		<script src="../src/XSeen.js"></script>
 		<script src="../src/Parse.js"></script>
-		<script src="../src/JSONParser.js"></script>
 		<script src="../src/utils/Properties.js"></script>
 		<script src="../src/Types.js"></script>
 		<script src="../src/NodeDefinitions.js"></script>
@@ -86,36 +86,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 	</head>
-	<body onload='dumpJson();'>
-<scene id='content_3d' height='500' width='1000'>
-  <group>
-    <shape>
-       <box />
-      <appearance>
-        <material diffuseColor='1 1 0' />
-      </appearance>
-    </shape>
-    <light color='0 1 1' intensity='.4' />
-  </group>
-</scene>
+	<body onload='loadJson();'>
+
 <script>
-function dumpJson() {
+function loadJson() {
 	// Serialize a portion of the DOM and dump it out
-	var s = new XMLSerializer();
-	var e = document.getElementById('content_3d');
-	var str = s.serializeToString(e);
+	// start with XML for grins
+	var str = "<scene id='xscene' height='450' width='800'><camera position='0 0 4'></camera><WorldInfo></WorldInfo><light intentsity='.5' direction='0 0 -1'></light><light color='0 .5 0' intensity='.5' direction='1 0 0'></light><transform translation='-5 -2 0' scale='.2 .2 .2'><model id='gltf_RiggedAnimation' src='Monster.glbl' playonload='*' duration='3.0'></model></transform></scene>";
+	var jsonObject2 = {
+        "scene": {
+          "@id": "xscene",
+          "@height": "450",
+          "@width": "800",
+          "-children": [
+            {
+              "camera": {
+                "@position": "0 0 4"
+              }
+            },
+            {
+              "WorldInfo": {}
+            },
+            {
+              "light": {
+                "@intentsity": ".5",
+                "@direction": "0 0 -1"
+              }
+            },
+            {
+              "light": {
+                "@color": "0 .5 0",
+                "@intensity": ".5",
+                "@direction": "1 0 0"
+              }
+            },
+            {
+              "transform": {
+                "@translation": "-5 -2 0",
+                "@scale": ".2 .2 .2",
+                "-children": [
+                  {
+                    "model": {
+                      "@id": "gltf_RiggedAnimation",
+                      "@src": "Monster.glbl",
+                      "@playonload": "*",
+                      "@duration": "3.0"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      };
 	console.log('serialized XML:\n'+str);
 
 	// Convert the XML text to an XML (DOM) Object, then convert that to JSON
 	var oParser = new DOMParser();
 	var xml = oParser.parseFromString(str, "text/xml");
-	var jsonObject = xmlToJson (xml);
-	var jsonstr = JSON.stringify ({'xseen': jsonObject}, null, '  ');
+	var jsonstr = JSON.stringify (jsonObject2, null, '  ');
 	console.log('Serialized JSON:\n' + jsonstr);
 	var jParser = new JSONParser();
-	var e = jParser.parseJavaScript(jsonObject);
-	var str = s.serializeToString(e);
-	console.log('Serialized XML:\n' + str);
+	var el = jParser.parseJavaScript(jsonObject2);
+	var s = new XMLSerializer();
+	str = s.serializeToString(el);
+	console.log('serialized XML:\n'+str);
+
+	var body = document.querySelector('body');
+	body.appendChild(el);
 }
 
 // Changes XML to JSON
@@ -139,19 +177,13 @@ function xmlToJson(xml) {
 
 	// do children
 	if (xml.hasChildNodes()) {
+		obj["-children"] = [];
 		for(var i = 0; i < xml.childNodes.length; i++) {
 			var item = xml.childNodes.item(i);
 			var nodeName = item.nodeName;
-			if (typeof(obj[nodeName]) == "undefined") {
-				obj[nodeName] = xmlToJson(item);
-			} else {
-				if (typeof(obj[nodeName].push) == "undefined") {
-					var old = obj[nodeName];
-					obj[nodeName] = [];
-					obj[nodeName].push(old);
-				}
-				obj[nodeName].push(xmlToJson(item));
-			}
+			var child = {};
+			child[nodeName] = xmlToJson(item);
+			obj["-children"].push(child);
 		}
 	}
 	return obj;

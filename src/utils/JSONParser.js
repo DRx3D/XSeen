@@ -11,9 +11,9 @@ JSONParser.prototype.constructor = JSONParser;
 	 * jsobj - the JavaScript object to convert to DOM.
 	 */
 JSONParser.prototype.parseJavaScript = function(jsobj) {
-		var child = this.CreateElement('xseen');
+		var child = this.CreateElement('scene');
 		this.ConvertToX3DOM(jsobj, "", child);
-		console.log(jsobj, child);
+		// console.log(jsobj, child);
 		return child;
 	};
 
@@ -210,7 +210,7 @@ JSONParser.prototype.ConvertToX3DOM = function(object, parentkey, element, conta
 				}
 			} else if (typeof object[key] === 'object') {
 				// This is where the whole thing starts
-				if (key === 'X3D') {
+				if (key === 'scene') {
 					this.ConvertToX3DOM(object[key], key, element);
 				} else {
 					this.ConvertObject(key, object, element);

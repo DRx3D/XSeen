@@ -147,7 +147,6 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         if (xseen.versionInfo !== undefined) {
             xseen.debug.logInfo("XSeen version " + xseen.versionInfo.version + ", " +
-                                "Revison " + xseen.versionInfo.revision + ", " +
                                 "Date " + xseen.versionInfo.date);
             xseen.debug.logInfo(xseen.versionInfo.splashText);
         }

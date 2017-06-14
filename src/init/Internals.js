@@ -35,6 +35,7 @@ var xseen = {
 						'GltfLegacy'	: '',
 						'GltfLoader'	: '',
 						'ObjLoader'		: '',
+						'ImageLoader'	: '',
 						'X3dLoader'		: new LoadManager(),
 					},
 	loadProgress	: function (xhr) {
@@ -52,6 +53,10 @@ var xseen = {
 						'glbl'	: {name: 'glTF Binary', loader: 'GltfLegacy'},
 						'gltf'	: {name: 'glTF JSON', loader: 'GltfLoader'},
 						'obj'	: {name: 'OBJ', loader: 'ObjLoader'},
+						'png'	: {name: 'PNG', loader: 'ImageLoader'},
+						'jpg'	: {name: 'JPEG', loader: 'ImageLoader'},
+						'jpeg'	: {name: 'JPEG', loader: 'ImageLoader'},
+						'gif'	: {name: 'GIF', loader: 'ImageLoader'},
 						'x3d'	: {name: 'X3D XML', loader: 'X3dLoader'},
 					},
 
@@ -74,6 +79,7 @@ var xseen = {
 							this.loader.GltfLegacy		= new THREE.GLTFLoader();
 							this.loader.GltfLoader		= new THREE.GLTF2Loader();
 							this.loader.ObjLoader		= new THREE.OBJLoader2();
+							this.loader.ImageLoader		= new THREE.TextureLoader();
 						},
 
 // Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
@@ -123,12 +129,12 @@ var xseen = {
 };
 
 xseen.versionInfo = {
-	major	: 0,
-	minor	: 1,
-	revision	: 6,
-	version	: '',
-	date	: '2017-06-09',
-	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting<br>\nNext work<ul><li>Image Texture</li><li>Triangle Geometry</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
+	major		: 0,
+	minor		: 1,
+	revision	: 8,
+	version		: '',
+	date		: '2017-06-12',
+	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet<br>\nNext work<ul><li>Triangle Geometry, Extrusion</li><li>Face Geometry</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
 };
 xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 

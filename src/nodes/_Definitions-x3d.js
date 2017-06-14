@@ -110,6 +110,12 @@ xseen.nodes._defineNode ('WorldInfo', 'Core', 'core_WorldInfo')
 	.addNode();
 xseen.nodes._defineNode ('Appearance', 'Appearance', 'appearance_Appearance')
 	.addNode();
+xseen.nodes._defineNode ('ImageTexture', 'Appearance', 'appearance_ImageTexture')
+	.addField('url', 'SFString', '')
+	.addField('repeatS', 'SFBool', true)
+	.addField('repeatT', 'SFBool', true)
+	.addNode();
+
 xseen.nodes._defineNode ('Shape', 'Shape', 'unk_Shape')
 	.addNode();
 xseen.nodes._defineNode ('Viewpoint', 'Unknown', 'unk_Viewpoint')
@@ -126,3 +132,26 @@ xseen.nodes._defineNode('Background', 'Environmental', 'env_Background')
 	.addField('srcRight', 'SFString', '')
 	.addField('backgroundIsCube', 'SFBool', 'true')
 	.addNode();
+
+xseen.nodes._defineNode('TriangleSet', 'Geometry', 'geometry_TriangleSet')
+	.addField('ccw', 'SFBool', 'true')
+	.addField('colorPerVertex', 'SFBool', 'true')
+	.addField('solid', 'SFBool', 'true')
+	.addNode();
+xseen.nodes._defineNode('IndexedTriangleSet', 'Geometry', 'geometry_IndexedTriangleSet')
+	.addField('ccw', 'SFBool', true)
+	.addField('colorPerVertex', 'SFBool', true)
+	.addField('solid', 'SFBool', true)
+	.addField('index', 'MFInt', '')
+	.addNode();
+xseen.nodes._defineNode('Coordinate', 'Geometry', 'geometry_Coordinate')
+	.addField('point', 'MFVec3f', [])
+	.addNode();
+xseen.nodes._defineNode('Normal', 'Geometry', 'geometry_Normal')
+	.addField('vector', 'MFVec3f', [])
+	.addNode();
+xseen.nodes._defineNode('Color', 'Geometry', 'geometry_Color')
+	.addField('color', 'MFColor', [])
+	.addNode();
+
+xseen.nodes._dumpTable();

@@ -41,71 +41,17 @@ xseen.node.unk_Viewpoint = {
 	'fin'	: function (e,p) {}
 };
 
-xseen.node.geometry3D_Box = {
-	'init'	: function (e,p)
-		{
-			p._xseen.geometry = new THREE.BoxGeometry(e._xseen.fields.size[0], e._xseen.fields.size[1], e._xseen.fields.size[2]);
-		},
-	'fin'	: function (e,p) {}
-};
-
-xseen.node.geometry3D_Cone = {
-	'init'	: function (e,p)
-		{
-			p._xseen.geometry = new THREE.ConeGeometry(e._xseen.fields.bottomradius, e._xseen.fields.height, 24, false, 0, 2*Math.PI);
-		},
-	'fin'	: function (e,p) {}
-};
-xseen.node.geometry3D_Sphere = {
-	'init'	: function (e,p)
-		{
-			p._xseen.geometry = new THREE.SphereGeometry(e._xseen.fields.radius, 32, 32, 0, Math.PI*2, 0, Math.PI);
-		},
-	'fin'	: function (e,p) {}
-};
-	
-xseen.node.geometry3D_Cylinder = {
-	'init'	: function (e,p)
-		{
-			var noCaps = !(e._xseen.fields.bottom || e._xseen.fields.top);
-			p._xseen.geometry = new THREE.CylinderGeometry(e._xseen.fields.radius, e._xseen.fields.radius, e._xseen.fields.height, 32, 1, noCaps, 0, Math.PI*2);
-		},
-	'fin'	: function (e,p) {}
-};
-
-xseen.node.appearance_Material = {
-	'init'	: function (e,p)
-		{
-			var transparency  = e._xseen.fields.transparency - 0;
-			var shininess  = e._xseen.fields.shininess - 0;
-			var colorDiffuse = xseen.types.Color3toInt (e._xseen.fields.diffusecolor);
-			var colorEmissive = xseen.types.Color3toInt (e._xseen.fields.emissivecolor);
-			var colorSpecular = xseen.types.Color3toInt (e._xseen.fields.specularcolor);
-			p._xseen.material = new THREE.MeshPhongMaterial( {
-//			p._xseen.material = new THREE.MeshBasicMaterial( {
-						'color'		: colorDiffuse,
-						'emissive'	: colorEmissive,
-						'specular'	: colorSpecular,
-						'shininess'	: shininess,
-						'opacity'	: 1.0-transparency,
-						'transparent'	: (transparency > 0.0) ? true : false
-						} );
-		},
-	'fin'	: function (e,p) {}
-};
-xseen.node.appearance_Appearance = {
-	'init'	: function (e,p) {},
-
-	'fin'	: function (e,p)
-		{
-			p._xseen.appearance = e._xseen.material;
-		}
-};
 xseen.node.unk_Shape = {
 	'init'	: function (e,p) {},
 	'fin'	: function (e,p)
 		{
-			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+//			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			if (typeof(e._xseen.materialProperty) !== 'undefined') {
+				e._xseen.appearance.vertexColors = THREE.VertexColors;
+				//e._xseen.appearance.vertexColors = THREE.FaceColors;
+				e._xseen.appearance._needsUpdate = true;
+				e._xseen.appearance.needsUpdate = true;
+			}
 			var m = new THREE.Mesh (e._xseen.geometry, e._xseen.appearance);
 			p._xseen.children.push(m);
 			m = null;

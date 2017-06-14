@@ -80,6 +80,52 @@ xseen.types = {
 			return value;
 		},
 
+//	For MF* types, a default of '' means to return an empty array on parsing error
+	'MFInt'		: function (value, def)
+		{
+			var defReturn = (def == '') ? [] : def;
+			if (value === null) {return defReturn;}
+			var mi = value.split(' ');
+			var rv = [];
+			for (var i=0; i<mi.length; i++) {
+				if (mi[i] == '') {continue;}
+				if (Number.isNaN(mi[i])) {return defReturn};
+				rv.push (Math.round(mi[i]));
+			}
+			return rv;
+		},
+
+	'MFVec3f'	: function (value, def)
+		{
+			var defReturn = (def == '') ? [] : def;
+			if (value === null) {return defReturn;}
+			value = value.trim().replace(/\s+/g, ' ');
+			var mi = value.split(' ');
+			var rv = [];
+			for (var i=0; i<mi.length; i=i+3) {
+				if (Number.isNaN(mi[i])) {return defReturn};
+				if (Number.isNaN(mi[i+1])) {return defReturn};
+				if (Number.isNaN(mi[i+2])) {return defReturn};
+				rv.push ([mi[i]-0, mi[i+1]-0, mi[i+2]-0]);
+			}
+			return rv;
+		},
+
+	'MFColor'	: function (value, def)
+		{
+			if (value === null) {return def;}
+			value = value.trim().replace(/\s+/g, ' ');
+			var mi = value.split(' ');
+			var rv = [];
+			for (var i=0; i<mi.length; i=i+3) {
+				if (Number.isNaN(mi[i])) {return def};
+				if (Number.isNaN(mi[i+1])) {return def};
+				if (Number.isNaN(mi[i+2])) {return def};
+				rv.push ([Math.min(Math.max(mi[i]-0, 0.0), 1.0), Math.min(Math.max(mi[i+1]-0, 0.0), 1.0), Math.min(Math.max(mi[i+2]-0, 0.0), 1.0)]);
+			}
+			return rv;
+		},
+
 // A-Frame data types
 
 // value can be any CSS color (#HHH, #HHHHHH, 24-bit Integer, name)

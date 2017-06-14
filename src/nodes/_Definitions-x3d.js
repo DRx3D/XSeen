@@ -153,5 +153,22 @@ xseen.nodes._defineNode('Normal', 'Geometry', 'geometry_Normal')
 xseen.nodes._defineNode('Color', 'Geometry', 'geometry_Color')
 	.addField('color', 'MFColor', [])
 	.addNode();
+xseen.nodes._defineNode('IndexedFaceSet', 'Geometry', 'geometry_IndexedFaceSet')
+	.addField('ccw', 'SFBool', true)
+	.addField('colorPerVertex', 'SFBool', true)
+	.addField('solid', 'SFBool', true)
+	.addField('coordIndex', 'MFInt', '')
+	.addNode();
+xseen.nodes._defineNode('IndexedQuadSet', 'Geometry', 'geometry_IndexedQuadSet')
+	.addField('ccw', 'SFBool', true)
+	.addField('colorPerVertex', 'SFBool', true)
+	.addField('solid', 'SFBool', true)
+	.addField('index', 'MFInt', '')
+	.addNode();
+xseen.nodes._defineNode('QuadSet', 'Geometry', 'geometry_QuadSet')
+	.addField('ccw', 'SFBool', true)
+	.addField('colorPerVertex', 'SFBool', true)
+	.addField('solid', 'SFBool', true)
+	.addNode();
 
-xseen.nodes._dumpTable();
+//xseen.nodes._dumpTable();

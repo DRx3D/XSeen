@@ -75,6 +75,34 @@ xseen.node.geometry_TriangleSet = {
 			}
 		}
 };
+xseen.node.geometry_QuadSet = {
+	'init'	: function (e,p) {},
+// Create default index (applies to coordinates, color, normals, and textures), then call _ITS; and local ccw, colorPerVertex, and solid
+	'fin'	: function (e,p) 
+		{
+			if (!e._xseen.fields.ccw) {
+				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
+				return;
+			}
+			if (!e._xseen.fields.solid) {
+				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
+				return;
+			}
+			var indices = [];
+			for (var i=0; i<e._xseen.fields.vertices.length; i++) {
+				indices[i] = i;
+			}
+			var triangles = xseen.node.geometry__TriangulateFixed (4, indices);
+			var geometry = xseen.node.geometry__Indexed3 (	indices,
+															e._xseen.fields.vertices,
+															e._xseen.fields.normals,
+															e._xseen.fields.color);
+			if (typeof(geometry) !== 'undefined') {
+				p._xseen.geometry = geometry;
+				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
+			}
+		}
+};
 
 function v3toString(v3) {
 	var s = v3.x + ', ' + v3.y + ', ' + v3.z;
@@ -107,6 +135,132 @@ xseen.node.geometry_IndexedTriangleSet = {
 			}
 		}
 };
+xseen.node.geometry_IndexedQuadSet = {
+	'init'	: function (e,p) {},
+// Call _ITS with indices, coordinates, color, normals, and textures; and local ccw, colorPerVertex, and solid
+	'fin'	: function (e,p) 
+		{
+			if (!e._xseen.fields.ccw) {
+				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
+				return;
+			}
+			if (!e._xseen.fields.solid) {
+				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
+				return;
+			}
+			var triangles = xseen.node.geometry__TriangulateFixed (4, e._xseen.fields.index);
+			var geometry = xseen.node.geometry__Indexed3 (	triangles,
+															e._xseen.fields.vertices,
+															e._xseen.fields.normals,
+															e._xseen.fields.color);
+			if (typeof(geometry) !== 'undefined') {
+				p._xseen.geometry = geometry;
+				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
+			}
+		}
+};
+xseen.node.geometry_IndexedFaceSet = {
+	'init'	: function (e,p) {},
+// Call _ITS with indices, coordinates, color, normals, and textures; and local ccw, colorPerVertex, and solid
+	'fin'	: function (e,p) 
+		{
+			if (!e._xseen.fields.ccw) {
+				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
+				return;
+			}
+			if (!e._xseen.fields.solid) {
+				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
+				return;
+			}
+			var triangles = xseen.node.geometry__TriangulateSentinel (e._xseen.fields.coordindex);
+			var geometry = xseen.node.geometry__Indexed3 (	triangles,
+															e._xseen.fields.vertices,
+															e._xseen.fields.normals,
+															e._xseen.fields.color);
+			if (typeof(geometry) !== 'undefined') {
+				p._xseen.geometry = geometry;
+				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
+			}
+		}
+};
+
+/*
+ *	Triangulate a set of indices
+ *	Uses the value of -1 as a sentinel to indicate that a face definition is complete
+ *
+ *	Works by taking the first three indices for the first triangle. The second triangle
+ *	starts at the first index, then to the last index of the previous triangle. The new 
+ *	last index is the next index of the sequence. Triangulation ends when a -1 is encountered.
+ *	It is an error if a face is defined with only two indices. There is no error checking.
+ *
+ *	Arguments:
+ *		indices	- An array of numbers that represents the indices of faces.
+ *
+ *	Return:
+ *		An array of numbers that represents the indices of the triangulated faces
+ */
+xseen.node.geometry__TriangulateSentinel = function(indices) {
+	var first, last, mid;
+	var ndx = 0;
+	var triangles = [];
+	while (ndx < indices.length) {
+		first = indices[ndx++];
+		mid = indices[ndx++];
+		last = indices[ndx++];
+		triangles.push(first, mid, last);
+		while (ndx < indices.length && indices[ndx] != -1) {
+			mid = last;
+			last = indices[ndx++];
+			triangles.push(first, mid, last);
+		}
+		if (ndx < indices.length && indices[ndx] == -1) {ndx++;}
+	}
+	return triangles;
+};
+
+/*
+ *	Triangulate a set of indices
+ *	Takes a fixed number of indices 
+ *
+ *	Works by taking the first three indices for the first triangle. The second triangle
+ *	starts at the first index, then to the last index of the previous triangle. The new 
+ *	last index is the next index of the sequence. Triangulation ends when a -1 is encountered.
+ *	It is an error if a face is defined with only two indices. There is no error checking.
+ *
+ *	Arguments:
+ *		count - An integer that is the number of indices making up a face throughout the entire 'indices' array.
+ *		indices	- An array of numbers that represents the indices of faces.
+ *
+ *	Return:
+ *		An array of numbers that represents the indices of the triangulated faces
+ */
+xseen.node.geometry__TriangulateFixed = function (count, indices) {
+	var first, last, mid, cnt;
+	var ndx = 0;
+	var triangles = [];
+	if (count < 3) {
+		console.log ('Two few ('+count+'vertices per triangle. No triangulation performed.');
+		return triangles;
+	}
+	if (indices.length % count != 0) {
+		console.log ('Number of indices ('+indices.length+') not divisible by '+count+'. Some indices not used');
+	}
+
+	while (ndx < indices.length) {
+		first = indices[ndx++];
+		mid = indices[ndx++];
+		last = indices[ndx++];
+		cnt = 3;
+		triangles.push(first, mid, last);
+		while (ndx < indices.length && cnt < count) {
+			mid = last;
+			last = indices[ndx++];
+			cnt ++;
+			triangles.push(first, mid, last);
+		}
+	}
+	return triangles;
+}
 
 /*
  *	Generalized indexed face geometry creation.

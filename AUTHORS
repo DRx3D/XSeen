@@ -8,6 +8,9 @@ Concepts and node/tag signatures taken from A-Frame
 
 Concepts and internals inspired by X3DOM
 	* Fraunhofer (http://x3dom.org/)
+	
+JSON -> XML converter code
+	* John Carlson
 
 X3D Standard (ISO/IEC 19775-1 and 19776-1) developed by
 	* Web3D Consortium (http://www.web3d.org/)

@@ -1,2 +1,22 @@
 2017-05-29
 Initial development Release V0.1
+ * all X3D pre-defined solids (box, sphere, cone, cylinder)
+ * all A-Frame pre-defined solids
+ * fixed camera
+ * directional light
+ * material diffuseColor, specularColor, emissiveColor
+
+Released in V0.2.0+9 -- 2017-06-14
+ * Image textures
+ * glTF model loader with animations
+ * A-Frame assets and reuse
+ * Viewpoint (simple)
+ * Background
+ * All X3D Lighting (Directional, Spot, Point)
+ * [Indexed]TriangleSet
+ * TriangleSet
+ * IndexedFaceSet
+ * QuadSet
+ * IndexedQuadSet
+ * JSON loader for Inline contet
+ 

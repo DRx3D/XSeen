@@ -79,7 +79,7 @@ sub getVersion {
 		if ($foundVersion) {
 			if (/\};/) {
 				$foundVersion = 0;
-			} elsif (/major/ || /minor/ || /revision/ || /date/) {
+			} elsif (/major/ || /minor/ || /patch/ || /release/ || /date/) {
 				chomp;
 				($name,$value,@parts) = split(':');
 				$name =~ s/^\s+|\s+$//g;
@@ -88,7 +88,7 @@ sub getVersion {
 			}
 		}
 	}
-	my $version = sprintf ("%d.%d.%d", $version{major}, $version{minor}, $version{revision});
+	my $version = sprintf ("%d.%d.%d+%d", $version{major}, $version{minor}, $version{patch}, $version{release});
 	return $version;
 }
 

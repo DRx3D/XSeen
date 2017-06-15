@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>My first three.js app</title>
+		<title>JSON Test</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
@@ -62,8 +62,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>
 		<script src="../ExternalLibraries/three.js"></script>
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
-<!--		<script src="../Release/XSeen.min.js"></script>	-->
-
+		<script src="../Release/XSeen.min.js"></script>
+<!--	
+		<script src="../src/utils/JSONParser.js"></script>
 		<script src='../src/utils/LoadManager.js'></script>
 		<script src='../src/utils/ColladaLoader.js'></script>
 		<script src='../src/utils/GLTF2Loader.js'></script>
@@ -85,99 +86,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src="../src/nodes/nodes-x3d_Appearance.js"></script>
 		<script src="../src/nodes/nodes-x3d_Geometry.js"></script>
 		<script src="../src/nodes/nodes-af.js"></script>
+-->
 
 	</head>
 	<body>
-		<scene id='xscene' height='450' width='800'>
-<Viewpoint position='0 6 10'></Viewpoint>
-<WorldInfo></WorldInfo>
-<light intentsity='.5' direction='0 0 -1'></light>
-<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
-<Inline id='inline4' url='inline.x3d'></Inline>
-<transform id='aframe_nodes' translation='0 0 15'>
-	<transform id='af_box' translation='0 -3 0'>
-		<a-box height='.2' depth='12' width='8'></a-box>
-	</transform>
-	<transform id='af_cone' translation='0 3 0'>
-		<a-cone height='8' radius='2'></a-cone>
-	</transform>
-	<transform id='af_cylinder' translation='4 0 0'>
-		<a-cylinder height='3' radius-bottom='.8' radius-top='1'></a-cylinder>
-	</transform>
-	<transform id='af_sphere' translation='4 0 3'>
-		<a-sphere radius='.8'></a-sphere>
-	</transform>
-	<transform id='af_torus' translation='0 5 0' rotation='1 0 0 1.57'>
-		<a-torus segments-tubular='16'></a-torus>
-	</transform>
-	<Inline id='inlineAF' url='PlatonicSolids.x3d'></Inline>
-</transform>
-<transform id='SceneParent_1' translation='0 0 -2' rotation='0 0 1 1.57'>
-	<transform id='SceneBox' translation='0 2 0' rotation='1 0 0 1'>
-		<shape>
-			<box></box>
-			<appearance>
-				<material diffusecolor='1 0 0' emissivecolor='0 .5 0'></material>
-			</appearance>
-		</shape>
-	</transform>
-	<transform id='SceneCone' scale='1 1.3 1.6'>
-		<light color='1 .5 0' direction='-1 0 0'></light>
-		<shape>
-			<cone></cone>
-			<appearance>
-				<material diffusecolor='0 .5 1' emissivecolor='.4 .2 .2'></material>
-			</appearance>
-		</shape>
-	</transform>
-</transform>
-<transform id='SceneParent_2' translation='-2 0 0'>
-	<shape>
-		<sphere radius='1.25'></sphere>
-		<appearance>
-			<material diffusecolor='0 1 0' emissivecolor='.5 0 0'></material>
-		</appearance>
-	</shape>
-	<shape>
-		<cylinder radius='1' height='2'></cylinder>
-		<appearance>
-			<material diffusecolor='0 0 1' emissivecolor='.5 0 0'></material>
-		</appearance>
-	</shape>
-</transform>
-		</scene>
-		<script>
-			// Our Javascript will go here.
-			//alert ('Processing closing script...');
-var x_renderer, x_canvas, x_camera
-function loadContent1() {
-	x_canvas = new THREE.Scene();
-	var divWidth = window.innerWidth/3;
-	var divHeight =  window.innerHeight/3;
-	x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
-	x_renderer = new THREE.WebGLRenderer();
-	x_renderer.setSize (divWidth, divHeight);
-//			xseen.sceneInfo[0].element.appendChild (x_renderer.domElement);
-	document.body.appendChild (x_renderer.domElement);
+<scene id='content_3d' height='500' width='1000'>
+	<Viewpoint position='0 4 6'></Viewpoint>
+	<Background skycolor='.8 .8 1'></Background>
+	<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
+	<group>
+		<Inline id='inline4' url='models/model.json'></Inline>
+		<transform id='af_box' translation='0 -3 0'>
+			<a-box height='.2' depth='100' width='200' src='images/textureTest.png'></a-box>
+		</transform>
+	</group>
+</scene>
 
-	loadContent (x_canvas, x_camera);
-}
-function render() {
-	requestAnimationFrame( render );
-	//x_renderer.render( x_canvas, x_camera );
-}
-function loadContent(scene, camera) {
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	var cube = new THREE.Mesh( geometry, material );
-
-	scene.add( cube );
-	camera.position.x = 1;
-	camera.position.z = 5;
-}
-//loadContent1();
-//render();
-
-		</script>
 	</body>
 </html>

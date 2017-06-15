@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.2.0+9
- *  Built Wed Jun 14 20:04:47 2017
+ *  XSeen V0.1.8
+ *  Built Mon Jun 12 10:20:44 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -53,7 +53,6 @@ Copyright (C) 2017, Daly Realism for XSeen
 Copyright, Fraunhofer for X3DOM
 Copyright, Mozilla for A-Frame
 Copyright, THREE and Khronos for various parts of THREE.js
-Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 
 ===  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -9254,262 +9253,6 @@ THREE.GLTFLoader = ( function () {
 	};
 	return GLTFLoader;
 } )();
-// File: utils/JSONParser.js
-﻿"use strict";
-
-var JSONParser = function(scene)
-{
-}
-
-JSONParser.prototype.constructor = JSONParser;
-
-	/**
-	 * Load X3D JSON into an element.
-	 * jsobj - the JavaScript object to convert to DOM.
-	 */
-JSONParser.prototype.parseJavaScript = function(jsobj) {
-		var child = this.CreateElement('scene');
-		this.ConvertToX3DOM(jsobj, "", child);
-		// console.log(jsobj, child);
-		return child;
-	};
-
-	// 'http://www.web3d.org/specifications/x3d-namespace'
-
-	// Load X3D JavaScript object into XML or DOM
-
-	/**
-	 * Yet another way to set an attribute on an element.  does not allow you to
-	 * set JSON schema or encoding.
-	 */
-JSONParser.prototype.elementSetAttribute = function(element, key, value) {
-		if (key === 'SON schema') {
-			// JSON Schema
-		} else if (key === 'ncoding') {
-			// encoding, UTF-8, UTF-16 or UTF-32
-		} else {
-			if (typeof element.setAttribute === 'function') {
-				element.setAttribute(key, value);
-			}
-		}
-	};
-
-	/**
-	 * converts children of object to DOM.
-	 */
-JSONParser.prototype.ConvertChildren = function(parentkey, object, element) {
-		var key;
-
-		for (key in object) {
-			if (typeof object[key] === 'object') {
-				if (isNaN(parseInt(key))) {
-					this.ConvertObject(key, object, element, parentkey.substr(1));
-				} else {
-					this.ConvertToX3DOM(object[key], key, element, parentkey.substr(1));
-				}
-			}
-		}
-	};
-
-	/**
-	 * a method to create and element with tagnam key to DOM in a namespace.  If
-	 * containerField is set, then the containerField is set in the elemetn.
-	 */
-JSONParser.prototype.CreateElement = function(key, containerField) {
-		var child = document.createElement(key);
-		if (typeof containerField !== 'undefined') {
-			this.elementSetAttribute(child, 'containerField', containerField);
-		}
-		return child;
-	};
-
-	/**
-	 * a way to create a CDATA function or script in HTML, by using a DOM parser.
-	 */
-JSONParser.prototype.CDATACreateFunction = function(document, element, str) {
-		var y = str.replace(/\\"/g, "\\\"")
-			.replace(/&lt;/g, "<")
-			.replace(/&gt;/g, ">")
-			.replace(/&amp;/g, "&");
-		do {
-			str = y;
-			y = str.replace(/'([^'\r\n]*)\n([^']*)'/g, "'$1\\n$2'");
-			if (str !== y) {
-				console.log("CDATA Replacing",str,"with",y);
-			}
-		} while (y != str);
-		var domParser = new DOMParser();
-		var cdataStr = '<script> <![CDATA[ ' + y + ' ]]> </script>'; // has to be wrapped into an element
-		var scriptDoc = domParser .parseFromString (cdataStr, 'application/xml');
-		var cdata = scriptDoc .children[0] .childNodes[1]; // space after script is childNode[0]
-		element .appendChild(cdata);
-	};
-
-	/**
-	 * convert the object at object[key] to DOM.
-	 */
-JSONParser.prototype.ConvertObject = function(key, object, element, containerField) {
-		var child;
-		if (object !== null && typeof object[key] === 'object') {
-			if (key.substr(0,1) === '@') {
-				this.ConvertToX3DOM(object[key], key, element);
-			} else if (key.substr(0,1) === '-') {
-				this.ConvertChildren(key, object[key], element);
-			} else if (key === '#comment') {
-				for (var c in object[key]) {
-					child = document.createComment(this.CommentStringToXML(object[key][c]));
-					element.appendChild(child);
-				}
-			} else if (key === '#text') {
-				child = document.createTextNode(object[key].join(""));
-				element.appendChild(child);
-			} else if (key === '#sourceText') {
-				this.CDATACreateFunction(document, element, object[key].join("\r\n")+"\r\n");
-			} else {
-				if (key === 'connect' || key === 'fieldValue' || key === 'field' || key === 'meta' || key === 'component') {
-					for (var childkey in object[key]) {  // for each field
-						if (typeof object[key][childkey] === 'object') {
-							child = this.CreateElement(key, containerField);
-							this.ConvertToX3DOM(object[key][childkey], childkey, child);
-							element.appendChild(child);
-							element.appendChild(document.createTextNode("\n"));
-						}
-					}
-				} else {
-					child = this.CreateElement(key, containerField);
-					this.ConvertToX3DOM(object[key], key, child);
-					element.appendChild(child);
-					element.appendChild(document.createTextNode("\n"));
-				}
-			}
-		}
-	};
-
-	/**
-	 * convert a comment string in JavaScript to XML.  Pass the string
-	 */
-JSONParser.prototype.CommentStringToXML = function(str) {
-		var y = str;
-		str = str.replace(/\\\\/g, '\\');
-		if (y !== str) {
-			console.log("X3DJSONLD <!-> replacing", y, "with", str);
-		}
-		return str;
-	};
-
-	/**
-	 * convert an SFString to XML.
-	 */
-JSONParser.prototype.SFStringToXML = function(str) {
-		var y = str;
-		/*
-		str = (""+str).replace(/\\\\/g, '\\\\');
-		str = str.replace(/\\\\\\\\/g, '\\\\');
-		str = str.replace(/(\\+)"/g, '\\"');
-		*/
-		str = str.replace(/\\/g, '\\\\');
-		str = str.replace(/"/g, '\\\"');
-		if (y !== str) {
-			console.log("X3DJSONLD [] replacing", y, "with", str);
-		}
-		return str;
-	};
-
-	/**
-	 * convert a JSON String to XML.
-	 */
-JSONParser.prototype.JSONStringToXML = function(str) {
-		var y = str;
-		str = str.replace(/\\/g, '\\\\');
-		str = str.replace(/\n/g, '\\n');
-		if (y !== str) {
-			console.log("X3DJSONLD replacing", y, "with", str);
-		}
-		return str;
-	};
-
-	/**
-	 * main routine for converting a JavaScript object to DOM.
-	 * object is the object to convert.
-	 * parentkey is the key of the object in the parent.
-	 * element is the parent element.
-	 * containerField is a possible containerField.
-	 */
-JSONParser.prototype.ConvertToX3DOM = function(object, parentkey, element, containerField) {
-		var key;
-		var localArray = [];
-		var isArray = false;
-		var arrayOfStrings = false;
-		for (key in object) {
-			if (isNaN(parseInt(key))) {
-				isArray = false;
-			} else {
-				isArray = true;
-			}
-			if (isArray) {
-				if (typeof object[key] === 'number') {
-					localArray.push(object[key]);
-				} else if (typeof object[key] === 'string') {
-					localArray.push(object[key]);
-					arrayOfStrings = true;
-				} else if (typeof object[key] === 'boolean') {
-					localArray.push(object[key]);
-				} else if (typeof object[key] === 'object') {
-					/*
-					if (object[key] != null && typeof object[key].join === 'function') {
-						localArray.push(object[key].join(" "));
-					}
-					*/
-					this.ConvertToX3DOM(object[key], key, element);
-				} else if (typeof object[key] === 'undefined') {
-				} else {
-					console.error("Unknown type found in array "+typeof object[key]);
-				}
-			} else if (typeof object[key] === 'object') {
-				// This is where the whole thing starts
-				if (key === 'scene') {
-					this.ConvertToX3DOM(object[key], key, element);
-				} else {
-					this.ConvertObject(key, object, element);
-				}
-			} else if (typeof object[key] === 'number') {
-				this.elementSetAttribute(element, key.substr(1),object[key]);
-			} else if (typeof object[key] === 'string') {
-				if (key === '#comment') {
-					var child = document.createComment(this.CommentStringToXML(object[key]));
-					element.appendChild(child);
-				} else if (key === '#text') {
-					var child = document.createTextNode(object[key]);
-					element.appendChild(child);
-				} else {
-					// ordinary string attributes
-					this.elementSetAttribute(element, key.substr(1), this.JSONStringToXML(object[key]));
-				}
-			} else if (typeof object[key] === 'boolean') {
-				this.elementSetAttribute(element, key.substr(1),object[key]);
-			} else if (typeof object[key] === 'undefined') {
-			} else {
-				console.error("Unknown type found in object "+typeof object[key]);
-				console.error(object);
-			}
-		}
-		if (isArray) {
-			if (parentkey.substr(0,1) === '@') {
-				if (arrayOfStrings) {
-					arrayOfStrings = false;
-					for (var str in localArray) {
-						localArray[str] = this.SFStringToXML(localArray[str]);
-					}
-					this.elementSetAttribute(element, parentkey.substr(1),'"'+localArray.join('" "')+'"');
-				} else {
-					// if non string array
-					this.elementSetAttribute(element, parentkey.substr(1),localArray.join(" "));
-				}
-			}
-			isArray = false;
-		}
-		return element;
-	};
 // File: utils/LoadManager.js
 /*
  * For use with XSeen JavaScript Library
@@ -9576,9 +9319,9 @@ function LoadManager () {
 		}
 	}
 
-	this.failure = function (xhr, errorCode, errorText) {
+	this.failure = function (xhr) {
 		if (typeof(xhr._loadManager.failure) !== undefined) {
-			xhr._loadManager.failure (xhr, xhr._loadManager.userdata, errorCode, errorText);
+			xhr._loadManager.failure (xhr, xhr._loadManager.userdata);
 		}
 	}
 
@@ -9613,9 +9356,6 @@ function LoadManager () {
 						'success'	: this.success,
 						'error'		: this.failure
 						};
-		if (settings.dataType == 'json') {
-			settings['beforeSend'] = function(xhr){xhr.overrideMimeType("application/json");};
-		}
 		this.urlQueue[this.urlNext] = null;
 		this.urlNext ++;
 		var x = jQuery.get(settings);		// Need to change this... Has impact throughout class
@@ -10697,8 +10437,8 @@ var xseen = {
 							console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 						}
 					},
-	loadError		: function (xhr, userdata, code, message) {
-						console.error('An error happened on '+userdata.e.id+'\n'+code+'\n'+message);
+	loadError		: function (xhr, userdata) {
+						console.error( 'An error happened on '+userdata.e.id);
 					},
 	loadMime		: {
 						''		: {name: 'Null', loader: 'Null'},
@@ -10784,15 +10524,13 @@ var xseen = {
 
 xseen.versionInfo = {
 	major		: 0,
-	minor		: 2,
-	patch		: 0,
-	release		: 9,
+	minor		: 1,
+	revision	: 8,
 	version		: '',
-	date		: '2017-06-14',
-	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
+	date		: '2017-06-12',
+	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet<br>\nNext work<ul><li>Triangle Geometry, Extrusion</li><li>Face Geometry</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
 };
-// Using the scheme at http://semver.org/
-xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.patch + '+' + xseen.versionInfo.release;
+xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 
 
 
@@ -12635,34 +12373,6 @@ xseen.node.geometry_TriangleSet = {
 			}
 		}
 };
-xseen.node.geometry_QuadSet = {
-	'init'	: function (e,p) {},
-// Create default index (applies to coordinates, color, normals, and textures), then call _ITS; and local ccw, colorPerVertex, and solid
-	'fin'	: function (e,p) 
-		{
-			if (!e._xseen.fields.ccw) {
-				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
-				return;
-			}
-			if (!e._xseen.fields.solid) {
-				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
-				return;
-			}
-			var indices = [];
-			for (var i=0; i<e._xseen.fields.vertices.length; i++) {
-				indices[i] = i;
-			}
-			var triangles = xseen.node.geometry__TriangulateFixed (4, indices);
-			var geometry = xseen.node.geometry__Indexed3 (	indices,
-															e._xseen.fields.vertices,
-															e._xseen.fields.normals,
-															e._xseen.fields.color);
-			if (typeof(geometry) !== 'undefined') {
-				p._xseen.geometry = geometry;
-				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
-			}
-		}
-};
 
 function v3toString(v3) {
 	var s = v3.x + ', ' + v3.y + ', ' + v3.z;
@@ -12695,132 +12405,6 @@ xseen.node.geometry_IndexedTriangleSet = {
 			}
 		}
 };
-xseen.node.geometry_IndexedQuadSet = {
-	'init'	: function (e,p) {},
-// Call _ITS with indices, coordinates, color, normals, and textures; and local ccw, colorPerVertex, and solid
-	'fin'	: function (e,p) 
-		{
-			if (!e._xseen.fields.ccw) {
-				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
-				return;
-			}
-			if (!e._xseen.fields.solid) {
-				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
-				return;
-			}
-			var triangles = xseen.node.geometry__TriangulateFixed (4, e._xseen.fields.index);
-			var geometry = xseen.node.geometry__Indexed3 (	triangles,
-															e._xseen.fields.vertices,
-															e._xseen.fields.normals,
-															e._xseen.fields.color);
-			if (typeof(geometry) !== 'undefined') {
-				p._xseen.geometry = geometry;
-				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
-			}
-		}
-};
-xseen.node.geometry_IndexedFaceSet = {
-	'init'	: function (e,p) {},
-// Call _ITS with indices, coordinates, color, normals, and textures; and local ccw, colorPerVertex, and solid
-	'fin'	: function (e,p) 
-		{
-			if (!e._xseen.fields.ccw) {
-				xseen.debug.logWarning ('Support for clock-wise vertex order is not supported. No geometry is created');
-				return;
-			}
-			if (!e._xseen.fields.solid) {
-				xseen.debug.logWarning ('Support for non-solid geometry is not supported. No geometry is created');
-				return;
-			}
-			var triangles = xseen.node.geometry__TriangulateSentinel (e._xseen.fields.coordindex);
-			var geometry = xseen.node.geometry__Indexed3 (	triangles,
-															e._xseen.fields.vertices,
-															e._xseen.fields.normals,
-															e._xseen.fields.color);
-			if (typeof(geometry) !== 'undefined') {
-				p._xseen.geometry = geometry;
-				p._xseen.materialProperty = {'vertexColors' : THREE.VertexColors};
-			}
-		}
-};
-
-/*
- *	Triangulate a set of indices
- *	Uses the value of -1 as a sentinel to indicate that a face definition is complete
- *
- *	Works by taking the first three indices for the first triangle. The second triangle
- *	starts at the first index, then to the last index of the previous triangle. The new 
- *	last index is the next index of the sequence. Triangulation ends when a -1 is encountered.
- *	It is an error if a face is defined with only two indices. There is no error checking.
- *
- *	Arguments:
- *		indices	- An array of numbers that represents the indices of faces.
- *
- *	Return:
- *		An array of numbers that represents the indices of the triangulated faces
- */
-xseen.node.geometry__TriangulateSentinel = function(indices) {
-	var first, last, mid;
-	var ndx = 0;
-	var triangles = [];
-	while (ndx < indices.length) {
-		first = indices[ndx++];
-		mid = indices[ndx++];
-		last = indices[ndx++];
-		triangles.push(first, mid, last);
-		while (ndx < indices.length && indices[ndx] != -1) {
-			mid = last;
-			last = indices[ndx++];
-			triangles.push(first, mid, last);
-		}
-		if (ndx < indices.length && indices[ndx] == -1) {ndx++;}
-	}
-	return triangles;
-};
-
-/*
- *	Triangulate a set of indices
- *	Takes a fixed number of indices 
- *
- *	Works by taking the first three indices for the first triangle. The second triangle
- *	starts at the first index, then to the last index of the previous triangle. The new 
- *	last index is the next index of the sequence. Triangulation ends when a -1 is encountered.
- *	It is an error if a face is defined with only two indices. There is no error checking.
- *
- *	Arguments:
- *		count - An integer that is the number of indices making up a face throughout the entire 'indices' array.
- *		indices	- An array of numbers that represents the indices of faces.
- *
- *	Return:
- *		An array of numbers that represents the indices of the triangulated faces
- */
-xseen.node.geometry__TriangulateFixed = function (count, indices) {
-	var first, last, mid, cnt;
-	var ndx = 0;
-	var triangles = [];
-	if (count < 3) {
-		console.log ('Two few ('+count+'vertices per triangle. No triangulation performed.');
-		return triangles;
-	}
-	if (indices.length % count != 0) {
-		console.log ('Number of indices ('+indices.length+') not divisible by '+count+'. Some indices not used');
-	}
-
-	while (ndx < indices.length) {
-		first = indices[ndx++];
-		mid = indices[ndx++];
-		last = indices[ndx++];
-		cnt = 3;
-		triangles.push(first, mid, last);
-		while (ndx < indices.length && cnt < count) {
-			mid = last;
-			last = indices[ndx++];
-			cnt ++;
-			triangles.push(first, mid, last);
-		}
-	}
-	return triangles;
-}
 
 /*
  *	Generalized indexed face geometry creation.
@@ -13059,26 +12643,24 @@ xseen.node.grouping_Transform = {
 	'fin'	: function (e,p)
 		{
 			// Apply transform to all objects in e._xseen.children
+			var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
 			var group = new THREE.Group();
-			if (e.nodeName == "TRANSFORM") {
-				var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
-				group.name = 'Transform children [' + e.id + ']';
-				group.position.x	= e._xseen.fields.translation[0];
-				group.position.y	= e._xseen.fields.translation[1];
-				group.position.z	= e._xseen.fields.translation[2];
-				group.scale.x		= e._xseen.fields.scale[0];
-				group.scale.y		= e._xseen.fields.scale[1];
-				group.scale.z		= e._xseen.fields.scale[2];
-				group.quaternion.x	= rotation.x;
-				group.quaternion.y	= rotation.y;
-				group.quaternion.z	= rotation.z;
-				group.quaternion.w	= rotation.w;
-			}
+			group.name = 'Transform children [' + e.id + ']';
+			group.position.x	= e._xseen.fields.translation[0];
+			group.position.y	= e._xseen.fields.translation[1];
+			group.position.z	= e._xseen.fields.translation[2];
+			group.scale.x		= e._xseen.fields.scale[0];
+			group.scale.y		= e._xseen.fields.scale[1];
+			group.scale.z		= e._xseen.fields.scale[2];
+			group.quaternion.x	= rotation.x;
+			group.quaternion.y	= rotation.y;
+			group.quaternion.z	= rotation.z;
+			group.quaternion.w	= rotation.w;
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
 					group.add(child);
 				});
-			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
 			p._xseen.children.push(group);
 			e._xseen.object = group;
 		}
@@ -13130,21 +12712,13 @@ xseen.node.networking_Inline = {
 	'init'	: function (e,p) 
 		{
 			if (typeof(e._xseen.processedUrl) === 'undefined' || !e._xseen.requestedUrl) {
-				var uri = xseen.parseUrl (e._xseen.fields.url);
-				var type = uri.extension;
 				e._xseen.loadGroup = new THREE.Group();
 				e._xseen.loadGroup.name = 'Inline content [' + e.id + ']';
 				console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
-				var userdata = {'requestType':'x3d', 'e':e, 'p':p}
-				if (type.toLowerCase() == 'json') {
-					userdata.requestType = 'json';
-					xseen.loadMgr.loadJson (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, userdata);
-				} else {
-					xseen.loadMgr.loadXml (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, userdata);
-				}
+				xseen.loadMgr.loadXml (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, {'e':e, 'p':p});
 				e._xseen.requestedUrl = true;
 			}
-			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
 			p._xseen.children.push(e._xseen.loadGroup);
 			console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
 		},
@@ -13155,22 +12729,17 @@ xseen.node.networking_Inline = {
 	'loadSuccess' :
 				function (response, userdata, xhr) {
 					userdata.e._xseen.processedUrl = true;
-					userdata.e._xseen.loadResponse = response;
+					userdata.e._xseen.loadText = response;
 					console.log("download successful for "+userdata.e.id);
-					if (userdata.requestType == 'json') {
-						var tmp = {'scene': response};
-						response = null;
-						response = (new JSONParser()).parseJavaScript(tmp);
-					}
 					var start = {'_xseen':0};
-					var findSceneTag = function (fragment) {
-						if (typeof(fragment._xseen) === 'undefined') {fragment._xseen = {'childCount': -1};}
-						if (fragment.nodeName.toLowerCase() == 'scene') {
-							start = fragment;
+					var findSceneTag = function (response) {
+						if (typeof(response._xseen) === 'undefined') {response._xseen = {'childCount': -1};}
+						if (response.nodeName == 'scene') {
+							start = response;
 							return;
-						} else if (fragment.children.length > 0) {
-							for (fragment._xseen.childCount=0; fragment._xseen.childCount<fragment.children.length; fragment._xseen.childCount++) {
-								findSceneTag(fragment.children[fragment._xseen.childCount]);
+						} else if (response.children.length > 0) {
+							for (response._xseen.childCount=0; response._xseen.childCount<response.children.length; response._xseen.childCount++) {
+								findSceneTag(response.children[response._xseen.childCount]);
 								if (start._xseen !== 0) {return;}
 							}
 						} else {
@@ -13508,8 +13077,6 @@ xseen.nodes._defineNode ('Transform', 'Grouping', 'grouping_Transform')
 	.addField('scale', 'SFVec3f', '1 1 1')
 	.addField('rotation', 'SFRotation', '0 1 0 0')
 	.addNode();
-xseen.nodes._defineNode ('Group', 'Grouping', 'grouping_Transform')
-	.addNode();
 
 xseen.nodes._defineNode ('Light', 'Lighting', 'lighting_Light')
 	.addField('direction', 'SFVec3f', '0 0 -1')									// DirectionalLight
@@ -13607,25 +13174,8 @@ xseen.nodes._defineNode('Normal', 'Geometry', 'geometry_Normal')
 xseen.nodes._defineNode('Color', 'Geometry', 'geometry_Color')
 	.addField('color', 'MFColor', [])
 	.addNode();
-xseen.nodes._defineNode('IndexedFaceSet', 'Geometry', 'geometry_IndexedFaceSet')
-	.addField('ccw', 'SFBool', true)
-	.addField('colorPerVertex', 'SFBool', true)
-	.addField('solid', 'SFBool', true)
-	.addField('coordIndex', 'MFInt', '')
-	.addNode();
-xseen.nodes._defineNode('IndexedQuadSet', 'Geometry', 'geometry_IndexedQuadSet')
-	.addField('ccw', 'SFBool', true)
-	.addField('colorPerVertex', 'SFBool', true)
-	.addField('solid', 'SFBool', true)
-	.addField('index', 'MFInt', '')
-	.addNode();
-xseen.nodes._defineNode('QuadSet', 'Geometry', 'geometry_QuadSet')
-	.addField('ccw', 'SFBool', true)
-	.addField('colorPerVertex', 'SFBool', true)
-	.addField('solid', 'SFBool', true)
-	.addNode();
 
-//xseen.nodes._dumpTable();
+xseen.nodes._dumpTable();
 // File: nodes/_Definitions-xseen.js
 /*
  * XSeen JavaScript library

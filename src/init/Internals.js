@@ -26,6 +26,7 @@ var xseen = {
 	nodeDefinitions	: {},
 	parseTable		: {},
 	node			: {},
+	utils			: {},
 
 	loadMgr			: new LoadManager(),
 	loader			: {
@@ -34,6 +35,7 @@ var xseen = {
 						'GltfLegacy'	: '',
 						'GltfLoader'	: '',
 						'ObjLoader'		: '',
+						'ImageLoader'	: '',
 						'X3dLoader'		: new LoadManager(),
 					},
 	loadProgress	: function (xhr) {
@@ -41,8 +43,8 @@ var xseen = {
 							console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 						}
 					},
-	loadError		: function (xhr, userdata) {
-						console.error( 'An error happened on '+userdata.e.id);
+	loadError		: function (xhr, userdata, code, message) {
+						console.error('An error happened on '+userdata.e.id+'\n'+code+'\n'+message);
 					},
 	loadMime		: {
 						''		: {name: 'Null', loader: 'Null'},
@@ -51,12 +53,18 @@ var xseen = {
 						'glbl'	: {name: 'glTF Binary', loader: 'GltfLegacy'},
 						'gltf'	: {name: 'glTF JSON', loader: 'GltfLoader'},
 						'obj'	: {name: 'OBJ', loader: 'ObjLoader'},
+						'png'	: {name: 'PNG', loader: 'ImageLoader'},
+						'jpg'	: {name: 'JPEG', loader: 'ImageLoader'},
+						'jpeg'	: {name: 'JPEG', loader: 'ImageLoader'},
+						'gif'	: {name: 'GIF', loader: 'ImageLoader'},
 						'x3d'	: {name: 'X3D XML', loader: 'X3dLoader'},
 					},
 
 	
 	timeStart		: (new Date()).getTime(),
 	timeNow			: (new Date()).getTime(),
+
+	tmp				: {},			// misc. out of the way storage
 
 	versionInfo		: [],
     x3dNS    		: 'http://www.web3d.org/specifications/x3d-namespace',
@@ -71,6 +79,7 @@ var xseen = {
 							this.loader.GltfLegacy		= new THREE.GLTFLoader();
 							this.loader.GltfLoader		= new THREE.GLTF2Loader();
 							this.loader.ObjLoader		= new THREE.OBJLoader2();
+							this.loader.ImageLoader		= new THREE.TextureLoader();
 						},
 
 // Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
@@ -108,28 +117,28 @@ var xseen = {
     							};
 						},
 
-	dumpChildren	: function (obj, indent, addstr)
+	dumpSceneGraph	: function () {this._dumpChildren (xseen.sceneInfo[0].scene, ' +', '--');},
+	_dumpChildren	: function (obj, indent, addstr)
 						{
 							console.log (indent + '> ' + obj.type + ' (' + obj.name + ')');
 							for (var i=0; i<obj.children.length; i++) {
 								var child = obj.children[i];
-								this.dumpChildren(child, indent+addstr, addstr);
+								this._dumpChildren(child, indent+addstr, addstr);
 							}
 						},
-
-	dumpSceneGraph	: function () {this.dumpChildren (xseen.sceneInfo[0].scene, ' +', '--');},
-
 };
 
 xseen.versionInfo = {
-	major	: 0,
-	minor	: 1,
-	revision	: 3,
-	version	: '',
-	date	: '2017-06-05',
-	splashText		: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse<br>\nNext work<ul><li>Viewpoints and Navigation</li><li>Event Model/Animation</li><li>Backgrounds</li></ul>",
+	major		: 0,
+	minor		: 2,
+	patch		: 0,
+	release		: 9,
+	version		: '',
+	date		: '2017-06-14',
+	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
 };
-xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
+// Using the scheme at http://semver.org/
+xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.patch + '+' + xseen.versionInfo.release;
 
 
 

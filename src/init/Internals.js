@@ -43,8 +43,8 @@ var xseen = {
 							console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 						}
 					},
-	loadError		: function (xhr, userdata) {
-						console.error( 'An error happened on '+userdata.e.id);
+	loadError		: function (xhr, userdata, code, message) {
+						console.error('An error happened on '+userdata.e.id+'\n'+code+'\n'+message);
 					},
 	loadMime		: {
 						''		: {name: 'Null', loader: 'Null'},
@@ -130,11 +130,11 @@ var xseen = {
 
 xseen.versionInfo = {
 	major		: 0,
-	minor		: 1,
-	revision	: 8,
+	minor		: 2,
+	revision	: 9,
 	version		: '',
-	date		: '2017-06-12',
-	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet<br>\nNext work<ul><li>Triangle Geometry, Extrusion</li><li>Face Geometry</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
+	date		: '2017-06-14',
+	splashText	: "XSeen 3D Language parser.<br>\n<a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>. All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Extrusion</li><li>Navigation</li><li>Event Model/Animation</li></ul>",
 };
 xseen.versionInfo.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.revision;
 

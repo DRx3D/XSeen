@@ -63,9 +63,9 @@ function LoadManager () {
 		}
 	}
 
-	this.failure = function (xhr) {
+	this.failure = function (xhr, errorCode, errorText) {
 		if (typeof(xhr._loadManager.failure) !== undefined) {
-			xhr._loadManager.failure (xhr, xhr._loadManager.userdata);
+			xhr._loadManager.failure (xhr, xhr._loadManager.userdata, errorCode, errorText);
 		}
 	}
 
@@ -100,6 +100,9 @@ function LoadManager () {
 						'success'	: this.success,
 						'error'		: this.failure
 						};
+		if (settings.dataType == 'json') {
+			settings['beforeSend'] = function(xhr){xhr.overrideMimeType("application/json");};
+		}
 		this.urlQueue[this.urlNext] = null;
 		this.urlNext ++;
 		var x = jQuery.get(settings);		// Need to change this... Has impact throughout class

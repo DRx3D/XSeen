@@ -63,24 +63,26 @@ xseen.node.grouping_Transform = {
 	'fin'	: function (e,p)
 		{
 			// Apply transform to all objects in e._xseen.children
-			var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
 			var group = new THREE.Group();
-			group.name = 'Transform children [' + e.id + ']';
-			group.position.x	= e._xseen.fields.translation[0];
-			group.position.y	= e._xseen.fields.translation[1];
-			group.position.z	= e._xseen.fields.translation[2];
-			group.scale.x		= e._xseen.fields.scale[0];
-			group.scale.y		= e._xseen.fields.scale[1];
-			group.scale.z		= e._xseen.fields.scale[2];
-			group.quaternion.x	= rotation.x;
-			group.quaternion.y	= rotation.y;
-			group.quaternion.z	= rotation.z;
-			group.quaternion.w	= rotation.w;
+			if (e.nodeName == "TRANSFORM") {
+				var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
+				group.name = 'Transform children [' + e.id + ']';
+				group.position.x	= e._xseen.fields.translation[0];
+				group.position.y	= e._xseen.fields.translation[1];
+				group.position.z	= e._xseen.fields.translation[2];
+				group.scale.x		= e._xseen.fields.scale[0];
+				group.scale.y		= e._xseen.fields.scale[1];
+				group.scale.z		= e._xseen.fields.scale[2];
+				group.quaternion.x	= rotation.x;
+				group.quaternion.y	= rotation.y;
+				group.quaternion.z	= rotation.z;
+				group.quaternion.w	= rotation.w;
+			}
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
 					group.add(child);
 				});
-			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
 			p._xseen.children.push(group);
 			e._xseen.object = group;
 		}
@@ -132,13 +134,21 @@ xseen.node.networking_Inline = {
 	'init'	: function (e,p) 
 		{
 			if (typeof(e._xseen.processedUrl) === 'undefined' || !e._xseen.requestedUrl) {
+				var uri = xseen.parseUrl (e._xseen.fields.url);
+				var type = uri.extension;
 				e._xseen.loadGroup = new THREE.Group();
 				e._xseen.loadGroup.name = 'Inline content [' + e.id + ']';
 				console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
-				xseen.loadMgr.loadXml (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, {'e':e, 'p':p});
+				var userdata = {'requestType':'x3d', 'e':e, 'p':p}
+				if (type.toLowerCase() == 'json') {
+					userdata.requestType = 'json';
+					xseen.loadMgr.loadJson (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, userdata);
+				} else {
+					xseen.loadMgr.loadXml (e._xseen.fields.url, this.loadSuccess, xseen.loadProgress, xseen.loadError, userdata);
+				}
 				e._xseen.requestedUrl = true;
 			}
-			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
 			p._xseen.children.push(e._xseen.loadGroup);
 			console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
 		},
@@ -149,17 +159,22 @@ xseen.node.networking_Inline = {
 	'loadSuccess' :
 				function (response, userdata, xhr) {
 					userdata.e._xseen.processedUrl = true;
-					userdata.e._xseen.loadText = response;
+					userdata.e._xseen.loadResponse = response;
 					console.log("download successful for "+userdata.e.id);
+					if (userdata.requestType == 'json') {
+						var tmp = {'scene': response};
+						response = null;
+						response = (new JSONParser()).parseJavaScript(tmp);
+					}
 					var start = {'_xseen':0};
-					var findSceneTag = function (response) {
-						if (typeof(response._xseen) === 'undefined') {response._xseen = {'childCount': -1};}
-						if (response.nodeName == 'scene') {
-							start = response;
+					var findSceneTag = function (fragment) {
+						if (typeof(fragment._xseen) === 'undefined') {fragment._xseen = {'childCount': -1};}
+						if (fragment.nodeName.toLowerCase() == 'scene') {
+							start = fragment;
 							return;
-						} else if (response.children.length > 0) {
-							for (response._xseen.childCount=0; response._xseen.childCount<response.children.length; response._xseen.childCount++) {
-								findSceneTag(response.children[response._xseen.childCount]);
+						} else if (fragment.children.length > 0) {
+							for (fragment._xseen.childCount=0; fragment._xseen.childCount<fragment.children.length; fragment._xseen.childCount++) {
+								findSceneTag(fragment.children[fragment._xseen.childCount]);
 								if (start._xseen !== 0) {return;}
 							}
 						} else {

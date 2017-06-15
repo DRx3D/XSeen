@@ -56,6 +56,8 @@ xseen.nodes._defineNode ('Transform', 'Grouping', 'grouping_Transform')
 	.addField('scale', 'SFVec3f', '1 1 1')
 	.addField('rotation', 'SFRotation', '0 1 0 0')
 	.addNode();
+xseen.nodes._defineNode ('Group', 'Grouping', 'grouping_Transform')
+	.addNode();
 
 xseen.nodes._defineNode ('Light', 'Lighting', 'lighting_Light')
 	.addField('direction', 'SFVec3f', '0 0 -1')									// DirectionalLight

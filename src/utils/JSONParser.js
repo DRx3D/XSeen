@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var JSONParser = function(scene)
+var JSONParser = function()
 {
 }
 

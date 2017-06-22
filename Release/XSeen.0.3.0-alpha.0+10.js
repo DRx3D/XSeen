@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.3.0-beta.1+11_529e7d9
- *  Built Thu Jun 22 10:00:19 2017
+ *  XSeen V0.3.0-alpha.0+10
+ *  Built Mon Jun 19 08:48:06 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -10651,6 +10651,257 @@ THREE.OBJLoader2 = (function () {
 
 	return OBJLoader2;
 })();
+// File: ./debug.js
+/*
+ * X3DOM JavaScript Library
+ * http://www.x3dom.org
+ *
+ * (C)2009 Fraunhofer IGD, Darmstadt, Germany
+ * Dual licensed under the MIT and GPL
+ *
+ * Based on code originally provided by
+ * Philip Taylor: http://philip.html5.org
+ */
+
+xseen.debug = {
+
+    INFO:       "INFO",
+    WARNING:    "WARNING",
+    ERROR:      "ERROR",
+    EXCEPTION:  "EXCEPTION",
+    
+	// determines whether debugging/logging is active. If set to "false"
+	// no debugging messages will be logged.
+	isActive: false,
+
+    // stores if firebug is available
+    isFirebugAvailable: false,
+    
+    // stores if the xseen.debug object is initialized already
+    isSetup: false,
+	
+	// stores if xseen.debug object is append already (Need for IE integration)
+	isAppend: false,
+
+    // stores the number of lines logged
+    numLinesLogged: 0,
+    
+    // the maximum number of lines to log in order to prevent
+    // the browser to slow down
+    maxLinesToLog: 10000,
+
+	// the container div for the logging messages
+	logContainer: null,
+    
+    /** @brief Setup the xseen.debug object.
+
+        Checks for firebug and creates the container div for the logging 
+		messages.
+      */
+    setup: function() {
+		// If debugging is already setup simply return
+        if (xseen.debug.isSetup) { return; }
+
+		// Check for firebug console
+        try {
+            if (window.console.firebug !== undefined) {
+                xseen.debug.isFirebugAvailable = true;           
+            }
+        }
+        catch (err) {
+            xseen.debug.isFirebugAvailable = false;
+        }
+        
+		// 
+		xseen.debug.setupLogContainer();
+
+        // setup should be setup only once, thus store if we done that already
+        xseen.debug.isSetup = true;
+    },
+	
+	/** @brief Activates the log
+      */
+	activate: function(visible) {
+		xseen.debug.isActive = true;
+		
+        //var aDiv = document.createElement("div");
+        //aDiv.style.clear = "both";
+        //aDiv.appendChild(document.createTextNode("\r\n"));
+        //aDiv.style.display = (visible) ? "block" : "none";
+        xseen.debug.logContainer.style.display = (visible) ? "block" : "none";
+		
+		//Need this HACK for IE/Flash integration. IE don't have a document.body at this time when starting Flash-Backend
+		if(!xseen.debug.isAppend) {
+			if(navigator.appName == "Microsoft Internet Explorer") {
+				//document.documentElement.appendChild(aDiv);
+				xseen.debug.logContainer.style.marginLeft = "8px";
+				document.documentElement.appendChild(xseen.debug.logContainer);
+			}else{
+				//document.body.appendChild(aDiv);
+				document.body.appendChild(xseen.debug.logContainer);
+			}
+			xseen.debug.isAppend = true;
+		}
+	},
+
+	/** @brief Inserts a container div for the logging messages into the HTML page
+      */
+	setupLogContainer: function() {
+		xseen.debug.logContainer = document.createElement("div");
+		xseen.debug.logContainer.id = "xseen_logdiv";
+		xseen.debug.logContainer.setAttribute("class", "xseen-logContainer");
+		xseen.debug.logContainer.style.clear = "both";
+		//document.body.appendChild(xseen.debug.logContainer);
+	},
+
+	/** @brief Generic logging function which does all the work.
+
+		@param msg the log message
+		@param logType the type of the log message. One of INFO, WARNING, ERROR 
+					   or EXCEPTION.
+      */
+    doLog: function(msg, logType) {
+
+		// If logging is deactivated do nothing and simply return
+		if (!xseen.debug.isActive) { return; }
+
+		// If we have reached the maximum number of logged lines output
+		// a warning message
+		if (xseen.debug.numLinesLogged === xseen.debug.maxLinesToLog) {
+			msg = "Maximum number of log lines (=" + xseen.debug.maxLinesToLog + 
+				  ") reached. Deactivating logging...";
+		}
+
+		// If the maximum number of log lines is exceeded do not log anything
+		// but simply return 
+		if (xseen.debug.numLinesLogged > xseen.debug.maxLinesToLog) { return; }
+
+		// Output a log line to the HTML page
+		var node = document.createElement("p");
+		node.style.margin = 0;
+        switch (logType) {
+            case xseen.debug.INFO:
+                node.style.color = "#009900";
+                break;
+            case xseen.debug.WARNING:
+                node.style.color = "#cd853f";
+                break;
+            case xseen.debug.ERROR:
+                node.style.color = "#ff4500";
+                break;
+            case xseen.debug.EXCEPTION:
+                node.style.color = "#ffff00";
+                break;
+            default: 
+                node.style.color = "#009900";
+                break;
+        }
+		
+		// not sure if try/catch solves problem http://sourceforge.net/apps/trac/x3dom/ticket/52
+		// but due to no avail of ATI gfxcard can't test
+        try {
+			node.innerHTML = logType + ": " + msg;
+			xseen.debug.logContainer.insertBefore(node, xseen.debug.logContainer.firstChild);
+        } catch (err) {
+			if (window.console.firebug !== undefined) {
+				window.console.warn(msg);
+			}
+        }
+        
+		// Use firebug's console if available
+        if (xseen.debug.isFirebugAvailable) {
+            switch (logType) {
+                case xseen.debug.INFO:
+                    window.console.info(msg);
+                    break;
+                case xseen.debug.WARNING:
+                    window.console.warn(msg);
+                    break;
+                case xseen.debug.ERROR:
+                    window.console.error(msg);
+                    break;
+                case xseen.debug.EXCEPTION:
+                    window.console.debug(msg);
+                    break;
+                default: 
+                    break;
+            }
+        }
+        
+		xseen.debug.numLinesLogged++;
+    },
+    
+    /** Log an info message. */
+    logInfo: function(msg) {
+        xseen.debug.doLog(msg, xseen.debug.INFO);
+    },
+    
+    /** Log a warning message. */
+    logWarning: function(msg) {
+        xseen.debug.doLog(msg, xseen.debug.WARNING);
+    },
+    
+    /** Log an error message. */
+    logError: function(msg) {
+        xseen.debug.doLog(msg, xseen.debug.ERROR);
+    },
+    
+    /** Log an exception message. */
+    logException: function(msg) {
+        xseen.debug.doLog(msg, xseen.debug.EXCEPTION);
+    },
+
+    /** Log an assertion. */
+	assert: function(c, msg) {
+		if (!c) {
+			xseen.debug.doLog("Assertion failed in " + 
+                    xseen.debug.assert.caller.name + ': ' + 
+                    msg, xseen.debug.ERROR);
+		}
+	},
+	
+	/**
+	 Checks the type of a given object.
+	 
+	 @param obj the object to check.
+	 @returns one of; "boolean", "number", "string", "object",
+	  "function", or "null".
+	*/
+	typeOf: function (obj) {
+		var type = typeof obj;
+		return type === "object" && !obj ? "null" : type;
+	},
+
+	/**
+	 Checks if a property of a specified object has the given type.
+	 
+	 @param obj the object to check.
+	 @param name the property name.
+	 @param type the property type (optional, default is "function").
+	 @returns true if the property exists and has the specified type,
+	  otherwise false.
+	*/
+	exists: function (obj, name, type) {
+		type = type || "function";
+		return (obj ? this.typeOf(obj[name]) : "null") === type;
+	},
+	
+	/**
+	 Dumps all members of the given object.
+	*/
+	dumpFields: function (node) {
+		var str = "";
+		for (var fName in node) {
+			str += (fName + ", ");
+		}
+		str += '\n';
+		xseen.debug.logInfo(str);
+		return str;
+	}
+};
+
+// Call the setup function to... umm, well, setup xseen.debug
+xseen.debug.setup();
 // File: ./NodeDefinitions.js
 /*
  * XSeen JavaScript library
@@ -10700,7 +10951,6 @@ xseen.nodes = {
 				'fields'	: [],
 				'fieldIndex': [],
 				'addField'	: function (fieldObj, datatype, defaultValue) {
-					var fieldName, namelc, enumerated, animatable;
 					if (typeof(fieldObj) === 'object') {
 						fieldName		= fieldObj.name;
 						datatype		= fieldObj.datatype;
@@ -10717,52 +10967,21 @@ xseen.nodes = {
 							enumerated = [];
 						}
 					}
-					namelc = fieldName.toLowerCase();
+					var namelc = fieldName.toLowerCase();
 					this.fields.push ({
 								'field'			: fieldName,
 								'fieldlc'		: namelc,
 								'type'			: datatype,
 								'default'		: defaultValue,
 								'enumeration'	: enumerated,
-								'animatable'	: animatable,
-								'clone'			: this.cloneField,
-								'setFieldName'	: this.setFieldName,
+								'animatable'	: animatable
 								});
-					this.fieldIndex[namelc] = this.fields.length-1;
+					this.fieldIndex[namelc] = this.fields.length;
 					return this;
 				},
 				'addNode'	: function () {
 					xseen.parseTable[this.taglc] = this;
-				},
-				'cloneField'	: function () {
-					var newFieldObject = {
-								'field'			: this.field,
-								'fieldlc'		: this.fieldlc,
-								'type'			: this.type,
-								'default'		: 0,
-								'enumeration'	: [],
-								'animatable'	: this.animatable,
-								'clone'			: this.clone,
-								'setFieldName'	: this.setFieldName,
-					};
-					for (var i=0; i<this.enumeration.length; i++) {
-						newFieldObject.enumeration.push(this.enumeration[i]);
-					}
-					if (Array.isArray(this.default)) {
-						newFieldObject.default = [];
-						for (var i=0; i<this.default.length; i++) {
-							newFieldObject.default.push(this.default[i]);
-						}
-					} else {
-						newFieldObject.default = this.default;
-					}
-					return newFieldObject;
-				},
-				'setFieldName'	: function(newName) {
-					this.field = newName;
-					this.fieldlc = newName.toLowerCase();
-					return this;
-				},
+				}
 		}
 		return node;
 	},
@@ -10775,20 +10994,17 @@ xseen.nodes = {
  *	only used for mixin assets.
  */
 	'_parseFields' : function(element, node) {
-		element._xseen.fields = [];		// fields for this node
-		element._xseen.animate = [];	// animatable fields for this node
-		element._xseen.animation = [];	// array of animations on this node
+		element._xseen.fields = [];
 		element._xseen.parseAll = false;
 		node.fields.forEach (function (field, ndx, wholeThing)
 			{
-				var value = this._parseField (field, element);
+				var value = this._parseField (field);
 				if (value == 'xseen.parse.all') {
-					element._xseen.parseAll = true;
+					this._xseen.parseAll = true;
 				} else {
-					element._xseen.fields[field.fieldlc] = value;
-					if (field.animatable) {element._xseen.animate[field.fieldlc] = null;}
+					this._xseen.fields[field.fieldlc] = value;
 				}
-			}, this);
+			}, element);
 /*
 		node.fields.forEach (function (field, ndx, wholeThing)
 			{
@@ -10814,17 +11030,17 @@ xseen.nodes = {
 		}
 	},
 	
-	'_parseField' : function (field, e) {
+	'_parseField' : function (field) {
 		if (field.field == '*') {
 			return 'xseen.parse.all';
 			//this._xseen.parseAll = true;
 		} else {
-			var value = e.getAttribute(field.fieldlc);
+			var value = this.getAttribute(field.fieldlc);
 			if (value !== null && value.substr(0,1) == '#') {		// Asset reference
 				var re = document.getElementById(value.substr(1,value.length));
 				value = re._xseen.fields[field.fieldlc] || '';
 			}
-			value = xseen.types[field.type] (value, field.default, field.enumeration);
+			value = xseen.types[field.type] (value, field.default, field.enumerated);
 			return value;
 		}
 	},
@@ -10865,7 +11081,6 @@ xseen.Parse = function (element, parent, sceneInfo) {
 		xseen.debug.logInfo("Unknown node: " + nodeName);
 	} else {
 		xseen.nodes._parseFields (element, xseen.parseTable[nodeName]);
-		console.log ('Calling node: ' + nodeName + '. Method: ' + xseen.parseTable[nodeName].method + '.init (e,p)');
 		xseen.node[xseen.parseTable[nodeName].method].init (element, parent);
 	}
 	
@@ -10997,59 +11212,55 @@ xseen.types = {
 
 	'SFFloat'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			if (Number.isNaN(value)) {return def};
 			return value;
 		},
 
 	'SFInt'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			if (Number.isNaN(value)) {return def};
 			return Math.round(value);
 		},
 
 	'SFBool'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			if (value) {return true;}
 			if (!value) {return false;}
 			return def;
 		},
 
-	'SFTime'	: function (value, def)
-		{
-			if (value === null) {return def;}
-			if (Number.isNaN(value)) {return def};
-			return value;
-		},
-
 	'SFVec3f'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			var v3 = value.split(' ');
 			if (v3.length < 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
-				return def;
+				value = def;
+				v3 = value.split(' ');
 			}
 			return [v3[0]-0, v3[1]-0, v3[2]-0];
 		},
 
 	'SFVec2f'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			var v2 = value.split(' ');
 			if (v2.length != 2 || Number.isNaN(v2[0]) || Number.isNaN(v2[1])) {
-				return def;
+				value = def;
+				v2 = value.split(' ');
 			}
 			return [v2[0]-0, v2[1]-0];
 		},
 
 	'SFRotation'	: function (value, def)
 		{
-			if (value === null) {return def;}
+			if (value === null) {value = def;}
 			var v4 = value.split(' ');
 			if (v4.length != 4 || Number.isNaN(v4[0]) || Number.isNaN(v4[1]) || Number.isNaN(v4[2]) || Number.isNaN(v4[3])) {
-				return def;
+				value = def;
+				v4 = value.split(' ');
 			}
 			var result = {
 							'vector'		: [v4[0], v4[1], v4[2], v4[3]],
@@ -11074,20 +11285,6 @@ xseen.types = {
 		},
 
 //	For MF* types, a default of '' means to return an empty array on parsing error
-	'MFFloat'	: function (value, def)
-		{
-			var defReturn = (def == '') ? [] : def;
-			if (value === null) {return defReturn;}
-			var mi = value.split(' ');
-			var rv = [];
-			for (var i=0; i<mi.length; i++) {
-				if (mi[i] == '') {continue;}
-				if (Number.isNaN(mi[i])) {return defReturn};
-				rv.push (mi[i]);
-			}
-			return rv;
-		},
-
 	'MFInt'		: function (value, def)
 		{
 			var defReturn = (def == '') ? [] : def;
@@ -11144,7 +11341,7 @@ xseen.types = {
 // XSeen data types
 	'EnumerateString' : function (value, defString, choices)
 		{
-			value = this.SFString (value, defString);
+			value = this.SFString (value, choices[0]);
 			for (var i=0; i<choices.length; i++) {
 				if (value == choices[i]) {return value;}
 			}
@@ -11205,125 +11402,6 @@ xseen.types = {
 		},
 	
 };
-// File: ./zVersion.js
-/*
- * XSeen JavaScript Library
- * http://tools.realism.com/...
- *
- * (C)2017 Daly Realiusm, Los Angeles
- * Dual licensed under the MIT and GPL
- *
- */
-
-/*
- * Version Information for XSeen
- */
-xseen.generateVersion = function () {
-	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
-	Major		= 0;
-	Minor		= 3;
-	Patch		= 0;
-	PreRelease	= 'beta.1';
-	Release		= 11;
-	Version		= '';
-	Date		= '2017-06-22';
-	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
-// All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
-
-	var version = {
-		major		: Major,
-		minor		: Minor,
-		patch		: Patch,
-		preRelease	: PreRelease,
-		release		: Release,
-		version		: '',
-		date		: Date,
-		splashText	: SplashText
-	};
-// Using the scheme at http://semver.org/
-	version.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.patch;
-	version.version += (xseen.versionInfo.preRelease != '') ? '-'+xseen.versionInfo.preRelease : '';
-	version.version += (xseen.versionInfo.release != '') ? '+'+xseen.versionInfo.release : '';
-	return version;
-}
-// File: ./_RuntimeDefinitions.js
-/*
- * XSeen JavaScript Library
- * http://tools.realism.com/...
- *
- * (C)2017 Daly Realiusm, Los Angeles
- * Dual licensed under the MIT and GPL
- *
- * Some portions may be extracted from
- * X3DOM JavaScript Library
- * http://www.x3dom.org
- *
- * (C)2009 Fraunhofer IGD, Darmstadt, Germany
- * Dual licensed under the MIT and GPL
- *
- * Based on code originally provided by
- * Philip Taylor: http://philip.html5.org
- */
-
-/**
- * The Namespace container for x3dom objects.
- * @namespace x3dom
- *
- *	Removed THREE loaders
-	loaders:	{
-					'file'	: new THREE.FileLoader(),
-					'image'	: 0,
-				},
-
- * */
-
-xseen.updateOnLoad	: function ()
-	{
-		this.loader.Null			= this.loader.X3dLoader;
-		this.loadMgr				= new LoadManager();
-		this.loader.X3dLoader		= this.loadMgr;
-		this.loader.ColladaLoader	= new THREE.ColladaLoader();
-		this.loader.GltfLegacy		= new THREE.GLTFLoader();
-		this.loader.GltfLoader		= new THREE.GLTF2Loader();
-		this.loader.ObjLoader		= new THREE.OBJLoader2();
-		this.loader.ImageLoader		= new THREE.TextureLoader();
-
-// Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
-		this.parseUrl		: function (url)
-			{
-				var parser = document.createElement('a'),
-				searchObject = {},
-        		queries, split, i, pathFile, path, file, extension;
-				// Let the browser do the work
-				parser.href = url;
-				// Convert query string to object
-    			queries = parser.search.replace(/^\?/, '').split('&');
-    			for( i = 0; i < queries.length; i++ ) {
-					split = queries[i].split('=');
-					searchObject[split[0]] = split[1];
-				}
-				pathFile = parser.pathname.split('/');
-				file = pathFile[pathFile.length-1];
-				pathFile.length --;
-				path = '/' + pathFile.join('/');
-				extension = file.split('.');
-				extension = extension[extension.length-1];
-    			return {
-        			protocol:		parser.protocol,
-        			host:			parser.host,
-        			hostname:		parser.hostname,
-        			port:			parser.port,
-        			pathname:		parser.pathname,
-					path:			path,
-					file:			file,
-					extension:		extension,
-        			search:			parser.search,
-        			searchObject:	searchObject,
-        			hash:			parser.hash
-    				};
-			};
-		this.versionInfo = this.generateVersion();
-	};
 // File: nodes/nodes-af.js
 /*
  * XSeen JavaScript library
@@ -11689,11 +11767,6 @@ xseen.node.appearance_Material = {
 						'opacity'	: 1.0-transparency,
 						'transparent'	: (transparency > 0.0) ? true : false
 						} );
-			e._xseen.animate['diffusecolor'] = p._xseen.material.color;
-			e._xseen.animate['emissivecolor'] = p._xseen.material.emissive;
-			e._xseen.animate['specularcolor'] = p._xseen.material.specular;
-			e._xseen.animate['transparency'] = p._xseen.material.opacity;
-			e._xseen.animate['shininess'] = p._xseen.material.shininess;
 		},
 	'fin'	: function (e,p) {}
 };
@@ -12217,8 +12290,10 @@ xseen.node.unk_Shape = {
 };
 
 xseen.node.grouping_Transform = {
-	'init'	: function (e,p) 
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p)
 		{
+			// Apply transform to all objects in e._xseen.children
 			var group = new THREE.Group();
 			if (e.nodeName == "TRANSFORM") {
 				var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
@@ -12233,21 +12308,14 @@ xseen.node.grouping_Transform = {
 				group.quaternion.y	= rotation.y;
 				group.quaternion.z	= rotation.z;
 				group.quaternion.w	= rotation.w;
-
-				e._xseen.animate['translation'] = group.position;
-				e._xseen.animate['rotation'] = group.quaternion;
-				e._xseen.animate['scale'] = group.scale;
 			}
-			e._xseen.sceneNode = group;
-		},
-	'fin'	: function (e,p)
-		{
-			// Apply transform to all objects in e._xseen.children
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
-					e._xseen.sceneNode.add(child);
+					group.add(child);
 				});
-			p._xseen.children.push(e._xseen.sceneNode);
+			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
+			p._xseen.children.push(group);
+			e._xseen.object = group;
 		}
 };
 
@@ -12407,11 +12475,6 @@ xseen.node.core_Scene = {
 			xseen.dumpSceneGraph ();
 			e._xseen.renderer.renderer.render( e._xseen.renderer.canvas, e._xseen.renderer.camera );
 			xseen.debug.logInfo("Rendered all elements -- Starting animation");
-			var vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
-			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
-			currentCamera.position.x = vp._xseen.fields.position[0];
-			currentCamera.position.y = vp._xseen.fields.position[1];
-			currentCamera.position.z = vp._xseen.fields.position[2];
 			xseen.render();
 		}
 };
@@ -12501,7 +12564,7 @@ xseen.node.env_Background = {
  // Node definition code (just stubs right now...)
 
 
-xseen.node.x_Animate = {
+xseen.node.animation_Animate = {
 	'init'	: function (e,p)
 		{
 			var delay = e._xseen.fields.delay * 1000;		// Convert to milliseconds
@@ -12511,113 +12574,27 @@ xseen.node.x_Animate = {
 			var easing = e._xseen.fields.easing;
 			
 			var fields = xseen.parseTable[p.localName.toLowerCase()].fields;
-			var fieldIndex = xseen.parseTable[p.localName.toLowerCase()].fieldIndex;
 			var toField = e._xseen.fields.field;
-			var toFieldIndex = fieldIndex[toField];
-			if (typeof(fields[toFieldIndex]) === 'undefined') {
+			if (typeof(fields[toField]) === 'undefined') {
 				xseen.debug.logInfo("Field '" + toField + "' not found in parent (" + p.localName.toLowerCase() + "). No animation performed.");
 				return;
 			}
-			var fieldObject = fields[toFieldIndex].clone().setFieldName('to');	// Parse table entry for 'toField'
-			var to = xseen.nodes._parseField(fieldObject, e);	// Parsed data  -- need to convert to THREE format
+			var fieldObject = fields[toField];				// Parse table entry for 'toField'
+			var to = xseen.nodes._parseField(fieldObject);	// Parsed data 
+			var fieldTHREE = p._xseen.animate[toField];		// THREE field for animation
 
-// Convert 'to' to the datatype of 'field'.
-			var interpolation;
-			if (fieldObject.type == 'SFVec3f') {
-				interpolation = TWEEN.Interpolation.Linear;
-				to = xseen.types.Vector3(to);
-				xseen.debug.logInfo("Interpolating field '" + toField + "' as 3-space.");
-
-			} else if (fieldObject.type == 'SFColor') {
-				interpolation = this.Interpolator.color;
-				to = new THREE.Color (xseen.types.Color3toInt(to));
-				xseen.debug.logInfo("Interpolation field '" + toField + "' as color.");
-
-			} else if (fieldObject.type == 'SFRotation') {
-				interpolation = this.Interpolator.slerp;
-				to = xseen.types.Rotation2Quat(to);
-				xseen.debug.logInfo("Interpolation field '" + toField + "' as rotation.");
-
-			} else {
-				xseen.debug.logInfo("Field '" + toField + "' not converted to THREE format. No animation performed.");
-				return;
-			}
-			var fieldTHREE = p._xseen.animate[toField];			// THREE field for animation
-
-			var tween = new TWEEN.Tween(fieldTHREE)
-								.to(to, duration)
+			var tween = new TWEEN.to (to, duration)
 								.delay(delay)
-								.repeat(repeat)
-								.interpolation(interpolation);
-			var easingType = e._xseen.fields.easingtype;
-			easingType = easingType.charAt(0).toUpperCase() + easingType.slice(1);
-			easing = (easingType != 'Linear' && easing == '') ? 'inout' : easing;
+								.repeat(repeat);
 			if (easing != '') {
-				easing = easing.replace('in', 'In').replace('out', 'Out');
-				easingType = (easingType == 'Linear') ? 'Quadratic' : easingType;
+				easing.replace('in', 'In').replace('out', 'Out');
 				e._xseen.fields.easing = easing;
-				e._xseen.fields.easingtype = easingType;
-				tween.easing(TWEEN.Easing[easingType][easing]);
+				tween.easing(TWEEN.Quadratic[easing]);
 			}
-
-// Handle the interpolation type. Vector is linear, rotation is slerp (custom), color is ...
-			tween.start();
 			e._xseen.animating = tween;
 			p._xseen.animation.push (tween);
 		},
-	'fin'	: function (e,p) {},
-	
-/*
- * Various interpolator functions for use with different data types
- * All are designed to be used within TWEEN and take two arguments
- *	v	A vector of way points (key values) that define the interpolated path
- *	k	The interpolating factor that defines how far along the path for the current result
- *
- * Functions
- *	slerp - Linear in quaterian space (though not yet)
- *	color - Linear in color space (currently HSL as used by THREE)
- *
- */
-	'Interpolator'	: {
-		'slerp'	: function (v,k)
-			{
-				var m = v.length - 1;
-				var f = m * k;
-				var i = Math.floor(f);
-	
-				if (k < 0) {
-					return v[0].slerp(v[1], f);
-//					return fn(v[0], v[1], f);
-				}
-
-				if (k > 1) {
-					return v[m].slerp(v[m-1], m-f);
-					//return fn(v[m], v[m - 1], m - f);
-				}
-
-				return v[i].slerp (v[i + 1 > m ? m : i + 1], f-i);
-				//return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-			},
-		'color' : function (v,k)
-			{
-				var m = v.length - 1;
-				var f = m * k;
-				var i = Math.floor(f);
-				var fn = this.slerpCompute;
-	
-				if (k < 0) {
-					return v[0].lerp(v[1], f);
-					//return fn(v[0], v[1], f);
-				}
-				if (k > 1) {
-					return v[m].lerp(v[m-1], m-f);
-					//return fn(v[m], v[m - 1], m - f);
-				}
-				return v[i].lerp (v[i + 1 > m ? m : i + 1], f - i);
-				//return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-			},
-	},
-
+	'fin'	: function (e,p) {} 
 /*
 	Probably need to store the animation someplace. Also need to start worrying
 	about methods to call when animating, at least start/stop since the target is
@@ -12798,7 +12775,7 @@ xseen.nodes._defineNode('Cone', 'Geometry3D', 'geometry3D_Cone')
 	.addNode();
 
 xseen.nodes._defineNode('Box', 'Geometry3D', 'geometry3D_Box')
-	.addField('size', 'SFVec3f', [1,1,1])
+	.addField('size', 'SFVec3f', '1 1 1')
 	.addNode();
 	
 xseen.nodes._defineNode('Sphere', 'Geometry3D', 'geometry3D_Sphere')
@@ -12814,60 +12791,60 @@ xseen.nodes._defineNode('Cylinder', 'Geometry3D', 'geometry3D_Cylinder')
 	.addNode();
 	
 xseen.nodes._defineNode ('Material', 'Appearance', 'appearance_Material')
-	.addField({name:'diffuseColor', datatype:'SFColor', defaultValue:[.8,.8,.8], animatable:true})
-	.addField({name:'emissiveColor',datatype: 'SFColor', defaultValue:[0,0,0], animatable:true})
-	.addField({name:'specularColor', datatype:'SFColor', defaultValue:[0,0,0], animatable:true})
-	.addField({name:'transparency', datatype:'SFFloat', defaultValue:'0', animatable:true})
-	.addField({name:'shininess', datatype:'SFFloat', defaultValue:'0', animatable:true})
+	.addField('diffuseColor', 'SFColor', '.8 .8 .8')
+	.addField('emissiveColor', 'SFColor', '0 0 0')
+	.addField('specularColor', 'SFColor', '0 0 0')
+	.addField('transparency', 'SFFloat', '0')
+	.addField('shininess', 'SFFloat', '0')
 	.addNode();
 
 xseen.nodes._defineNode ('Transform', 'Grouping', 'grouping_Transform')
-	.addField({name:'translation', datatype:'SFVec3f', defaultValue:[0,0,0], animatable:true})
-	.addField({name:'scale', datatype:'SFVec3f', defaultValue:[1,1,1], animatable:true})
-	.addField({name:'rotation', datatype:'SFRotation', defaultValue:xseen.types.SFRotation('0 1 0 0',''), animatable:true})
+	.addField('translation', 'SFVec3f', '0 0 0')
+	.addField('scale', 'SFVec3f', '1 1 1')
+	.addField('rotation', 'SFRotation', '0 1 0 0')
 	.addNode();
 xseen.nodes._defineNode ('Group', 'Grouping', 'grouping_Transform')
 	.addNode();
 
 xseen.nodes._defineNode ('Light', 'Lighting', 'lighting_Light')
-	.addField('direction', 'SFVec3f', [0,0,-1])									// DirectionalLight
-	.addField('location', 'SFVec3f', [0,0,0])									// PointLight & SpotLight
+	.addField('direction', 'SFVec3f', '0 0 -1')									// DirectionalLight
+	.addField('location', 'SFVec3f', '0 0 0')									// PointLight & SpotLight
 	.addField('radius', 'SFFloat', '100')										// PointLight & SpotLight
-	.addField('attenuation', 'SFVec3f', [1,0,0])								// PointLight & SpotLight
+	.addField('attenuation', 'SFVec3f', '1 0 0')								// PointLight & SpotLight
 	.addField('beamWidth', 'SFFloat', '0.78539816339744830961566084581988')		// SpotLight
 	.addField('cutOffAngle', 'SFFloat', '1.5707963267948966192313216916398')	// SpotLight
-	.addField('color', 'SFColor', [1,1,1])										// General
+	.addField('color', 'SFColor', '1 1 1')										// General
 	.addField('intensity', 'SFFloat', '1')										// General
-	.addField({name:'type', datatype:'EnumerateString', defaultValue:'Directional', enumerated:['Directional', 'Spot', 'Point'], animatable:true})
+	.addField('type', 'SFString', 'Directional')
 	.addNode();
 xseen.nodes._defineNode ('DirectionalLight', 'Lighting', 'lighting_Light')
-	.addField('direction', 'SFVec3f', [0,0,-1])
-	.addField('color', 'SFColor', [1,1,1])
+	.addField('direction', 'SFVec3f', '0 0 -1')
+	.addField('color', 'SFColor', '1 1 1')
 	.addField('intensity', 'SFFloat', '1')
 	.addField('type', 'SFString', 'Directional')
 	.addNode();
 xseen.nodes._defineNode ('PointLight', 'Lighting', 'lighting_Light')
-	.addField('location', 'SFVec3f', [0,0,0])
+	.addField('location', 'SFVec3f', '0 0 0')
 	.addField('radius', 'SFFloat', '100')
-	.addField('attenuation', 'SFVec3f', [1,0,0])
-	.addField('color', 'SFColor', [1,1,1])
+	.addField('attenuation', 'SFVec3f', '1 0 0')
+	.addField('color', 'SFColor', '1 1 1')
 	.addField('intensity', 'SFFloat', '1')
 	.addField('type', 'SFString', 'Point')
 	.addNode();
 xseen.nodes._defineNode ('SpotLight', 'Lighting', 'lighting_Light')
-	.addField('direction', 'SFVec3f', [0,0,-1])
+	.addField('direction', 'SFVec3f', '0 0 -1')
 	.addField('radius', 'SFFloat', '100')
-	.addField('attenuation', 'SFVec3f', [1,0,0])
+	.addField('attenuation', 'SFVec3f', '1 0 0')
 	.addField('beamWidth', 'SFFloat', '0.78539816339744830961566084581988')		// pi/4
 	.addField('cutOffAngle', 'SFFloat', '1.5707963267948966192313216916398')	// pi/2
-	.addField('color', 'SFColor', [1,1,1])
+	.addField('color', 'SFColor', '1 1 1')
 	.addField('intensity', 'SFFloat', '1')
 	.addField('type', 'SFString', 'Spot')
 	.addNode();
 
 xseen.nodes._defineNode ('Camera', 'Unknown', 'unk_Viewpoint')
-	.addField('position', 'SFVec3f', [0,0,10])
-	.addField('orientation', 'SFRotation', xseen.types.SFRotation('0 1 0 0',''))
+	.addField('position', 'SFVec3f', '0 0 10')
+	.addField('orientation', 'SFRotation', '0 1 0 0')
 	.addNode();
 
 xseen.nodes._defineNode ('Inline', 'Networking', 'networking_Inline')
@@ -12892,10 +12869,10 @@ xseen.nodes._defineNode ('Shape', 'Shape', 'unk_Shape')
 	.addNode();
 xseen.nodes._defineNode ('Viewpoint', 'Unknown', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', '0 0 10')
-	.addField('orientation', 'SFRotation', xseen.types.SFRotation('0 1 0 0',''))
+	.addField('orientation', 'SFRotation', '0 1 0 0')
 	.addNode();
 xseen.nodes._defineNode('Background', 'Environmental', 'env_Background')
-	.addField('skyColor', 'SFColor', [0,0,0])
+	.addField('skyColor', 'SFColor', '0 0 0')
 	.addField('srcFront', 'SFString', '')
 	.addField('srcBack', 'SFString', '')
 	.addField('srcTop', 'SFString', '')
@@ -12943,7 +12920,7 @@ xseen.nodes._defineNode('QuadSet', 'Geometry', 'geometry_QuadSet')
 	.addField('solid', 'SFBool', true)
 	.addNode();
 
-xseen.nodes._dumpTable();
+//xseen.nodes._dumpTable();
 // File: nodes/_Definitions-xseen.js
 /*
  * XSeen JavaScript library
@@ -12975,13 +12952,12 @@ xseen.nodes._defineNode('model', 'XSeen', 'x_Model')
 
 xseen.nodes._defineNode('animate', 'XSeen', 'x_Animate')
 	.addField('field', 'SFString', '')
-	.addField('to', 'MFFloat', '')				// Needs to be 'field' datatype. That is not known until node-parse. For now insist on numeric array
+	.addField('to', 'SFString', '')				// Needs to be 'field' datatype. That is not known until node-parse
 	.addField('delay', 'SFTime', 0)
 	.addField('duration', 'SFTime', 0)
 	.addField('repeat', 'SFInt', 0)
-	.addField({name:'interpolator', datatype:'EnumerateString', defaultValue:'position', enumerated:['position', 'rotation', 'color'], animatable:false})
-	.addField({name:'Easing', datatype:'EnumerateString', defaultValue:'', enumerated:['', 'in', 'out', 'inout'], animatable:false})
-	.addField({name:'EasingType', datatype:'EnumerateString', defaultValue:'linear', enumerated:['linear', 'quadratic', 'sinusoidal', 'exponential', 'elastic', 'bounce'], animatable:false})
+	.addField('interpolator', 'EnumerateString', ['position', 'rotation', 'color'])
+	.addField('easing', 'EnumerateString', ['', 'in', 'out', 'inout'])
 	.addField('start', 'SFTime', 0)				// incoming event, need to set timer trigger
 	.addField('end', 'SFTime', 0)				// incoming event, need to set timer trigger
 	.addNode();

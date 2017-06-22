@@ -31,6 +31,11 @@ xseen.node.appearance_Material = {
 						'opacity'	: 1.0-transparency,
 						'transparent'	: (transparency > 0.0) ? true : false
 						} );
+			e._xseen.animate['diffusecolor'] = p._xseen.material.color;
+			e._xseen.animate['emissivecolor'] = p._xseen.material.emissive;
+			e._xseen.animate['specularcolor'] = p._xseen.material.specular;
+			e._xseen.animate['transparency'] = p._xseen.material.opacity;
+			e._xseen.animate['shininess'] = p._xseen.material.shininess;
 		},
 	'fin'	: function (e,p) {}
 };

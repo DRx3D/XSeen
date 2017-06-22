@@ -229,7 +229,6 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			xseen.Parse (xseen.sceneInfo[i].element, xseen.sceneInfo[i]);
 			t1 = new Date().getTime() - t[i];
             xseen.debug.logInfo('Time for initial pass #' + i + ' parsing: ' + t1 + " ms.");
-		
 		}
 /*
 		window.setTimeout (function() { 
@@ -251,6 +250,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 						// Various objects needing animation should register for an event ... or something
 						// Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
 								var deltaT, radians, x, y, z, P, radius, vp;
+								TWEEN.update();
 								var nodeAframe = document.getElementById ('aframe_nodes');
 								P = 16000;
 								deltaT = xseen.sceneInfo[0].clock.getDelta();
@@ -265,9 +265,9 @@ xseen.rerouteSetAttribute = function(node, browser) {
 								z = radius * Math.cos(radians);
 								y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
 								var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
-								currentCamera.position.x = x;
+								//currentCamera.position.x = x;
 								currentCamera.position.y = y;
-								currentCamera.position.z = z;
+								//currentCamera.position.z = z;
 								currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
 								if (nodeAframe !== null) {nodeAframe._xseen.object.position.x = -x;}
 						// End of animation

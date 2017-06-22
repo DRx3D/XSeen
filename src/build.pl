@@ -6,22 +6,31 @@
 #
 
 #	Only .js files are built
-#	Source files are built in alphabetical order from directory order in @directoryOrder
+#	Source files are built in alphabetical order from directory order in %directoryOrder
 #	The version information is extracted from the file $versionFile by looking for the string 'xseen.versionInfo'
 #		It is assumed that this string defines an object with the fields: 'major', 'minor', 'revision', and 'date'
 use strict;
-my @directoryOrder = ('utils', 'init', '.', 'nodes');
-my $versionFile = 'init/Internals.js';
+use File::Basename;
+
+my $dirname = dirname(__FILE__);
+chdir ($dirname);
+
+my %directoryOrder = (	'Full'		=> ['utils', 'init', '.', 'nodes'],
+						'Partial'	=> ['utils', '.', 'nodes']
+						);
+my $versionFile = './zVersion.js';
 my $releaseDirectory = '../Release/';
 my $preambleFile = '../LICENSE';
 my $outputFilename = 'XSeen';
-my $version = getVersion ($versionFile);
-my @releaseFile = ($outputFilename . '.' . $version, $outputFilename);
+my %version = getVersion ($versionFile);
+my $partialBuild = (substr($version{'PreRelease'}, 0, 6) == 'alpha.') ? 'Partial' : 'Full';
+my @releaseFile = ($outputFilename . '.' . $version{'id'}, $outputFilename);
+my $noOutput = 0;
 
 my (@files, @output, @preamble);
 open (FILE, "<$preambleFile") or die "Unable to open $preambleFile\n$!\n";
 print "Reading $preambleFile\n";
-push @preamble, ("/*", " *  XSeen V$version", " *  Built " . localtime(), " *\n");
+push @preamble, ("/*", " *  XSeen V".$version{'id'}, " *  Built " . localtime(), " *\n");
 while (<FILE>) {
 	chomp;
 	push @preamble, $_;
@@ -29,7 +38,7 @@ while (<FILE>) {
 close FILE;
 push @preamble, " */\n";
 
-foreach my $dir (@directoryOrder) {
+foreach my $dir (@{$directoryOrder{$partialBuild}}) {
 	opendir (DIR, "$dir") or die "Unable to open $dir\n$!\n";
 	@files = grep /.*\.js$/, readdir DIR;
 	closedir DIR;
@@ -49,6 +58,10 @@ foreach my $dir (@directoryOrder) {
 my @compressed = compressJS(@output);
 
 print "\n";
+if ($noOutput) {
+	print STDERR "Not creating output file: $releaseFile[0]\n";
+	exit;
+}
 foreach my $outFile (@releaseFile) {
 	open (FILE, ">$releaseDirectory$outFile.js") or die "Unable to open $releaseDirectory$outFile.js\n$!\n";
 	binmode FILE;
@@ -73,23 +86,30 @@ sub getVersion {
 	my @parts;
 	my (%version, $name, $value);
 	while (<FILE>) {
-		if (/xseen.versionInfo/) {
+		if (/\s*var/) {
 			$foundVersion = 1;
 		}
 		if ($foundVersion) {
-			if (/\};/) {
+			if (/^\/\//) {
 				$foundVersion = 0;
-			} elsif (/major/ || /minor/ || /patch/ || /release/ || /date/) {
+			} elsif (/^\s*Major/ || /^\s*Minor/ || /^\s*Patch/ || /^\s*PreRelease/ || /^\s*Release/ || /^\s*Date/) {
 				chomp;
-				($name,$value,@parts) = split(':');
+				($name,$value,@parts) = split('=');
 				$name =~ s/^\s+|\s+$//g;
-				$value = (split(',', $value))[0];
+				$value = (split(';', $value))[0];
+				$value =~ s/^\s+|\s+$//g;
+				$value =~ tr/'//d;
 				$version{$name} = $value;
 			}
 		}
 	}
-	my $version = sprintf ("%d.%d.%d+%d", $version{major}, $version{minor}, $version{patch}, $version{release});
-	return $version;
+	my $cmd = 'git rev-parse --short HEAD';
+	my $gitHead = `$cmd`;
+	chomp $gitHead;
+	$version{'id'} = sprintf ("%d.%d.%d", $version{Major}, $version{Minor}, $version{Patch});
+	$version{'id'} .= ($version{PreRelease} ne '') ? '-'.$version{PreRelease} : '';
+	$version{'id'} .= '+' . $version{Release} . '_' . $gitHead;
+	return %version;
 }
 
 sub compressJS {

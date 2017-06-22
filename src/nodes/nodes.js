@@ -59,10 +59,8 @@ xseen.node.unk_Shape = {
 };
 
 xseen.node.grouping_Transform = {
-	'init'	: function (e,p) {},
-	'fin'	: function (e,p)
+	'init'	: function (e,p) 
 		{
-			// Apply transform to all objects in e._xseen.children
 			var group = new THREE.Group();
 			if (e.nodeName == "TRANSFORM") {
 				var rotation = xseen.types.Rotation2Quat(e._xseen.fields.rotation);
@@ -77,14 +75,21 @@ xseen.node.grouping_Transform = {
 				group.quaternion.y	= rotation.y;
 				group.quaternion.z	= rotation.z;
 				group.quaternion.w	= rotation.w;
+
+				e._xseen.animate['translation'] = group.position;
+				e._xseen.animate['rotation'] = group.quaternion;
+				e._xseen.animate['scale'] = group.scale;
 			}
+			e._xseen.sceneNode = group;
+		},
+	'fin'	: function (e,p)
+		{
+			// Apply transform to all objects in e._xseen.children
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
-					group.add(child);
+					e._xseen.sceneNode.add(child);
 				});
-			//if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
-			p._xseen.children.push(group);
-			e._xseen.object = group;
+			p._xseen.children.push(e._xseen.sceneNode);
 		}
 };
 
@@ -244,6 +249,11 @@ xseen.node.core_Scene = {
 			xseen.dumpSceneGraph ();
 			e._xseen.renderer.renderer.render( e._xseen.renderer.canvas, e._xseen.renderer.camera );
 			xseen.debug.logInfo("Rendered all elements -- Starting animation");
+			var vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
+			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
+			currentCamera.position.x = vp._xseen.fields.position[0];
+			currentCamera.position.y = vp._xseen.fields.position[1];
+			currentCamera.position.z = vp._xseen.fields.position[2];
 			xseen.render();
 		}
 };

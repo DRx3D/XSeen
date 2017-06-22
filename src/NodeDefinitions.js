@@ -24,7 +24,14 @@
  * to have a routine that dumps out the Object so it can be captured and saved. A routine
  * or documentation on how to load the Object would also be good. 
  *
- * Still need to determine how this thing is going to be internally stored.
+ * Fields are added with the .addField method. It takes its values from the argument list
+ * or an object passed as the first argument. The properties of the argument are:
+ *	name - the name of the field. This is converted to lowercase before use
+ *	datatype - the datatype of the field. There must be a method in xseen.types by this name
+ *	defaultValue - the default value of the field to be used if the field is not present or incorrectly defined.
+ *					If this argument is an array, then it is the set of allowed values. The first element is the default.
+ *	enumerated - the list of allowed values when the datatype only allows specific values for this field (optional)
+ *	animatable - Flag (T/F) indicating if the field is animatable. Generally speaking, enumerated fieles are not animatable
  */
 
 xseen.nodes = {
@@ -38,21 +45,70 @@ xseen.nodes = {
 				'method'	: methodBase + nodeMethod,
 				'fields'	: [],
 				'fieldIndex': [],
-				'addField'	: function (fieldName, fieldType, fieldDefault) {
-					var newIndex = this.fields.length;
-					var namelc = fieldName.toLowerCase();
-					this.fieldIndex[namelc] = newIndex;
-					this.fields[newIndex] = {
-								'field'		: fieldName,
-								'fieldlc'	: namelc,
-								'type'		: fieldType,
-								'default'	: fieldDefault
-					};
+				'addField'	: function (fieldObj, datatype, defaultValue) {
+					var fieldName, namelc, enumerated, animatable;
+					if (typeof(fieldObj) === 'object') {
+						fieldName		= fieldObj.name;
+						datatype		= fieldObj.datatype;
+						defaultValue	= fieldObj.defaultValue;
+						enumerated		= (typeof(fieldObj.enumerated) === 'undefined') ? [] : fieldObj.enumerated;
+						animatable		= (typeof(fieldObj.animatable) === 'undefined') ? false : fieldObj.animatable;
+					} else {
+						fieldName	= fieldObj;
+						animatable	= false;
+						if (typeof(defaultValue) == 'array') {
+							enumerated	= defaultValue;
+							defaultValue = enumerated[0];
+						} else {
+							enumerated = [];
+						}
+					}
+					namelc = fieldName.toLowerCase();
+					this.fields.push ({
+								'field'			: fieldName,
+								'fieldlc'		: namelc,
+								'type'			: datatype,
+								'default'		: defaultValue,
+								'enumeration'	: enumerated,
+								'animatable'	: animatable,
+								'clone'			: this.cloneField,
+								'setFieldName'	: this.setFieldName,
+								});
+					this.fieldIndex[namelc] = this.fields.length-1;
 					return this;
 				},
 				'addNode'	: function () {
 					xseen.parseTable[this.taglc] = this;
-				}
+				},
+				'cloneField'	: function () {
+					var newFieldObject = {
+								'field'			: this.field,
+								'fieldlc'		: this.fieldlc,
+								'type'			: this.type,
+								'default'		: 0,
+								'enumeration'	: [],
+								'animatable'	: this.animatable,
+								'clone'			: this.clone,
+								'setFieldName'	: this.setFieldName,
+					};
+					for (var i=0; i<this.enumeration.length; i++) {
+						newFieldObject.enumeration.push(this.enumeration[i]);
+					}
+					if (Array.isArray(this.default)) {
+						newFieldObject.default = [];
+						for (var i=0; i<this.default.length; i++) {
+							newFieldObject.default.push(this.default[i]);
+						}
+					} else {
+						newFieldObject.default = this.default;
+					}
+					return newFieldObject;
+				},
+				'setFieldName'	: function(newName) {
+					this.field = newName;
+					this.fieldlc = newName.toLowerCase();
+					return this;
+				},
 		}
 		return node;
 	},
@@ -65,8 +121,21 @@ xseen.nodes = {
  *	only used for mixin assets.
  */
 	'_parseFields' : function(element, node) {
-		element._xseen.fields = [];
+		element._xseen.fields = [];		// fields for this node
+		element._xseen.animate = [];	// animatable fields for this node
+		element._xseen.animation = [];	// array of animations on this node
 		element._xseen.parseAll = false;
+		node.fields.forEach (function (field, ndx, wholeThing)
+			{
+				var value = this._parseField (field, element);
+				if (value == 'xseen.parse.all') {
+					element._xseen.parseAll = true;
+				} else {
+					element._xseen.fields[field.fieldlc] = value;
+					if (field.animatable) {element._xseen.animate[field.fieldlc] = null;}
+				}
+			}, this);
+/*
 		node.fields.forEach (function (field, ndx, wholeThing)
 			{
 				if (field.field == '*') {
@@ -81,6 +150,7 @@ xseen.nodes = {
 					this._xseen.fields[field.fieldlc] = value;
 				}
 			}, element);
+ */
 		if (element._xseen.parseAll) {
 			for (var i=0; i<element.attributes.length; i++) {
 				if (typeof(element._xseen.fields[element.attributes[i].name]) === 'undefined') {
@@ -89,6 +159,22 @@ xseen.nodes = {
 			}
 		}
 	},
+	
+	'_parseField' : function (field, e) {
+		if (field.field == '*') {
+			return 'xseen.parse.all';
+			//this._xseen.parseAll = true;
+		} else {
+			var value = e.getAttribute(field.fieldlc);
+			if (value !== null && value.substr(0,1) == '#') {		// Asset reference
+				var re = document.getElementById(value.substr(1,value.length));
+				value = re._xseen.fields[field.fieldlc] || '';
+			}
+			value = xseen.types[field.type] (value, field.default, field.enumeration);
+			return value;
+		}
+	},
+
 
 	'_dumpTable' : function() {
 		var jsonstr = JSON.stringify ({'nodes': xseen.parseTable}, null, '  ');

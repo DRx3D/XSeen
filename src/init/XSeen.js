@@ -58,7 +58,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         // check if element already has been processed
         for (var i=0; i < xseens_unfiltered.length; i++) {
-            if (typeof(xseens_unfiltered[i]._xseen) === undefined)
+            if (typeof(xseens_unfiltered[i]._xseen) === 'undefined')
                 xseens.push(xseens_unfiltered[i]);
         }
 

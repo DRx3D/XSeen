@@ -14,7 +14,7 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 3;
-	Patch		= 5;
+	Patch		= 6;
 	PreRelease	= 'beta.1';
 	Release		= 12;
 	Version		= '';

@@ -59,36 +59,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			canvas { width: 67%; height: 67% }
 			#xscene {width:800px; height:450px; border:1px red dashed; }
 		</style>
-		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>
+		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>		
 		<script src="../ExternalLibraries/three.js"></script>
+		<script src="../ExternalLibraries/Tween.js"></script>
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
-<!--		<script src="../Release/XSeen.js"></script>	-->
-
-
-		<script src='../src/utils/LoadManager.js'></script>
-		<script src='../src/utils/ColladaLoader.js'></script>
-		<script src='../src/utils/GLTF2Loader.js'></script>
-		<script src='../src/utils/GLTFLoader.js'></script>
-		<script src='../src/utils/OBJLoader2.js'></script>
-		<script src="../src/init/Internals.js"></script>
-		<script src="../src/debug.js"></script>
-		<script src="../src/StackHandler.js"></script>
-		<script src="../src/XSeen.js"></script>
-		<script src="../src/Parse.js"></script>
-		<script src="../src/Properties.js"></script>
-		<script src="../src/Types.js"></script>
-		<script src="../src/NodeDefinitions.js"></script>
-		<script src="../src/nodes/_Definitions-x3d.js"></script>
-		<script src="../src/nodes/_Definitions-aframe.js"></script>
-		<script src="../src/nodes/nodes.js"></script>
-		<script src="../src/nodes/nodes-x3d_Appearance.js"></script>
-		<script src="../src/nodes/nodes-af.js"></script>
-
-
+		<script src="../Release/XSeen.js"></script>
 	</head>
 	<body>
-		<scene id='xscene' height='450' width='800'>
-<Viewpoint position='0 6 3'></Viewpoint>
+		<scene id='xscene' height='450' width='800' turntable='on'>
+<Viewpoint position='2 4 3'></Viewpoint>
 <SpotLight	intentsity='.6' color='1 0 0' direction='-10 0 0' cutoffAngle='1.5' beamWidth='1.'></SpotLight>
 <PointLight intensity='.7' color='0 0 1'></PointLight>
 <Light type='directional' intensity='1' color='1 1 1' direction='0 0 -20'></Light>
@@ -98,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<box size='2 1 6'></box>
 		<Appearance>
 			<Material diffuseColor='1 1 1'></Material>
-			<ImageTexture url="images/textureTest.png" repeatS='true', repeatT='true'></ImageTexture>
+			<ImageTexture url="textures/textureTest.png" repeatS='true', repeatT='true'></ImageTexture>
 		</Appearance>
 	</Shape>
 </Transform>
@@ -150,41 +129,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</Appearance>
 	</Shape>
 </Transform>
-
-
 		</scene>
-		<script>
-			// Our Javascript will go here.
-			//alert ('Processing closing script...');
-var x_renderer, x_canvas, x_camera
-function loadContent1() {
-	x_canvas = new THREE.Scene();
-	var divWidth = window.innerWidth/3;
-	var divHeight =  window.innerHeight/3;
-	x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
-	x_renderer = new THREE.WebGLRenderer();
-	x_renderer.setSize (divWidth, divHeight);
-//			xseen.sceneInfo[0].element.appendChild (x_renderer.domElement);
-	document.body.appendChild (x_renderer.domElement);
-
-	loadContent (x_canvas, x_camera);
-}
-function render() {
-	requestAnimationFrame( render );
-	//x_renderer.render( x_canvas, x_camera );
-}
-function loadContent(scene, camera) {
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	var cube = new THREE.Mesh( geometry, material );
-
-	scene.add( cube );
-	camera.position.x = 1;
-	camera.position.z = 5;
-}
-//loadContent1();
-//render();
-
-		</script>
 	</body>
 </html>

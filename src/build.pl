@@ -23,7 +23,7 @@ my $releaseDirectory = '../Release/';
 my $preambleFile = '../LICENSE';
 my $outputFilename = 'XSeen';
 my %version = getVersion ($versionFile);
-my $partialBuild = (substr($version{'PreRelease'}, 0, 6) == 'alpha.') ? 'Partial' : 'Full';
+my $partialBuild = (substr($version{'PreRelease'}, 0, 6) eq 'alpha.') ? 'Partial' : 'Full';
 my @releaseFile = ($outputFilename . '.' . $version{'id'}, $outputFilename);
 my $noOutput = 0;
 

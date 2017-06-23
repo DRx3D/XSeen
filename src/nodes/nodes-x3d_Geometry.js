@@ -260,7 +260,7 @@ xseen.node.geometry__TriangulateFixed = function (count, indices) {
 		}
 	}
 	return triangles;
-}
+};
 
 /*
  *	Generalized indexed face geometry creation.

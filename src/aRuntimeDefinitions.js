@@ -40,7 +40,7 @@ xseen.updateOnLoad = function ()
 		this.loader.ImageLoader		= new THREE.TextureLoader();
 
 // Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
-		this.parseUrl		: function (url)
+		this.parseUrl = function (url)
 			{
 				var parser = document.createElement('a'),
 				searchObject = {},

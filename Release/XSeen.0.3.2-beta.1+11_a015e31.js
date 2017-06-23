@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.3.3-beta.1+11_a015e31
- *  Built Fri Jun 23 06:58:55 2017
+ *  XSeen V0.3.2-beta.1+11_a015e31
+ *  Built Thu Jun 22 16:10:35 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -10808,7 +10808,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         // check if element already has been processed
         for (var i=0; i < xseens_unfiltered.length; i++) {
-            if (typeof(xseens_unfiltered[i]._xseen) === undefined)
+            if (xseens_unfiltered[i].hasRuntime === undefined)
                 xseens.push(xseens_unfiltered[i]);
         }
 
@@ -10890,12 +10890,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		}
 
         // Convert the collection into a simple array (is this necessary?)
-/* Don't think so -- commented out
         xseens = Array.map(xseens, function (n) {
             n.hasRuntime = true;
             return n;
         });
- */
 
         if (xseen.versionInfo !== undefined) {
             xseen.debug.logInfo("XSeen version " + xseen.versionInfo.version + ", " +
@@ -10941,7 +10939,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			} else if (divWidth < 50) {
 				divWidth = divHeight * 2 - 100;
 			}
-			var turntable = (x_element.getAttribute('turntable') || '').toLowerCase();
+			var turntable = x_element.getAttribute('turntable').toLowerCase();
 			if (turntable == 'on' || turntable == 'yes' || turntable == 'y' || turntable == '1') {
 				turntable = true;
 			} else {
@@ -11042,7 +11040,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 				x = radius * Math.sin(radians);
 				currentCamera.position.x = x;
 				currentCamera.position.z = radius * Math.cos(radians);
-				if (nodeAframe !== null) {nodeAframe._xseen.sceneNode.position.x = -x;}
+				if (nodeAframe !== null) {nodeAframe._xseen.object.position.x = -x;}
 			}
 			currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
 			// End of animation
@@ -12021,7 +12019,7 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 3;
-	Patch		= 3;
+	Patch		= 2;
 	PreRelease	= 'beta.1';
 	Release		= 11;
 	Version		= '';

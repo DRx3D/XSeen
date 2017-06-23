@@ -58,6 +58,15 @@ var xseen = {
 						'gif'	: {name: 'GIF', loader: 'ImageLoader'},
 						'x3d'	: {name: 'X3D XML', loader: 'X3dLoader'},
 					},
+// helper
+	array_to_object	: function (a) {
+						var o = {};
+						for(var i=0;i<a.length;i++) {
+							o[a[i]]='';
+						}
+						return o;
+					},
+
 
 	
 	timeStart		: (new Date()).getTime(),

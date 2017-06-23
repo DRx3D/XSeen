@@ -173,4 +173,4 @@ xseen.nodes._defineNode('QuadSet', 'Geometry', 'geometry_QuadSet')
 	.addField('solid', 'SFBool', true)
 	.addNode();
 
-xseen.nodes._dumpTable();
+//xseen.nodes._dumpTable();

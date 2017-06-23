@@ -61,32 +61,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</style>
 		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>
 		<script src="../ExternalLibraries/three.js"></script>
+		<script src="../ExternalLibraries/Tween.js"></script>
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
-<!--		<script src="../Release/XSeen.min.js"></script>	-->
-		<script src='../src/utils/ColladaLoader.js'></script>
-		<script src='../src/utils/GLTFLoader.js'></script>
-		<script src='../src/utils/GLTF2Loader.js'></script>
-		<script src='../src/utils/OBJLoader2.js'></script>
-		<script src='../src/utils/LoadManager.js'></script>
-
-		<script src="../src/init/Internals.js"></script>
-		<script src="../src/init/debug.js"></script>
-		<script src="../src/XSeen.js"></script>
-		<script src="../src/Parse.js"></script>
-		<script src="../src/utils/Properties.js"></script>
-		<script src="../src/Types.js"></script>
-		<script src="../src/NodeDefinitions.js"></script>
-		<script src="../src/nodes/_Definitions-x3d.js"></script>
-		<script src="../src/nodes/_Definitions-aframe.js"></script>
-		<script src="../src/nodes/_Definitions-xseen.js"></script>
-		<script src="../src/nodes/nodes.js"></script>
-		<script src="../src/nodes/nodes-af.js"></script>
-		<script src="../src/nodes/nodes-xseen.js"></script>
--->
-
+		<script src="../Release/XSeen.min.js"></script>
 	</head>
 	<body>
-		<scene id='xscene' height='450' width='800'>
+		<scene id='xscene' height='450' width='800' turntable='on'>
 <camera position='0 0 4'></camera>
 <WorldInfo></WorldInfo>
 <light intentsity='.5' direction='0 0 -1'></light>
@@ -97,7 +77,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <transform translation='-3 1 0' scale='.5 .5 .5'>
 	<model id='gltf_RiggedAnimation' src='RiggedSimple.glbl'></model>
 </transform>
-
 		</scene>
 	</body>
 </html>

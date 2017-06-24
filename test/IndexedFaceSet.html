@@ -53,40 +53,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>TriangleSets with Normals & Colors Testing</title>
+		<title>IndexedFaceSet Testing</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
 			#xscene {width:800px; height:450px; border:1px red dashed; }
 		</style>
-		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>
+		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>		
 		<script src="../ExternalLibraries/three.js"></script>
+		<script src="../ExternalLibraries/Tween.js"></script>
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
 		<script src="../Release/XSeen.js"></script>
-<!--
-		<script src='../src/utils/LoadManager.js'></script>
-		<script src='../src/utils/ColladaLoader.js'></script>
-		<script src='../src/utils/GLTF2Loader.js'></script>
-		<script src='../src/utils/GLTFLoader.js'></script>
-		<script src='../src/utils/OBJLoader2.js'></script>
-		<script src="../src/init/Internals.js"></script>
-		<script src="../src/debug.js"></script>
-		<script src="../src/StackHandler.js"></script>
-		<script src="../src/XSeen.js"></script>
-		<script src="../src/Parse.js"></script>
-		<script src="../src/Properties.js"></script>
-		<script src="../src/Types.js"></script>
-		<script src="../src/NodeDefinitions.js"></script>
-		<script src="../src/nodes/_Definitions-x3d.js"></script>
-		<script src="../src/nodes/_Definitions-aframe.js"></script>
-		<script src="../src/nodes/nodes.js"></script>
-		<script src="../src/nodes/nodes-x3d_Appearance.js"></script>
-		<script src="../src/nodes/nodes-x3d_Geometry.js"></script>
-		<script src="../src/nodes/nodes-af.js"></script>
--->
-		<script src="../src/nodes/_Definitions-x3d.js"></script>
-		<script src="../src/nodes/nodes-x3d_Geometry.js"></script>
-
 	</head>
 	<body>
 <!--
@@ -95,8 +72,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	http://x3dgraphics.com/examples/X3dForWebAuthors/Chapter06GeometryPointsLinesPolygons/IndexedFaceSetIndex.html
 	Redistribution by author according to the conditions listed at the top of this page.
 -->
-		<scene id='xscene' height='450' width='800'>
-<Viewpoint position='0 4 4'></Viewpoint>
+		<scene id='xscene' height='450' width='800' turntable='on'>
+<Viewpoint position='2 2 3'></Viewpoint>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 40 -20'></DirectionalLight>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 -20 40'></DirectionalLight>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 -20 0'></DirectionalLight>

@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>JSON Test</title>
+		<title>XSeen Animation Development Test</title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 67%; height: 67% }
@@ -66,17 +66,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src="../Release/XSeen.js"></script>
 	</head>
 	<body>
-<scene id='content_3d' height='450' width='800' turntable='on'>
-	<Viewpoint position='0 4 6'></Viewpoint>
-	<Background skycolor='.8 .8 1'></Background>
-	<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
-	<group>
-		<Inline id='inline4' url='models/simpleShapes.json'></Inline>
-		<transform id='af_box' translation='0 -3 0'>
-			<a-box height='.2' depth='100' width='200' src='images/textureTest.png'></a-box>
-		</transform>
-	</group>
-</scene>
-
+		<scene id='xscene' height='450' width='800'>
+<Viewpoint position='0 2 20'></Viewpoint>
+<light intentsity='.5' direction='0 0 -1'></light>
+<light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
+<Transform>
+	<Shape>
+		<Box size='40 40 .2'></Box>
+		<Appearance>
+			<Material diffuseColor='.7 .7 1'></Material>
+			<ImageTexture url="textures/textureTest.png" repeatS='true' repeatT='true'></ImageTexture>
+		</Appearance>
+	</Shape>
+</Transform>
+<Transform translation='0 0 0' rotation='0 0 1 3.14'>
+	<Animate field='translation' to='15 15 0' repeat='-1' duration='6' easing='InOut' easingType='exponetial'></Animate>
+	<Animate field='scale' to='2 4 1' repeat='-1' duration='4' easing='' easingType='sinusoidal' delay='1'></Animate>
+	<Animate field='rotation' to='0 0 1 -1.57' repeat='-1' duration='5' easing='' easingType='quadratic'></Animate>
+	<Shape>
+		<Cone bottomRadius='.8' height='3'></Cone>
+		<Appearance>
+			<Material diffuseColor='1 .5 .5'>
+				<Animate field='diffusecolor' to='0 .5 1' repeat='-1' duration='4'></Animate>
+			</Material>
+		</Appearance>
+	</Shape>
+</Transform>
+		</scene>
 	</body>
 </html>

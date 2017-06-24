@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.3.6+12_b17c405
- *  Built Fri Jun 23 14:35:00 2017
+ *  XSeen V0.3.3-beta.1+11_a015e31
+ *  Built Fri Jun 23 06:58:55 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -10808,7 +10808,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         // check if element already has been processed
         for (var i=0; i < xseens_unfiltered.length; i++) {
-            if (typeof(xseens_unfiltered[i]._xseen) === 'undefined')
+            if (typeof(xseens_unfiltered[i]._xseen) === undefined)
                 xseens.push(xseens_unfiltered[i]);
         }
 
@@ -12021,11 +12021,11 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 3;
-	Patch		= 6;
-	PreRelease	= '';
-	Release		= 12;
+	Patch		= 3;
+	PreRelease	= 'beta.1';
+	Release		= 11;
 	Version		= '';
-	Date		= '2017-06-23';
+	Date		= '2017-06-22';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
 // All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
 
@@ -12040,9 +12040,9 @@ xseen.generateVersion = function () {
 		splashText	: SplashText
 	};
 // Using the scheme at http://semver.org/
-	version.version = version.major + '.' + version.minor + '.' + version.patch;
-	version.version += (version.preRelease != '') ? '-' + version.preRelease : '';
-	version.version += (version.release != '') ? '+' + version.release : '';
+	version.version = xseen.versionInfo.major + '.' + xseen.versionInfo.minor + '.' + xseen.versionInfo.patch;
+	version.version += (xseen.versionInfo.preRelease != '') ? '-'+xseen.versionInfo.preRelease : '';
+	version.version += (xseen.versionInfo.release != '') ? '+'+xseen.versionInfo.release : '';
 	return version;
 }
 // File: nodes/nodes-af.js
@@ -12703,7 +12703,7 @@ xseen.node.geometry__TriangulateFixed = function (count, indices) {
 		}
 	}
 	return triangles;
-};
+}
 
 /*
  *	Generalized indexed face geometry creation.
@@ -13664,7 +13664,7 @@ xseen.nodes._defineNode('QuadSet', 'Geometry', 'geometry_QuadSet')
 	.addField('solid', 'SFBool', true)
 	.addNode();
 
-//xseen.nodes._dumpTable();
+xseen.nodes._dumpTable();
 // File: nodes/_Definitions-xseen.js
 /*
  * XSeen JavaScript library

@@ -58,14 +58,14 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         // check if element already has been processed
         for (var i=0; i < xseens_unfiltered.length; i++) {
-            if (xseens_unfiltered[i].hasRuntime === undefined)
+            if (typeof(xseens_unfiltered[i]._xseen) === 'undefined')
                 xseens.push(xseens_unfiltered[i]);
         }
 
         // ~~ Components and params {{{ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         var params;
         var settings = new xseen.Properties();  // stores the stuff in <param>
-        var validParams = array_to_object([ 
+        var validParams = xseen.array_to_object([ 
             'showLog', 
             'showStat',
             'showProgress', 
@@ -140,10 +140,12 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		}
 
         // Convert the collection into a simple array (is this necessary?)
+/* Don't think so -- commented out
         xseens = Array.map(xseens, function (n) {
             n.hasRuntime = true;
             return n;
         });
+ */
 
         if (xseen.versionInfo !== undefined) {
             xseen.debug.logInfo("XSeen version " + xseen.versionInfo.version + ", " +
@@ -172,11 +174,29 @@ xseen.rerouteSetAttribute = function(node, browser) {
             
             t0 = new Date().getTime();
 
+/*
+ * Handle opening tag attributes
+ *	divHeight
+ *	divWidth
+ *	turntable	Indicates if view automatically rotates (independent of navigation)
+ */
 
 			var divWidth = x_element.getAttribute('width');
 			var divHeight =  x_element.getAttribute('height');
-			//var divWidth = window.innerWidth;
-			//var divHeight =  window.innerHeight;
+			if (divHeight + divWidth < 100) {
+				divHeight = 450;
+				divWidth = 800;
+			} else if (divHeight < 50) {
+				divHeight = Math.floor(divWidth/2) + 50;
+			} else if (divWidth < 50) {
+				divWidth = divHeight * 2 - 100;
+			}
+			var turntable = (x_element.getAttribute('turntable') || '').toLowerCase();
+			if (turntable == 'on' || turntable == 'yes' || turntable == 'y' || turntable == '1') {
+				turntable = true;
+			} else {
+				turntable = false;
+			}
 			var x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
 			x_camera.position.x = 0;
 			x_camera.position.z = 10;
@@ -189,6 +209,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 									'scene'		: x_canvas, 
 									'renderer'	: x_renderer,
 									'camera'	: [x_camera],
+									'turntable'	: turntable,
 									'mixers'	: [],
 									'clock'		: new THREE.Clock(),
 									'element'	: x_element,
@@ -229,7 +250,6 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			xseen.Parse (xseen.sceneInfo[i].element, xseen.sceneInfo[i]);
 			t1 = new Date().getTime() - t[i];
             xseen.debug.logInfo('Time for initial pass #' + i + ' parsing: ' + t1 + " ms.");
-		
 		}
 /*
 		window.setTimeout (function() { 
@@ -245,34 +265,39 @@ xseen.rerouteSetAttribute = function(node, browser) {
  *	Most of the stuff belongs, but perhaps in separate functions/methods
  *	Camera animation should not be in here at all. That should be animated separately in XSeen code
  */
-	xseen.render = function () {
-								requestAnimationFrame (xseen.render);
-						// This is not the way to do animation. Code should not be in the loop
-						// Various objects needing animation should register for an event ... or something
-						// Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
-								var deltaT, radians, x, y, z, P, radius, vp;
-								var nodeAframe = document.getElementById ('aframe_nodes');
-								P = 16000;
-								deltaT = xseen.sceneInfo[0].clock.getDelta();
-								for (var i=0; i<xseen.sceneInfo[0].mixers.length; i++) {
-									xseen.sceneInfo[0].mixers[i].update(deltaT);
-								}
-								deltaT = (new Date()).getTime() - xseen.timeStart;
-								radians = deltaT/P * 2 * Math.PI;
-								vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
-								radius = vp._xseen.fields._radius0;
-								x = radius * Math.sin(radians);
-								z = radius * Math.cos(radians);
-								y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
-								var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
-								currentCamera.position.x = x;
-								currentCamera.position.y = y;
-								currentCamera.position.z = z;
-								currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
-								if (nodeAframe !== null) {nodeAframe._xseen.object.position.x = -x;}
-						// End of animation
-								xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
-								};
+	xseen.render = function () 
+		{
+			requestAnimationFrame (xseen.render);
+/*
+ *	This is not the way to do animation. Code should not be in the loop
+ *	Various objects needing animation should register for an event ... or something
+ *	Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
+ */
+			var deltaT, radians, x, y, z, P, radius, vp;
+			TWEEN.update();
+			var nodeAframe = document.getElementById ('aframe_nodes');
+			P = 16000;
+			deltaT = xseen.sceneInfo[0].clock.getDelta();
+			for (var i=0; i<xseen.sceneInfo[0].mixers.length; i++) {
+				xseen.sceneInfo[0].mixers[i].update(deltaT);
+			}
+			deltaT = (new Date()).getTime() - xseen.timeStart;
+			radians = deltaT/P * 2 * Math.PI;
+			vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
+			radius = vp._xseen.fields._radius0;
+			y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
+			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
+			currentCamera.position.y = y;		// This uses Viewpoint initial 'y' coordinate for range
+			if (xseen.sceneInfo[0].turntable) {
+				x = radius * Math.sin(radians);
+				currentCamera.position.x = x;
+				currentCamera.position.z = radius * Math.cos(radians);
+				if (nodeAframe !== null) {nodeAframe._xseen.sceneNode.position.x = -x;}
+			}
+			currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
+			// End of animation
+			xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
+		};
     
 	// Replace with code that calls THREE's unload methods
     var onunload = function() {

@@ -8,55 +8,59 @@ xseen.types = {
 
 	'SFFloat'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			if (Number.isNaN(value)) {return def};
 			return value;
 		},
 
 	'SFInt'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			if (Number.isNaN(value)) {return def};
 			return Math.round(value);
 		},
 
 	'SFBool'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			if (value) {return true;}
 			if (!value) {return false;}
 			return def;
 		},
 
+	'SFTime'	: function (value, def)
+		{
+			if (value === null) {return def;}
+			if (Number.isNaN(value)) {return def};
+			return value;
+		},
+
 	'SFVec3f'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			var v3 = value.split(' ');
 			if (v3.length < 3 || Number.isNaN(v3[0]) || Number.isNaN(v3[1]) || Number.isNaN(v3[2])) {
-				value = def;
-				v3 = value.split(' ');
+				return def;
 			}
 			return [v3[0]-0, v3[1]-0, v3[2]-0];
 		},
 
 	'SFVec2f'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			var v2 = value.split(' ');
 			if (v2.length != 2 || Number.isNaN(v2[0]) || Number.isNaN(v2[1])) {
-				value = def;
-				v2 = value.split(' ');
+				return def;
 			}
 			return [v2[0]-0, v2[1]-0];
 		},
 
 	'SFRotation'	: function (value, def)
 		{
-			if (value === null) {value = def;}
+			if (value === null) {return def;}
 			var v4 = value.split(' ');
 			if (v4.length != 4 || Number.isNaN(v4[0]) || Number.isNaN(v4[1]) || Number.isNaN(v4[2]) || Number.isNaN(v4[3])) {
-				value = def;
-				v4 = value.split(' ');
+				return def;
 			}
 			var result = {
 							'vector'		: [v4[0], v4[1], v4[2], v4[3]],
@@ -81,6 +85,20 @@ xseen.types = {
 		},
 
 //	For MF* types, a default of '' means to return an empty array on parsing error
+	'MFFloat'	: function (value, def)
+		{
+			var defReturn = (def == '') ? [] : def;
+			if (value === null) {return defReturn;}
+			var mi = value.split(' ');
+			var rv = [];
+			for (var i=0; i<mi.length; i++) {
+				if (mi[i] == '') {continue;}
+				if (Number.isNaN(mi[i])) {return defReturn};
+				rv.push (mi[i]);
+			}
+			return rv;
+		},
+
 	'MFInt'		: function (value, def)
 		{
 			var defReturn = (def == '') ? [] : def;
@@ -134,6 +152,16 @@ xseen.types = {
 			return defaultString;
 		},
 	
+// XSeen data types
+	'EnumerateString' : function (value, defString, choices)
+		{
+			value = this.SFString (value, defString);
+			for (var i=0; i<choices.length; i++) {
+				if (value == choices[i]) {return value;}
+			}
+			return defString;
+		},
+
 // Conversion methods
 	'Vector3'	: function (value)
 		{

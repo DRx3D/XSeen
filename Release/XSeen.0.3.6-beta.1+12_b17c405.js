@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.3.6+12_b17c405
- *  Built Fri Jun 23 14:35:00 2017
+ *  XSeen V0.3.6-beta.1+12_b17c405
+ *  Built Fri Jun 23 14:33:29 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -12022,7 +12022,7 @@ xseen.generateVersion = function () {
 	Major		= 0;
 	Minor		= 3;
 	Patch		= 6;
-	PreRelease	= '';
+	PreRelease	= 'beta.1';
 	Release		= 12;
 	Version		= '';
 	Date		= '2017-06-23';

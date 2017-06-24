@@ -26,6 +26,7 @@ xseen.Parse = function (element, parent, sceneInfo) {
 		xseen.debug.logInfo("Unknown node: " + nodeName);
 	} else {
 		xseen.nodes._parseFields (element, xseen.parseTable[nodeName]);
+		console.log ('Calling node: ' + nodeName + '. Method: ' + xseen.parseTable[nodeName].method + '.init (e,p)');
 		xseen.node[xseen.parseTable[nodeName].method].init (element, parent);
 	}
 	

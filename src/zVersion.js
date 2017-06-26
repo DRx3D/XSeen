@@ -25,6 +25,7 @@ xseen.generateVersion = function () {
  *
  * V0.4.0+13 Feature -- events (at least from HTML to XSeen
  * V0.4.1+14 Fix - minor text correction in xseen.node.geometry__TriangulateFix (nodes-x3d_Geometry.js)
+ * V0.4.1+15 Modified build.pl to increase compression by removing block comments
  */
 	var version = {
 		major		: Major,

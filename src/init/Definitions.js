@@ -26,6 +26,7 @@ var xseen = {
 	parseTable		: {},
 	node			: {},
 	utils			: {},
+	eventManager	: {},
 
 	loadMgr			: {},
 	loader			: {

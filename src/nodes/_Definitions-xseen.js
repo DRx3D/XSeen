@@ -35,8 +35,15 @@ xseen.nodes._defineNode('animate', 'XSeen', 'x_Animate')
 	.addField({name:'interpolator', datatype:'EnumerateString', defaultValue:'position', enumerated:['position', 'rotation', 'color'], animatable:false})
 	.addField({name:'Easing', datatype:'EnumerateString', defaultValue:'', enumerated:['', 'in', 'out', 'inout'], animatable:false})
 	.addField({name:'EasingType', datatype:'EnumerateString', defaultValue:'linear', enumerated:['linear', 'quadratic', 'sinusoidal', 'exponential', 'elastic', 'bounce'], animatable:false})
-	.addField('start', 'SFTime', 0)				// incoming event, need to set timer trigger
-	.addField('end', 'SFTime', 0)				// incoming event, need to set timer trigger
+	.addField('start', 'SFBool', true)				// incoming event, need to set timer trigger
+	.addField('stop', 'SFBool', true)				// incoming event, need to set timer trigger
+	.addNode();
+
+xseen.nodes._defineNode('route', 'XSeen', 'x_Route')
+	.addField('source', 'SFString', '')
+	.addField('event', 'SFString', '')
+	.addField('destination', 'SFString', '')
+	.addField('field', 'SFString', '')
 	.addNode();
 
 

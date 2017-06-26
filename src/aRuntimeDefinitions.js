@@ -74,6 +74,20 @@ xseen.updateOnLoad = function ()
     				};
 			};
 		this.versionInfo = this.generateVersion();
+
+		this.routes = [];
+		this.EventHandler = function (route, source, eventName, destination, field)
+			{
+				var handler = {};
+				handler.route = route;					// Route element
+				handler.source = source;				// Source element
+				handler.event = eventName;				// Event name
+				handler.destination = destination;		// Destination element
+				handler.field = field;					// Destination field structure
+				handler.handler = destination._xseen.handlers[field.handlerName];
+				this.routes.push (handler);
+				source.addEventListener (eventName, function(ev) {handler.handler(ev)});
+			};
 		
 		this.debug = {
 			INFO:       "INFO",

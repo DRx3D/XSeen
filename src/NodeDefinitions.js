@@ -113,6 +113,33 @@ xseen.nodes = {
 		return node;
 	},
 /*
+ *	Returns all of the available information about a specified field in a given node. The
+ *	property 'good' indicates that everything was found and could be handled. If 'good' is FALSE, then
+ *	something went wrong or is missing.
+ */
+	'_getFieldInfo' : function (nodeName, fieldName) {
+		var fieldInfo = {'good': false, 'nodeExists': false, 'fieldExists': false};
+		if (typeof(nodeName) === 'undefined' || nodeName == '' || typeof(fieldName) === 'undefined' || fieldName == '') {return fieldInfo;}
+		var nodeLC = nodeName.toLowerCase();
+		if (typeof(xseen.parseTable[nodeLC]) === 'undefined') {
+			return fieldInfo;
+		}
+		fieldInfo.nodeExists = true;
+		var node = xseen.parseTable[nodeLC];
+		var fieldLC = fieldName.toLowerCase();
+		if (typeof(node.fieldIndex[fieldLC]) === 'undefined') {
+			return fieldInfo;
+		}
+		fieldInfo.fieldExists = true;
+		var field = node.fields[node.fieldIndex[fieldLC]];
+		fieldInfo.node = node;
+		fieldInfo.field = field;
+		fieldInfo.handlerName = 'set' + field.field;
+		fieldInfo.dataType = field.type;
+		fieldInfo.good = true;
+		return fieldInfo;
+	},
+/*
  *	Parse fields of an HTML tag (called element) using the field information from the defined 'node'
  *	If the first character of the field value is '#', then the remainder is treated as an ID and the
  *	field value is obtained from that HTML tag prior to parsing. The referenced tag's attribute name

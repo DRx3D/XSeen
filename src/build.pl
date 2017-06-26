@@ -25,7 +25,7 @@ my $outputFilename = 'XSeen';
 my %version = getVersion ($versionFile);
 my $partialBuild = (substr($version{'PreRelease'}, 0, 6) eq 'alpha.') ? 'Partial' : 'Full';
 my @releaseFile = ($outputFilename . '.' . $version{'id'}, $outputFilename);
-my $noOutput = 0;
+my $noOutput = 1;
 
 my (@files, @output, @preamble);
 open (FILE, "<$preambleFile") or die "Unable to open $preambleFile\n$!\n";
@@ -114,11 +114,18 @@ sub getVersion {
 
 sub compressJS {
 	my (@records) = @_;
-	my @compressed;
+	my (@compressed, $blockComment);
+	$blockComment = 0;
 	foreach my $line (@records) {
 		if ($line !~ /^\s*$/ && $line !~ /^\s*\/\//) {
 			$line =~ s/^\s+//;
-			push @compressed, $line;
+			if (!$blockComment && $line =~ /^\/\*/) {
+				$blockComment = 1;
+			} elsif ($blockComment && $line =~ /^\*\//) {
+				$blockComment = 0;
+			} elsif (!$blockComment) {
+				push @compressed, $line;
+			}
 		}
 	}
 	return @compressed;

@@ -239,7 +239,7 @@ xseen.node.geometry__TriangulateFixed = function (count, indices) {
 	var ndx = 0;
 	var triangles = [];
 	if (count < 3) {
-		console.log ('Two few ('+count+'vertices per triangle. No triangulation performed.');
+		console.log ('Too few ('+count+') vertices per triangle. No triangulation performed.');
 		return triangles;
 	}
 	if (indices.length % count != 0) {

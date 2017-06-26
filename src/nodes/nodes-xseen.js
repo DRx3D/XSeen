@@ -68,3 +68,42 @@ xseen.node.x_Model = {
 						}
 					}
 };
+
+
+xseen.node.x_Route = {
+	'init'	: function (e,p)
+		{
+			if (e._xseen.fields.source == '' || e._xseen.fields.destination == '' || e._xseen.fields.event == '' || e._xseen.fields.field == '') {
+				xseen.debug.logError ('Route node missing field. No route setup');
+				return;
+			}
+			// Check existence of source and destination elements
+			eSource = document.getElementById (e._xseen.fields.source);
+			eDestination = document.getElementById (e._xseen.fields.destination);
+			if (typeof(eSource) === 'undefined' || typeof(eDestination) === 'undefined') {
+				xseen.debug.logError ('Source or Destination node does not exist. No route setup');
+				return;
+			}
+			// Get field information -- perhaps there is some use in the Animate node?
+			fField = xseen.nodes._getFieldInfo (eDestination.nodeName, e._xseen.fields.field);
+			if (typeof(fField) === 'undefined' || !fField.good) {
+				xseen.debug.logError ('Destination field does not exist or incorrectly specified. No route setup');
+				return;
+			}
+			// Set up listener on source node for specified event. The listener code is the 'set<field>' method for the
+			// node. It is passed the DOM 'event' data structure. Since there may be more than one node of the type
+			// specified by 'destination', the event handler is attached to the node in e._xseen.handlers. This is done
+			// when the node is parsed
+			xseen.EventHandler (e, eSource, e._xseen.fields.event, eDestination, fField);
+		},
+
+	'fin'	: function (e,p)
+		{
+		},
+	'evHandler' : function (u)
+		{
+			var de = u.e;
+			var df = u.f;
+			return de._xseen.handlers[df.handlerName];
+		},
+};

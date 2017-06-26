@@ -75,10 +75,23 @@ xseen.node.x_Animate = {
 
 // Handle the interpolation type. Vector is linear, rotation is slerp (custom), color is ...
 			tween.start();
+			e._xseen.handlers = {};
+			e._xseen.handlers.setstart = this.setstart;
+			e._xseen.handlers.setstop = this.setstop;
 			e._xseen.animating = tween;
 			p._xseen.animation.push (tween);
 		},
 	'fin'	: function (e,p) {},
+	'setstart'	: function (ev)
+		{
+			console.log ('Starting animation');
+			this.destination._xseen.animating.start();
+		},
+	'setstop'	: function (ev) 
+		{
+			console.log ('Stopping animation');
+			this.destination._xseen.animating.stop();
+		},
 	
 /*
  * Various interpolator functions for use with different data types

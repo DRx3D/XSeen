@@ -64,6 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script src="../ExternalLibraries/Tween.js"></script>
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
 		<script src="../Release/XSeen.js"></script>
+		<script src='../src/aRuntimeDefinitions.js'></script>
 		<script src='../src/nodes/_Definitions-xseen.js'></script>
 		<script src='../src/nodes/nodes-xseen.js'></script>
 		<script src='../src/nodes/nodes_Animate.js'></script>
@@ -74,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <light intentsity='.5' direction='0 0 -1'></light>
 <light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
 <Transform>
-	<Shape>
+	<Shape id='BoxShape'>
 		<Box size='40 40 .2'></Box>
 		<Appearance>
 			<Material diffuseColor='.7 .7 1'></Material>
@@ -86,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<Animate id='AnimatePosition' field='translation' to='15 15 0' repeat='-1' duration='6' easing='InOut' easingType='exponetial'></Animate>
 	<Animate field='scale' to='2 4 1' repeat='-1' duration='4' easing='' easingType='sinusoidal' delay='1'></Animate>
 	<Animate field='rotation' to='0 0 1 -1.57' repeat='-1' duration='5' easing='' easingType='quadratic'></Animate>
-	<Shape>
+	<Shape id='ConeShape'>
 		<Cone bottomRadius='.8' height='3' onclick='console.log("Cliking on cone");'></Cone>
 		<Appearance>
 			<Material diffuseColor='1 .5 .5'>
@@ -97,8 +98,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </Transform>
 	<route source='AnimationStop' event='click' destination='AnimatePosition' field='stop'></route>
 	<route source='AnimationStart' event='click' destination='AnimatePosition' field='start'></route>
+	<route source='ConeShape' event='xseen' destination='eventFromXseen'></route>
+	<route source='BoxShape' event='xseen' destination='eventFromXseen'></route>
 		</scene>
 		<div id='AnimationStop'>Stop Translation Animation</div>
 		<div id='AnimationStart'>Start Translation Animation</div>
+<script>
+function eventFromXseen (ev) {
+	console.log ('Handling XSeen event of type: ' + ev.detail.type + ' @ ' + ev.timeStamp);
+	ev.stopPropagation();
+}
+</script>
 	</body>
 </html>

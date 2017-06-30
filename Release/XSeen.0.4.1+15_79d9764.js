@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.4.1+16_79d9764
- *  Built Thu Jun 29 20:35:33 2017
+ *  XSeen V0.4.1+15_79d9764
+ *  Built Sun Jun 25 19:08:48 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -10681,7 +10681,6 @@ var xseen = {
 	node			: {},
 	utils			: {},
 	eventManager	: {},
-	Events			: {},
 
 	loadMgr			: {},
 	loader			: {
@@ -10955,14 +10954,6 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			var x_renderer = new THREE.WebGLRenderer();
 			x_renderer.setSize (divWidth, divHeight);
 			x_element.appendChild (x_renderer.domElement);
-
-// Add event handler to XSeen tag (x_element)
-x_element.addEventListener ('dblclick', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('click', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mousedown', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);	
 			
 			xseen.sceneInfo.push ({
 									'size'		: {'width':divWidth, 'height':divHeight},
@@ -10973,10 +10964,8 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
 									'mixers'	: [],
 									'clock'		: new THREE.Clock(),
 									'element'	: x_element,
-									'selectable': [],
 									'stacks'	: [],
 									'tmp'		: {activeViewpoint:false},
-									'xseen'		: xseen,
 								});
 			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};
@@ -11227,140 +11216,20 @@ xseen.updateOnLoad = function ()
 			};
 		this.versionInfo = this.generateVersion();
 
-		this.Events = {
-				MODE_NAVIGATION:	1,
-				MODE_SELECT:		2,
-				mode:				2,
-				inNavigation: function () {return (this.mode == this.MODE_NAVIGATION) ? true : false;},
-				inSelect: function () {return (this.mode == this.MODE_SELECT) ? true : false;},
-				that: this,
-				routes: [],
-				redispatch: false,
-				target: {},
-				raycaster: new THREE.Raycaster(),
-				mouse: new THREE.Vector2(),
-				
-
-/*
- * Handle user-generated events on the canvas. These include all mouse events (click, doubleClick, move, drag...)
- * Need to create new XSeen event (has event.xseen = true) that is essentially the same and dispatch the
- * event from the proper target (for selection mode). The proper target is selected with the help of WebGL to
- * find the first (closest) object in the scene that intersects a ray drawn from the cursor. May need to add a field
- * to THREE geometry that indicates if it is selectable.
- *
- * In NavigationMode, cursor movements tend to indicate navigation requests. This is the default mode. The system is
- * switched into SelectMode when the user "clicks" on geometry that is active (selectable).
- *
- * Need to clearly define event operations
- * Initially: [2017-06-27]
- * Regular mouse events are captured here. Perhaps initially should only capture mousedown
- * Check to see what (if any) selectable nodes (probably a subset of geometry) intersects a ray drawn from the cusor
- * If nothing, (background is not selectable), then switch to MODE_NAVIGATION; otherwise switch to MODE_SELECT
- * Establish event handlers for mouseup, leave canvas, mousemove, click, and double-click
- * Handlers act differently based on MODE
- * MODE_SELECT events are converted to 'xseen' CustomEvent and can bubble up past <xseen>
- * MODE_NAVIGATION events are 'captured' (not bubbled) and drive the camera position
- *
- * In MODE_SELECT
- *	mousedown	sets redispatch to TRUE
- *	click		Activates 
- *	dblclick	??
- *	mouseup		terminates select
- *	mousemove	sets redispatch to FALSE
- *	In all cases, recreate event as type='xseen' and dispatch from geometry when
- *	redispatch is TRUE. 
- */
-				canvasHandler: function (ev)
-					{
-						//console.log ('Primary canvas event handler for event type: ' + ev.type);
-						ev.stopPropagation();		// No propagation beyond this tag
-						var sceneInfo = ev.currentTarget._xseen.sceneInfo;
-						var localXseen = sceneInfo.xseen;
-						var lEvents = localXseen.Events;
-						var type = ev.type;
-						if (type == 'mousedown') {
-							lEvents.redispatch = true;
-							lEvents.mode = lEvents.MODE_SELECT;
-							lEvents.mouse.x = (ev.clientX / 800) * 2 -1;
-							lEvents.mouse.y = (ev.clientX / 450) * 2 -1;
-							//
-							lEvents.raycaster.setFromCamera(lEvents.mouse, sceneInfo.element._xseen.renderer.camera);
-							var hitGeometryList = lEvents.raycaster.intersectObjects (sceneInfo.selectable, true);
-							//if (hitGeometryList.length != 0) {
-							//lEvents.target = document.getElementById ('AnimatePosition');
-							lEvents.target = hitGeometryList[0];
-						}
-						if (lEvents.redispatch || type == 'click' || type == 'dblclick') {
-							//console.log('Processing event: ' + type);
-							// Generate an XSeen (Custom)Event of the same type and (force) propagate it from 'AnimatePosition'
-							var newEv = lEvents.createEvent (ev, lEvents.target);
-							//lEvents.target.dispatchEvent(newEv);
-						} else {
-							//console.log ('Navigation mode...');
-						}
-						if (type == 'mouseup') {
-							lEvents.redispatch = false;
-							lEvents.mode = lEvents.MODE_NAVIGATION;
-							//lEvents.target = {};
-						}
-					},
-
-				createEvent: function (ev, originator)
-					{
-						var properties = {
-								'detail':		{					// This object contains all of the XSeen data
-										'type':			'xseen',
-										'originalType':	ev.type,
-										'originator':	originator,
-										'position': {
-												'x': 0,
-												'y': 0,
-												'z': 0,
-												},
-										'normal': {
-												'x': 0,
-												'y': 0,
-												'z': 0,
-												},
-										'screenX':	ev.screenX,
-										'screenY':	ev.screenY,
-										'clientX':	ev.clientX,
-										'clientY':	ev.clientY,
-										'ctrlKey':	ev.ctrlKey,
-										'shiftKey':	ev.shiftKey,
-										'altKey': 	ev.altKey,
-										'metaKey':	ev.metaKey,
-										'button':	ev.button,
-										'buttons':	ev.buttons,
-												},
-								'bubbles':		ev.bubbles,
-								'cancelable':	ev.cancelable,
-								'composed':		ev.composed,
-							};
-
-						var newEvent = new CustomEvent('xseen', properties);
-						return newEvent;
-					},
-				// Uses method described in https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-				// to change 'this' for the handler method. Want 'this' to refer to the target node.
-				addHandler: function (route, source, eventName, destination, field)
-					{
-						var handler = {};
-						handler.route = route;					// Route element
-						handler.source = source;				// Source element
-						handler.type = eventName;				// Event type
-						handler.destination = destination;		// Destination element
-						handler.field = field;					// Destination field structure
-						handler.handler = destination._xseen.handlers[field.handlerName];
-						this.routes.push (handler);
-						source.addEventListener (eventName, function(ev) {handler.handler(ev)});
-					},
-				XSeenHandler: function (ev)
-					{
-						console.log ('XSeen Event handler, original type: ' + ev.detail.originalType);
-					},
+		this.routes = [];
+		this.EventHandler = function (route, source, eventName, destination, field)
+			{
+				var handler = {};
+				handler.route = route;					// Route element
+				handler.source = source;				// Source element
+				handler.event = eventName;				// Event name
+				handler.destination = destination;		// Destination element
+				handler.field = field;					// Destination field structure
+				handler.handler = destination._xseen.handlers[field.handlerName];
+				this.routes.push (handler);
+				source.addEventListener (eventName, function(ev) {handler.handler(ev)});
 			};
-
+		
 		this.debug = {
 			INFO:       "INFO",
 			WARNING:    "WARNING",
@@ -12196,17 +12065,16 @@ xseen.generateVersion = function () {
 	Minor		= 4;
 	Patch		= 1;
 	PreRelease	= '';
-	Release		= 16;
+	Release		= 15;
 	Version		= '';
-	Date		= '2017-06-26';
+	Date		= '2017-06-25';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
 /*
  * All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
  *
- * V0.4.0+13 Feature -- events (from HTML to XSeen)
+ * V0.4.0+13 Feature -- events (at least from HTML to XSeen
  * V0.4.1+14 Fix - minor text correction in xseen.node.geometry__TriangulateFix (nodes-x3d_Geometry.js)
  * V0.4.1+15 Modified build.pl to increase compression by removing block comments
- * V0.4.1+16 Feature -- XSeen events
  */
 	var version = {
 		major		: Major,
@@ -12393,8 +12261,6 @@ xseen.node.af_Box = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12417,8 +12283,6 @@ xseen.node.af_Cone = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12442,8 +12306,6 @@ xseen.node.af_Cylinder = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12461,8 +12323,6 @@ xseen.node.af_Dodecahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12480,8 +12340,6 @@ xseen.node.af_Icosahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12499,8 +12357,6 @@ xseen.node.af_Octahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12523,8 +12379,6 @@ xseen.node.af_Sphere = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12542,8 +12396,6 @@ xseen.node.af_Tetrahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -12564,8 +12416,6 @@ xseen.node.af_Torus = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
-			mesh.userData = e;
-			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -13099,7 +12949,7 @@ xseen.node.x_Route = {
 			// node. It is passed the DOM 'event' data structure. Since there may be more than one node of the type
 			// specified by 'destination', the event handler is attached to the node in e._xseen.handlers. This is done
 			// when the node is parsed
-			xseen.Events.addHandler (e, eSource, e._xseen.fields.event, eDestination, fField);
+			xseen.EventHandler (e, eSource, e._xseen.fields.event, eDestination, fField);
 		},
 
 	'fin'	: function (e,p)
@@ -13167,11 +13017,9 @@ xseen.node.unk_Shape = {
 				e._xseen.appearance._needsUpdate = true;
 				e._xseen.appearance.needsUpdate = true;
 			}
-			var mesh = new THREE.Mesh (e._xseen.geometry, e._xseen.appearance);
-			mesh.userData = e;
-			p._xseen.children.push(mesh);
-			p._xseen.sceneInfo.selectable.push(mesh);
-			mesh = null;
+			var m = new THREE.Mesh (e._xseen.geometry, e._xseen.appearance);
+			p._xseen.children.push(m);
+			m = null;
 		}
 };
 

@@ -203,6 +203,14 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			var x_renderer = new THREE.WebGLRenderer();
 			x_renderer.setSize (divWidth, divHeight);
 			x_element.appendChild (x_renderer.domElement);
+
+// Add event handler to XSeen tag (x_element)
+x_element.addEventListener ('dblclick', xseen.Events.canvasHandler, true);	
+x_element.addEventListener ('click', xseen.Events.canvasHandler, true);	
+x_element.addEventListener ('mousedown', xseen.Events.canvasHandler, true);	
+x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
+x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
+x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);	
 			
 			xseen.sceneInfo.push ({
 									'size'		: {'width':divWidth, 'height':divHeight},
@@ -213,8 +221,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 									'mixers'	: [],
 									'clock'		: new THREE.Clock(),
 									'element'	: x_element,
+									'selectable': [],
 									'stacks'	: [],
 									'tmp'		: {activeViewpoint:false},
+									'xseen'		: xseen,
 								});
 			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};

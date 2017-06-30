@@ -166,6 +166,8 @@ xseen.node.af_Box = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -188,6 +190,8 @@ xseen.node.af_Cone = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -211,6 +215,8 @@ xseen.node.af_Cylinder = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -228,6 +234,8 @@ xseen.node.af_Dodecahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -245,6 +253,8 @@ xseen.node.af_Icosahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -262,6 +272,8 @@ xseen.node.af_Octahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -284,6 +296,8 @@ xseen.node.af_Sphere = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -301,6 +315,8 @@ xseen.node.af_Tetrahedron = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}
@@ -321,6 +337,8 @@ xseen.node.af_Torus = {
 									);
 			var appearance = xseen.node.af_Appearance (e);
 			var mesh = new THREE.Mesh (geometry, appearance);
+			mesh.userData = e;
+			p._xseen.sceneInfo.selectable.push(mesh);
 			var group = new THREE.Group();
 			group.add (mesh);
 			if (typeof(p._xseen.children) == 'undefined') {p._xseen.children = [];}

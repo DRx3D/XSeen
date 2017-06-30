@@ -52,9 +52,11 @@ xseen.node.unk_Shape = {
 				e._xseen.appearance._needsUpdate = true;
 				e._xseen.appearance.needsUpdate = true;
 			}
-			var m = new THREE.Mesh (e._xseen.geometry, e._xseen.appearance);
-			p._xseen.children.push(m);
-			m = null;
+			var mesh = new THREE.Mesh (e._xseen.geometry, e._xseen.appearance);
+			mesh.userData = e;
+			p._xseen.children.push(mesh);
+			p._xseen.sceneInfo.selectable.push(mesh);
+			mesh = null;
 		}
 };
 

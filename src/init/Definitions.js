@@ -27,6 +27,7 @@ var xseen = {
 	node			: {},
 	utils			: {},
 	eventManager	: {},
+	Events			: {},
 
 	loadMgr			: {},
 	loader			: {

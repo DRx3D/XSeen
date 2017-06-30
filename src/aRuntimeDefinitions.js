@@ -129,13 +129,18 @@ xseen.updateOnLoad = function ()
 						if (type == 'mousedown') {
 							lEvents.redispatch = true;
 							lEvents.mode = lEvents.MODE_SELECT;
-							lEvents.mouse.x = (ev.clientX / 800) * 2 -1;	// TODO: Use real sizes
+							lEvents.mouse.x = (ev.clientX / 800) * 2 -1;	// TODO: Use real XSeen display sizes
 							lEvents.mouse.y = (ev.clientX / 450) * 2 -1;
 							//
 							lEvents.raycaster.setFromCamera(lEvents.mouse, sceneInfo.element._xseen.renderer.camera);
 							var hitGeometryList = lEvents.raycaster.intersectObjects (sceneInfo.selectable, true);
-							if (hitGeometryList.length != 0) {lEvents.object = hitGeometryList[0];}
-							var test = lEvents.object;
+							if (hitGeometryList.length != 0) {
+								lEvents.object = hitGeometryList[0];
+							} else {
+								lEvents.object = {};
+								lEvents.redispatch = false;
+								lEvents.mode = lEvents.MODE_NAVIGATION;
+							}
 						}
 						if ((lEvents.redispatch || type == 'click' || type == 'dblclick') && typeof(lEvents.object.object) !== 'undefined') {
 							// Generate an XSeen (Custom)Event of the same type and dispatch it
@@ -204,6 +209,8 @@ xseen.updateOnLoad = function ()
 						this.routes.push (handler);
 						source.addEventListener (eventName, function(ev) {handler.handler(ev)});
 					},
+
+				// Generic notification handler for XSeen's canvas
 				XSeenHandler: function (ev)
 					{
 						console.log ('XSeen Event handler, original type: ' + ev.detail.originalType);

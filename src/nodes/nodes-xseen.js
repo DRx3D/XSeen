@@ -74,15 +74,20 @@ xseen.node.x_Route = {
 	'init'	: function (e,p)
 		{
 			var dest = e._xseen.fields.destination;
+			var hand = e._xseen.fields.handler;
 			var externalHandler = false;
-			if (e._xseen.fields.source == '' || e._xseen.fields.event == '' || 
-				typeof(window[dest]) !== 'function' && (dest == '' || e._xseen.fields.event == '' || e._xseen.fields.field == '')) {
-				xseen.debug.logError ('Route node missing field. No route setup. Source: '+e._xseen.fields.source+'.'+e._xseen.fields.event+'; Destination: '+dest+'.'+e._xseen.fields.field+';');
+			
+			// Make sure sufficient data is provided
+			if (e._xseen.fields.source == '' || 
+				typeof(window[hand]) !== 'function' && 
+					(dest == '' || e._xseen.fields.event == '' || e._xseen.fields.field == '')) {
+				xseen.debug.logError ('Route node missing field. No route setup. Source: '+e._xseen.fields.source+'.'+e._xseen.fields.event+'; Destination: '+dest+'.'+e._xseen.fields.field+'; Handler: '+hand);
 				return;
-			} else if (typeof(window[dest]) === 'function') {
+			} else if (typeof(window[hand]) === 'function') {
 				externalHandler = true;
 			}
-			// Check existence of source and destination elements
+			
+			// For toNode routing, check existence of source and destination elements
 			eSource = document.getElementById (e._xseen.fields.source);
 			if (! externalHandler) {
 				eDestination = document.getElementById (dest);
@@ -102,8 +107,13 @@ xseen.node.x_Route = {
 				// when the node is parsed
 				xseen.Events.addHandler (e, eSource, e._xseen.fields.event, eDestination, fField);
 
-			} else {			// External (to XSeen) event handler
-				var handler = window[dest];
+/*
+ * External (to XSeen) event handler
+ *	TODO: limit the events to those requested if e._xseen.fields.event != 'xseen'
+ *	This probably requires an intermediatiary event handler 
+ */
+			} else {
+				var handler = window[hand];
 				eSource.addEventListener ('xseen', handler);
 			}
 		},

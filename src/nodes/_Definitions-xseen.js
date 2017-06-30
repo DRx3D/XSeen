@@ -44,6 +44,7 @@ xseen.nodes._defineNode('route', 'XSeen', 'x_Route')
 	.addField('event', 'SFString', '')
 	.addField('destination', 'SFString', '')
 	.addField('field', 'SFString', '')
+	.addField('handler', 'SFString', '')
 	.addNode();
 
 

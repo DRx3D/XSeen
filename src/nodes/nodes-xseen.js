@@ -88,7 +88,7 @@ xseen.node.x_Route = {
 			}
 			
 			// For toNode routing, check existence of source and destination elements
-			eSource = document.getElementById (e._xseen.fields.source);
+			var eSource = document.getElementById (e._xseen.fields.source);
 			if (! externalHandler) {
 				eDestination = document.getElementById (dest);
 				if (typeof(eSource) === 'undefined' || typeof(eDestination) === 'undefined') {

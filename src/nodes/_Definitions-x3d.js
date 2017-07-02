@@ -123,6 +123,9 @@ xseen.nodes._defineNode ('Shape', 'Shape', 'unk_Shape')
 xseen.nodes._defineNode ('Viewpoint', 'Unknown', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', '0 0 10')
 	.addField('orientation', 'SFRotation', xseen.types.SFRotation('0 1 0 0',''))
+	.addField('description', 'SFString', '')
+	.addField({name:'type', datatype:'EnumerateString', defaultValue:'perspective', enumerated:['perspective', 'stereo', 'orthographic'], animatable:false})
+	.addField('active', 'SFBool', true)				// incoming event
 	.addNode();
 xseen.nodes._defineNode('Background', 'Environmental', 'env_Background')
 	.addField('skyColor', 'SFColor', [0,0,0])

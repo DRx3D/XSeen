@@ -86,7 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <Transform translation='0 0 0' rotation='0 0 1 3.14'>
 	<Animate id='AnimatePosition' field='translation' to='15 15 0' repeat='-1' duration='6' easing='InOut' easingType='exponetial'></Animate>
 	<Animate field='scale' to='2 4 1' repeat='-1' duration='4' easing='' easingType='sinusoidal' delay='1'></Animate>
-	<Animate field='rotation' to='0 0 1 -1.57' repeat='-1' duration='5' easing='' easingType='quadratic'></Animate>
+	<Animate id='AnimateRotation' field='rotation' to='0 0 1 -1.57' repeat='-1' duration='5' easing='' easingType='quadratic'></Animate>
 	<Shape id='ConeShape'>
 		<Cone bottomRadius='.8' height='3' onclick='console.log("Cliking on cone");'></Cone>
 		<Appearance>
@@ -96,17 +96,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</Appearance>
 	</Shape>
 </Transform>
-	<route source='AnimationStop' event='click' destination='AnimatePosition' field='stop'></route>
-	<route source='AnimationStart' event='click' destination='AnimatePosition' field='start'></route>
-	<route source='ConeShape' event='xseen' destination='eventFromXseen'></route>
-	<route source='BoxShape' event='xseen' destination='eventFromXseen'></route>
+	<route source='BoxShape' event='mousedown' destination='AnimateRotation' field='pause'></route>
+	<route source='BoxShape' event='mouseup' destination='AnimateRotation' field='resetstart'></route>
+	<route source='AnimationPause' event='click' destination='AnimatePosition' field='pause'></route>
+	<route source='AnimationResume' event='click' destination='AnimatePosition' field='resetstart'></route>
+	<route source='ConeShape' handler='eventFromXseen'></route>
+	<route source='BoxShape' handler='eventFromXseen'></route>
 		</scene>
-		<div id='AnimationStop'>Stop Translation Animation</div>
-		<div id='AnimationStart'>Start Translation Animation</div>
+		<form name='XseenControl' onsubmit='return false;'>
+			<input id='AnimationPause' type='submit' value='Pause Translation'>
+			<input id='AnimationResume' type='submit' value='Resume Translation'>
+			<div id='BackgroundInfo'>
+				<div id='BackgroundLocation'>Coordinates: (<span id='PositionX'></span>, <span id='PositionY'></span>, <span id='PositionZ'></span>)</div>
+				<div id='BackgroundTexture'>Texture: (<span id='TextureX'></span>, <span id='TextureY'></span>)</div>
+				<div id='BackgroundClient'>Window: (<span id='ClientX'></span>, <span id='ClientY'></span>)</div>
+				<div id='BackgroundScreen'>Screen: (<span id='ScreenX'></span>, <span id='ScreenY'></span>)</div>
+			</div>
+		</form>
 <script>
 function eventFromXseen (ev) {
-	console.log ('Handling XSeen event of type: ' + ev.detail.type + ' @ ' + ev.timeStamp);
-	ev.stopPropagation();
+	if (ev.detail.type == 'click') {
+		$('#PositionX').text(ev.detail.position.x);
+		$('#PositionY').text(ev.detail.position.y);
+		$('#PositionZ').text(ev.detail.position.z);
+		$('#ScreenX').text(ev.detail.screenX);
+		$('#ScreenY').text(ev.detail.screenY);
+		$('#ClientX').text(ev.detail.clientX);
+		$('#ClientY').text(ev.detail.clientY);
+		$('#TextureX').text(ev.detail.uv.x);
+		$('#TextureY').text(ev.detail.uv.y);
+		ev.stopPropagation();
+	} else {
+		console.log ('Bubbling XSeen event of type: ' + ev.detail.type + ' @ ' + ev.timeStamp);
+	}
 }
 </script>
 	</body>

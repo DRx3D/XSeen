@@ -165,13 +165,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 
         for (var i=0; i < xseens.length; i++)
         {
-            x_element = xseens[i];
+            x_element = xseens[i];		// The XSeen DOM element
 
-			// Need to replace with code that reference THREE
-            x_canvas = new THREE.Scene(); // May need addtl info if multiple: xseen.X3DCanvas(x_element, xseen.canvases.length);
-            xseen.canvases.push(x_canvas);
-			// Need to handle failure to initialize?
-            
+            x_canvas = new THREE.Scene();	// May need addtl info if multiple: xseen.X3DCanvas(x_element, xseen.canvases.length);
+            xseen.canvases.push(x_canvas);	// TODO: Need to handle failure to initialize?
             t0 = new Date().getTime();
 
 /*
@@ -197,25 +194,39 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			} else {
 				turntable = false;
 			}
+/*
+ *	Removed because camera is stored in the Scene node (x_element._xseen.renderer.camera
+ *	Leave variable definition so other code works...
 			var x_camera = new THREE.PerspectiveCamera( 75, divWidth / divHeight, 0.1, 1000 );
 			x_camera.position.x = 0;
 			x_camera.position.z = 10;
+ */
+			var x_camera = {};
 			var x_renderer = new THREE.WebGLRenderer();
 			x_renderer.setSize (divWidth, divHeight);
-			x_element.appendChild (x_renderer.domElement);
+			//x_element.appendChild (x_renderer.domElement);
+			
+			// Stereo camera effect
+			// from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
+			var x_effect = new THREE.StereoEffect(x_renderer);
 
-// Add event handler to XSeen tag (x_element)
-x_element.addEventListener ('dblclick', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('click', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mousedown', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
-x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);	
+/*
+ * Add event handler to XSeen tag (x_element)
+ *	These handle all mouse/cursor/button controls when the cursor is
+ *	in the XSeen region of the page
+ */
+			x_element.addEventListener ('dblclick', xseen.Events.canvasHandler, true);	
+			x_element.addEventListener ('click', xseen.Events.canvasHandler, true);	
+			x_element.addEventListener ('mousedown', xseen.Events.canvasHandler, true);	
+			x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
+			x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
+			x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);		// Last chance for XSeen handling of event
 			
 			xseen.sceneInfo.push ({
 									'size'		: {'width':divWidth, 'height':divHeight},
 									'scene'		: x_canvas, 
 									'renderer'	: x_renderer,
+									'effect'	: x_effect,
 									'camera'	: [x_camera],
 									'turntable'	: turntable,
 									'mixers'	: [],
@@ -226,7 +237,6 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
 									'tmp'		: {activeViewpoint:false},
 									'xseen'		: xseen,
 								});
-			//x_element._xseen.sceneInfo = ({'scene' : x_canvas, 'renderer' : x_renderer, 'camera' : [x_camera], 'element' : x_element});
 			x_element._xseen = {};
 			x_element._xseen.children = [];
 			x_element._xseen.sceneInfo = xseen.sceneInfo[xseen.sceneInfo.length-1];
@@ -248,7 +258,6 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
                 document.body.fireEvent('on' + eventType, evt);   
             }
         })('load');
-		//xseen.render();
 		
 		// for each X-Scene tag, parse and load the contents
 		var t=[];
@@ -261,11 +270,6 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
 			t1 = new Date().getTime() - t[i];
             xseen.debug.logInfo('Time for initial pass #' + i + ' parsing: ' + t1 + " ms.");
 		}
-/*
-		window.setTimeout (function() { 
-							loadContent(xseen.sceneInfo[0].scene, xseen.sceneInfo[0].camera); 
-							}, 20 );
- */
     };
 
 /*
@@ -275,9 +279,9 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
  *	Most of the stuff belongs, but perhaps in separate functions/methods
  *	Camera animation should not be in here at all. That should be animated separately in XSeen code
  */
-	xseen.render = function () 
+	xseen.renderFrame = function () 
 		{
-			requestAnimationFrame (xseen.render);
+			requestAnimationFrame (xseen.renderFrame);
 /*
  *	This is not the way to do animation. Code should not be in the loop
  *	Various objects needing animation should register for an event ... or something
@@ -296,7 +300,7 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
 			vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
 			radius = vp._xseen.fields._radius0;
 			y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
-			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
+			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.activeCamera;
 			currentCamera.position.y = y;		// This uses Viewpoint initial 'y' coordinate for range
 			if (xseen.sceneInfo[0].turntable) {
 				x = radius * Math.sin(radians);
@@ -304,9 +308,14 @@ x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);
 				currentCamera.position.z = radius * Math.cos(radians);
 				if (nodeAframe !== null) {nodeAframe._xseen.sceneNode.position.x = -x;}
 			}
-			currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
+			//currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
+			currentCamera.lookAt(xseen.ORIGIN);
 			// End of animation
-			xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
+			// StereoEffect renderer
+			var activeRender = xseen.sceneInfo[0].element._xseen.renderer.activeRender;
+			activeRender.render (xseen.sceneInfo[0].scene, currentCamera);
+//			xseen.sceneInfo[0].effect.render (xseen.sceneInfo[0].scene, currentCamera);
+//			xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
 		};
     
 	// Replace with code that calls THREE's unload methods

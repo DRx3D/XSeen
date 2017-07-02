@@ -37,8 +37,21 @@ xseen.node.unk_Viewpoint = {
 				e._xseen.sceneInfo.stacks.Viewpoints.pushDown(e);
 				e._xseen.sceneInfo.tmp.activeViewpoint = true;
 			}
+			
+			e._xseen.handlers = {};
+			e._xseen.handlers.setactive = this.setactive;
 		},
-	'fin'	: function (e,p) {}
+	'fin'	: function (e,p) {},
+
+	'setactive'	: function (ev)
+		{
+			// TODO: This works, except when going from Stereo to Mono. Only the left half of the screen shows
+			this.destination._xseen.sceneInfo.element._xseen.renderer.activeCamera = 
+				this.destination._xseen.sceneInfo.element._xseen.renderer.cameras[this.destination._xseen.fields.type];
+			this.destination._xseen.sceneInfo.element._xseen.renderer.activeRender = 
+				this.destination._xseen.sceneInfo.element._xseen.renderer.renderEffects[this.destination._xseen.fields.type];
+			//this.destination._xseen.animating.start();
+		},
 };
 
 xseen.node.unk_Shape = {
@@ -209,24 +222,48 @@ console.log ('...Adding ' + child.type + ' (' + child.name + ') to Inline Group?
 				}
 };
 
+/*
+ * Most of this stuff is only done once per XSeen element. Loading of Inline contents should not
+ * repeat the definitions and canvas creation
+ */
 xseen.node.core_Scene = {
 	'init'	: function (e,p)
 		{
 			var width = e._xseen.sceneInfo.size.width;
 			var height = e._xseen.sceneInfo.size.height;
+			var x_renderer = new THREE.WebGLRenderer();
+			x_renderer.setSize (width, height);
+			var perspectiveCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+			var orthoCamera = new THREE.OrthographicCamera( 75, width / height, 0.1, 1000 );
+			perspectiveCamera.translateX(0).translateY(0).translateZ(10);	// Default position
+			orthoCamera.translateX(0).translateY(0).translateZ(10);			// Default position
+
+			// Stereo viewing effect
+			// from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
+			var x_effect = new THREE.StereoEffect(x_renderer);
+
+			e.appendChild (x_renderer.domElement);
 			e._xseen.renderer = {
-						'canvas' 	: e._xseen.sceneInfo.scene,
-						'width'		: width,
-						'height'	: height,
-						'camera'	: e._xseen.sceneInfo.camera[0],
-						'renderer'	: e._xseen.sceneInfo.renderer,
+						'canvas' 		: e._xseen.sceneInfo.scene,
+						'width'			: width,
+						'height'		: height,
+						'cameras'		: {
+									'perspective'	: perspectiveCamera,
+									'ortho'			: orthoCamera,
+									'stereo'		: perspectiveCamera,
+											},		// Removed .sceneInfo camera because this node defines the camera
+						'effects'		: x_effect,
+						'renderEffects'	: {
+									'normal'		: x_renderer,
+									'perspective'	: x_renderer,
+									'ortho'			: x_renderer,
+									'stereo'		: x_effect,
+											},
+						'activeRender'	: {},
+						'activeCamera'	: {},
 						};
-			e._xseen.renderer.renderer.setSize (width, height);
-			var camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
-			camera.position.x = 0;		// hardwired for now...
-			camera.position.y = 0;
-			camera.position.z = 4;
-			e._xseen.renderer.camera = camera;
+			e._xseen.renderer.activeRender = e._xseen.renderer.renderEffects.normal;
+			e._xseen.renderer.activeCamera = e._xseen.renderer.cameras.perspective;
 		},
 
 /*
@@ -249,15 +286,24 @@ xseen.node.core_Scene = {
 					e._xseen.renderer.canvas.add(child);
 				});
 			xseen.dumpSceneGraph ();
-			e._xseen.renderer.renderer.render( e._xseen.renderer.canvas, e._xseen.renderer.camera );
-			xseen.debug.logInfo("Rendered all elements -- Starting animation");
+//			e._xseen.renderer.renderer.render( e._xseen.renderer.canvas, e._xseen.renderer.camera );
+//			xseen.debug.logInfo("Rendered all elements -- Starting animation");
+/*
+ * TODO: Need to get current top-of-stack for all stack-bound nodes and set them as active.
+ *	This only happens the initial time for each XSeen tag in the main HTML file
+ *
+ *	At this time, only Viewpoint is stack-bound. Probably need to stack just the <Viewpoint>._xseen object.
+ *	Also, .fields.position is the initial specified location; not the navigated/animated one
+ */
 			var vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
-			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.camera;
+			var currentCamera = e._xseen.renderer.activeCamera;
 			currentCamera.position.x = vp._xseen.fields.position[0];
 			currentCamera.position.y = vp._xseen.fields.position[1];
 			currentCamera.position.z = vp._xseen.fields.position[2];
-			xseen.render();
-		}
+			xseen.debug.logInfo("Ready to kick off rendering loop");
+			xseen.renderFrame();
+		},
+
 };
 
 xseen.node.env_Background = {

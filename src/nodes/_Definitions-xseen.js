@@ -37,6 +37,8 @@ xseen.nodes._defineNode('animate', 'XSeen', 'x_Animate')
 	.addField({name:'EasingType', datatype:'EnumerateString', defaultValue:'linear', enumerated:['linear', 'quadratic', 'sinusoidal', 'exponential', 'elastic', 'bounce'], animatable:false})
 	.addField('start', 'SFBool', true)				// incoming event, need to set timer trigger
 	.addField('stop', 'SFBool', true)				// incoming event, need to set timer trigger
+	.addField('resetstart', 'SFBool', true)			// incoming event, need to set timer trigger
+	.addField('pause', 'SFBool', true)				// incoming event, need to set timer trigger
 	.addNode();
 
 xseen.nodes._defineNode('route', 'XSeen', 'x_Route')

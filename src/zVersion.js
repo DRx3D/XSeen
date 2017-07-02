@@ -14,11 +14,11 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 4;
-	Patch		= 1;
+	Patch		= 2;
 	PreRelease	= '';
-	Release		= 16;
+	Release		= 18;
 	Version		= '';
-	Date		= '2017-06-30';
+	Date		= '2017-07-01';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
 /*
  * All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
@@ -27,10 +27,10 @@ xseen.generateVersion = function () {
  * V0.4.1+14 Fix - minor text correction in xseen.node.geometry__TriangulateFix (nodes-x3d_Geometry.js)
  * V0.4.1+15 Modified build.pl to increase compression by removing block comments
  * V0.4.1+16 Feature -- XSeen events (from XSeen to HTML)
+ * V0.4.2+17 Feature -- XSeen internals events (from XSeen to XSeen) with changes to fix previous event handling
+ * V0.4.x+18 Feature -- Split screen VR display
  *
  * In progress
- * V0.4.x+17 Feature -- XSeen internals events (from XSeen to XSeen)
- * V0.4.x+18 Feature -- Split screen VR display
  */
 	var version = {
 		major		: Major,

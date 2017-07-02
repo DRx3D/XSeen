@@ -34,7 +34,7 @@ xseen.node.x_Animate = {
 			var fieldObject = fields[toFieldIndex].clone().setFieldName('to');	// Parse table entry for 'toField'
 			var to = xseen.nodes._parseField(fieldObject, e);	// Parsed data  -- need to convert to THREE format
 
-// Convert 'to' to the datatype of 'field'.
+// Convert 'to' to the datatype of 'field' and set interpolation type.
 			var interpolation;
 			if (fieldObject.type == 'SFVec3f') {
 				interpolation = TWEEN.Interpolation.Linear;
@@ -73,13 +73,22 @@ xseen.node.x_Animate = {
 				tween.easing(TWEEN.Easing[easingType][easing]);
 			}
 
-// Handle the interpolation type. Vector is linear, rotation is slerp (custom), color is ...
-			tween.start();
+/*
+ * Put animation-specific data in node (e._xseen) so it can be accessed on events (through 'this')
+ *	This includes initial value and field
+ *	All handlers (goes into .handlers)
+ *	TWEEN object
+ */
+			e._xseen.initialValue = fieldTHREE.clone();
+			e._xseen.animatingField = fieldTHREE;
 			e._xseen.handlers = {};
 			e._xseen.handlers.setstart = this.setstart;
 			e._xseen.handlers.setstop = this.setstop;
+			e._xseen.handlers.setpause = this.setpause;
+			e._xseen.handlers.setresetstart = this.setresetstart;
 			e._xseen.animating = tween;
 			p._xseen.animation.push (tween);
+			tween.start();
 		},
 	'fin'	: function (e,p) {},
 	'setstart'	: function (ev)
@@ -91,6 +100,22 @@ xseen.node.x_Animate = {
 		{
 			console.log ('Stopping animation');
 			this.destination._xseen.animating.stop();
+		},
+/*
+ * TODO: Update TWEEN to support real pause & resume. 
+ *	Pause needs to hold current position
+ *	Resume needs to restart the timer to current time so there is no "jump"
+ */
+	'setpause'	: function (ev) 
+		{
+			console.log ('Pausing (really stopping) animation');
+			this.destination._xseen.animating.stop();
+		},
+	'setresetstart'	: function (ev) 	// TODO: Create seperate 'reset' method
+		{
+			console.log ('Reset and start animation');
+			this.destination._xseen.animatingField = this.destination._xseen.initialValue;
+			this.destination._xseen.animating.start();
 		},
 	
 /*
@@ -113,16 +138,13 @@ xseen.node.x_Animate = {
 	
 				if (k < 0) {
 					return v[0].slerp(v[1], f);
-//					return fn(v[0], v[1], f);
 				}
 
 				if (k > 1) {
 					return v[m].slerp(v[m-1], m-f);
-					//return fn(v[m], v[m - 1], m - f);
 				}
 
 				return v[i].slerp (v[i + 1 > m ? m : i + 1], f-i);
-				//return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
 			},
 		'color' : function (v,k)
 			{
@@ -133,26 +155,11 @@ xseen.node.x_Animate = {
 	
 				if (k < 0) {
 					return v[0].lerp(v[1], f);
-					//return fn(v[0], v[1], f);
 				}
 				if (k > 1) {
 					return v[m].lerp(v[m-1], m-f);
-					//return fn(v[m], v[m - 1], m - f);
 				}
 				return v[i].lerp (v[i + 1 > m ? m : i + 1], f - i);
-				//return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
 			},
 	},
-
-/*
-	Probably need to store the animation someplace. Also need to start worrying
-	about methods to call when animating, at least start/stop since the target is
-	identified by 'id'. Need to put the method references into the DOM node
-	There is also other unresolved references,
-	 * capturing the 'to' data
-	 * handling differening interpolation methods (rotation, color space, discrete)
-	 * handling array of 'to' values (probably a child node)
-	 * handling array of key values
-	 * investigate other easing types (besides Quadratic)
- */
 };

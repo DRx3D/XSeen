@@ -38,6 +38,7 @@ xseen.updateOnLoad = function ()
 		this.loader.GltfLoader		= new THREE.GLTF2Loader();
 		this.loader.ObjLoader		= new THREE.OBJLoader2();
 		this.loader.ImageLoader		= new THREE.TextureLoader();
+		this.ORIGIN					= xseen.types.Vector3([0,0,0])
 
 // Base code from https://www.abeautifulsite.net/parsing-urls-in-javascript
 		this.parseUrl = function (url)
@@ -130,7 +131,7 @@ xseen.updateOnLoad = function ()
 							lEvents.redispatch = true;
 							lEvents.mode = lEvents.MODE_SELECT;
 							lEvents.mouse.x = (ev.clientX / 800) * 2 -1;	// TODO: Use real XSeen display sizes
-							lEvents.mouse.y = (ev.clientX / 450) * 2 -1;
+							lEvents.mouse.y = (ev.clientY / 450) * 2 -1;
 							//
 							lEvents.raycaster.setFromCamera(lEvents.mouse, sceneInfo.element._xseen.renderer.camera);
 							var hitGeometryList = lEvents.raycaster.intersectObjects (sceneInfo.selectable, true);
@@ -207,7 +208,15 @@ xseen.updateOnLoad = function ()
 						handler.field = field;					// Destination field structure
 						handler.handler = destination._xseen.handlers[field.handlerName];
 						this.routes.push (handler);
-						source.addEventListener (eventName, function(ev) {handler.handler(ev)});
+						if (typeof(source._xseen) === 'undefined') {	// DOM event
+							source.addEventListener (eventName, function(ev) {
+								handler.handler(ev)
+								});
+						} else {								// XSeen event
+							source.addEventListener ('xseen', function(ev) {
+								handler.handler(ev)
+								});
+						}
 					},
 
 				// Generic notification handler for XSeen's canvas

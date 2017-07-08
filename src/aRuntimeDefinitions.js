@@ -133,7 +133,7 @@ xseen.updateOnLoad = function ()
 							lEvents.mouse.x = (ev.clientX / 800) * 2 -1;	// TODO: Use real XSeen display sizes
 							lEvents.mouse.y = (ev.clientY / 450) * 2 -1;
 							//
-							lEvents.raycaster.setFromCamera(lEvents.mouse, sceneInfo.element._xseen.renderer.camera);
+							lEvents.raycaster.setFromCamera(lEvents.mouse, sceneInfo.element._xseen.renderer.activeCamera);
 							var hitGeometryList = lEvents.raycaster.intersectObjects (sceneInfo.selectable, true);
 							if (hitGeometryList.length != 0) {
 								lEvents.object = hitGeometryList[0];
@@ -222,7 +222,7 @@ xseen.updateOnLoad = function ()
 				// Generic notification handler for XSeen's canvas
 				XSeenHandler: function (ev)
 					{
-						console.log ('XSeen Event handler, original type: ' + ev.detail.originalType);
+						//console.log ('XSeen Event handler, original type: ' + ev.detail.originalType);
 					},
 			};
 

@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.4.3+20_b628511
- *  Built Fri Jul  7 21:27:30 2017
+ *  XSeen V0.4.2+18_b628511
+ *  Built Fri Jul  7 16:51:54 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -10682,7 +10682,6 @@ var xseen = {
 	utils			: {},
 	eventManager	: {},
 	Events			: {},
-	Navigation		: {},
 
 	loadMgr			: {},
 	loader			: {
@@ -11030,10 +11029,9 @@ xseen.rerouteSetAttribute = function(node, browser) {
 /*
  * Animation/render function loop
  *
- *	Run each animation frame. 
- *	Various types of animation (anything that changes frame-to-frame) goes here
- *	.controls is for navigation. See example code at https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_orbit.html
- *	lines 75-80 + render loop
+ *	Run each animation frame. This is not well done as everything is tossed in here
+ *	Most of the stuff belongs, but perhaps in separate functions/methods
+ *	Camera animation should not be in here at all. That should be animated separately in XSeen code
  */
 	xseen.renderFrame = function () 
 		{
@@ -11041,17 +11039,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 /*
  *	This is not the way to do animation. Code should not be in the loop
  *	Various objects needing animation should register for an event ... or something
- *
- *	controls are not handling navigation. Currently only working with orbit controls.
- *	Don't know if the problem is events (not generating, not getting), not processing events, or not updating things
  */
 			TWEEN.update();
 			xseen.updateAnimation (xseen.sceneInfo[0]);
 			xseen.updateCamera (xseen.sceneInfo[0]);
-			
-			var renderObj = xseen.sceneInfo[0].element._xseen.renderer;
-			renderObj.controls.update();
-
 /*
  * Existing code moved to updateAnimation & updateCamera to better handle navigation
  *
@@ -11080,8 +11071,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
  */
 			// End of animation (objects & camera/navigation)
 			// StereoEffect renderer
-			var activeRender = renderObj.activeRender;
-			var currentCamera = renderObj.activeCamera;
+			var activeRender = xseen.sceneInfo[0].element._xseen.renderer.activeRender;
 			activeRender.render (xseen.sceneInfo[0].scene, currentCamera);
 		};
 
@@ -11094,11 +11084,25 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		};
 	xseen.updateCamera = function (scene)
 		{
-			var deltaT
+			//	Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
+			var deltaT, radians, x, y, z, P, radius, vp;
+			var nodeAframe = document.getElementById ('aframe_nodes');
+			P = 16000;
 			deltaT = scene.clock.getDelta();
-			var navigation = scene.stacks.Navigation.getActive();
-			
-			xseen.Navigation[navigation.type] (navigation.speed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
+			deltaT = (new Date()).getTime() - xseen.timeStart;		// TODO: Determine which one to use
+			radians = deltaT/P * 2 * Math.PI;
+			vp = scene.stacks.Viewpoints.getActive();
+			radius = vp.fields._radius0;
+			y = vp.fields.position[1] * Math.cos(1.5*radians);
+			var currentCamera = scene.element._xseen.renderer.activeCamera;
+			currentCamera.position.y = y;		// This uses Viewpoint initial 'y' coordinate for range
+			if (scene.turntable) {
+				x = radius * Math.sin(radians);
+				currentCamera.position.x = x;
+				currentCamera.position.z = radius * Math.cos(radians);
+				if (nodeAframe !== null) {nodeAframe._xseen.sceneNode.position.x = -x;}
+			}
+			currentCamera.lookAt(scene.ORIGIN);
 		};
     
 	// Replace with code that calls THREE's unload methods
@@ -11653,82 +11657,6 @@ xseen.updateOnLoad = function ()
 		this.debug.setup();
 
 	};
-// File: ./Navigation.js
-/*
- * XSeen JavaScript library
- *
- * (c)2017, Daly Realism, Los Angeles
- *
- * This is all new code.
- * Portions of XSeen extracted from or inspired by
- * X3DOM JavaScript Library
- * http://www.x3dom.org
- *
- * Dual licensed under the MIT and GPL
- */
-
-
-/*
- * xseen.Navigation.<mode>(label);
- * Computes the new viewing location for the specific mode.
- *
- *	Each Navigation method takes the following parameters:
- *		speed	Floating point value indicating motion speed. 
- *				Units are distance per milli-second for linear motion or
- *				revolutions (2*pi) per milli-second for angular motion
- *		deltaT	Time since last update in milli-seconds
- *			TODO: This is not true for the Turntable class of camera motion -- which isn't really Navigation anyway
- *		scene	The 'sceneInfo' object for this HTML instance
- *		camera	The current (active) camera (aka scene.element._xseen.renderer.activeCamera)
- *
- * Navigation is the user-controlled process of moving in the 3D world.
- * 
- */
-
-xseen.Navigation = {
-	'TwoPi'		: 2 * Math.PI,
-	'none'		: function () {},		// Does not allow user-controlled navigation
-	
-	'turntable'	: function (speed, deltaT, scene, camera)
-		{
-			var T, radians, radius, vp;
-			T = (new Date()).getTime() - xseen.timeStart;
-			radians = T * speed * this.TwoPi;
-			vp = scene.stacks.Viewpoints.getActive();			// Convienence declaration
-			radius = vp.fields._radius0;
-			camera.position.x = radius * Math.sin(radians)
-			camera.position.y = vp.fields.position[1] * Math.cos(1.5*radians);
-			camera.position.z = radius * Math.cos(radians);
-			camera.lookAt(scene.ORIGIN);
-		},
-
-	'tilt'		: function (speed, deltaT, scene, camera)
-		{
-			var T, radians, vp;
-			T = (new Date()).getTime() - xseen.timeStart;
-			radians = T * speed * this.TwoPi;
-			vp = scene.stacks.Viewpoints.getActive();			// Convienence declaration
-			camera.position.y = vp.fields.position[1] * Math.cos(1.5*radians);
-			camera.lookAt(scene.ORIGIN);
-		},
-		
-	'setup'		: {
-		'none'		: function () {return null;},
-		
-		'orbit'		: function (camera, renderer)
-			{
-				var controls;
-				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', render ); // remove when using animation loop
-				// enable animation loop when using damping or autorotation
-				//controls.enableDamping = true;
-				//controls.dampingFactor = 0.25;
-				controls.enableZoom = false;
-				controls.enableZoom = true;
-				return controls;
-			},
-		},
-};
 // File: ./NodeDefinitions.js
 /*
  * XSeen JavaScript library
@@ -12082,20 +12010,13 @@ xseen.utils.StackHandler = function (label) {
 		this._setActiveNode();
 	}
 
-	this.popOff = function() {			// Pop node off stack and make next one active
+	this.popOff = function() {			// Pop new node onto stack and make active
 		this._internals.stack.pop();
 		this._setActiveNode();
 	}
 
 	this.getActive = function() {
 		return this._internals.activeNode;
-	}
-	
-	this.setDefault = function(node) {
-		this._internals.defaultNode = node;
-		if (Object.keys(this._internals.activeNode).length === 0) {
-			this._internals.activeNode = this._internals.defaultNode;
-		}
 	}
 }
 // File: ./Types.js
@@ -12334,11 +12255,11 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 4;
-	Patch		= 3;
+	Patch		= 2;
 	PreRelease	= '';
-	Release		= 20;
+	Release		= 18;
 	Version		= '';
-	Date		= '2017-07-07';
+	Date		= '2017-07-01';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
 /*
  * All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
@@ -12744,13 +12665,11 @@ xseen.node.unk_Viewpoint = {
 													e._xseen.fields.position[1]*e._xseen.fields.position[1] + 
 													e._xseen.fields.position[2]*e._xseen.fields.position[2]);
 			e._xseen.domNode = e;	// Back-link to node if needed later on
-			e._xseen.position = new THREE.Vector3(e._xseen.fields.position[0], e._xseen.fields.position[1], e._xseen.fields.position[2]);
-			e._xseen.type = e._xseen.fields.type;
 			if (!e._xseen.sceneInfo.tmp.activeViewpoint) {
 				e._xseen.sceneInfo.stacks.Viewpoints.pushDown(e._xseen);
 				e._xseen.sceneInfo.tmp.activeViewpoint = true;
 			}
-
+			
 			e._xseen.handlers = {};
 			e._xseen.handlers.setactive = this.setactive;
 		},
@@ -12773,16 +12692,11 @@ xseen.node.unk_Viewpoint = {
 xseen.node.controls_Navigation = {
 	'init'	: function (e,p)
 		{	// This should really go in a separate push-down list for Viewpoints
-
-			e._xseen.domNode = e;	// Back-link to node if needed later on
-			e._xseen.speed = e._xseen.fields.speed;
-			e._xseen.type = e._xseen.fields.type;
-			e._xseen.setup = e._xseen.fields.type;
-			if (!(e._xseen.type == 'none' || e._xseen.type == 'turntable' || e._xseen.type == 'tilt')) {e._xseen.type = 'none';}
-			if (!(e._xseen.setup == 'orbit')) {e._xseen.setup = 'none';}
-
+			e._xseen.fields._radius0 = Math.sqrt(	e._xseen.fields.position[0]*e._xseen.fields.position[0] + 
+													e._xseen.fields.position[1]*e._xseen.fields.position[1] + 
+													e._xseen.fields.position[2]*e._xseen.fields.position[2]);
 			if (!e._xseen.sceneInfo.tmp.activeNavigation) {
-				e._xseen.sceneInfo.stacks.Navigation.pushDown(e._xseen);
+				e._xseen.sceneInfo.stacks.Navigation.pushDown(e);
 				e._xseen.sceneInfo.tmp.activeNavigation = true;
 			}
 			
@@ -13571,15 +13485,15 @@ console.log ('...Adding ' + child.type + ' (' + child.name + ') to Inline Group?
 xseen.node.core_Scene = {
 	'DEFAULT'	: {
 			'Viewpoint'	: {
-				'Position'		: new THREE.Vector3 (0, 0, 10),
+				'Position'		: THREE.Vector3 (0, 0, 10),
 				'Orientation'	: '0 1 0 0',		// TODO: fix (and below) when handling orientation
 				'Type'			: 'perpsective',
 			},
 			'Navigation' : {
-				'Speed'		: 1/(16.0*1000),		// 16 spr (1 revolution per 16 seconds), in mseconds.
+				'Speed'		: 16.0 * 1000,		// 16 spr (1 revolution per 16 seconds), in mseconds.
 				'Type'		: 'turntable',
 			}
-		},
+		}
 	'init'	: function (e,p)
 		{
 			// Create default Viewpoint and Navigation
@@ -13588,7 +13502,6 @@ xseen.node.core_Scene = {
 					'position'	: this.DEFAULT.Viewpoint.Position,
 					'type'		: this.DEFAULT.Viewpoint.Type,
 					'domNode'	: e,
-					'fields'	: {},
 				}
 			);
 			xseen.sceneInfo[0].stacks.Navigation.setDefault(
@@ -13596,7 +13509,6 @@ xseen.node.core_Scene = {
 					'speed'		: this.DEFAULT.Navigation.Speed,
 					'type'		: this.DEFAULT.Navigation.Type,
 					'domNode'	: e,
-					'fields'	: {},
 				}
 			);
 
@@ -13606,8 +13518,8 @@ xseen.node.core_Scene = {
 			x_renderer.setSize (width, height);
 			var perspectiveCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
 			var orthoCamera = new THREE.OrthographicCamera( 75, width / height, 0.1, 1000 );
-			//perspectiveCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);	// Default position
-			//orthoCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);			// Default position
+			perspectiveCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);	// Default position
+			orthoCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);			// Default position
 			perspectiveCamera.position = this.DEFAULT.Viewpoint.Position;	// Default position
 			orthoCamera.position = this.DEFAULT.Viewpoint.Position;			// Default position
 
@@ -13634,7 +13546,6 @@ xseen.node.core_Scene = {
 											},
 						'activeRender'	: {},
 						'activeCamera'	: {},
-						'controls'		: {},		// Used for navigation
 						};
 			e._xseen.renderer.activeRender = e._xseen.renderer.renderEffects.normal;
 			e._xseen.renderer.activeCamera = e._xseen.renderer.cameras.perspective;
@@ -13670,11 +13581,10 @@ xseen.node.core_Scene = {
  *	Also, .fields.position is the initial specified location; not the navigated/animated one
  */
 			var vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
-			var nav = xseen.sceneInfo[0].stacks.Navigation.getActive();
 			var currentCamera = e._xseen.renderer.activeCamera;
-			var currentRenderer = e._xseen.renderer.activeRender;
-			currentCamera.position = vp.position.clone();
-			e._xseen.renderer.controls = xseen.Navigation.setup[nav.setup] (currentCamera, currentRenderer);
+			currentCamera.position.x = vp._xseen.fields.position[0];
+			currentCamera.position.y = vp._xseen.fields.position[1];
+			currentCamera.position.z = vp._xseen.fields.position[2];
 			xseen.debug.logInfo("Ready to kick off rendering loop");
 			xseen.renderFrame();
 		},
@@ -14159,7 +14069,7 @@ xseen.nodes._defineNode ('Viewpoint', 'Controls', 'unk_Viewpoint')
 	.addNode();
 xseen.nodes._defineNode ('NavigationMode', 'Controls', 'controls_Navigation')
 	.addField('speed', 'SFFloat', 1.)
-	.addField({name:'type', datatype:'EnumerateString', defaultValue:'none', enumerated:['none', 'orbit', 'fly', 'turntable', 'tilt'], animatable:false})
+	.addField({name:'type', datatype:'EnumerateString', defaultValue:'orbit', enumerated:['orbit', 'fly', 'turntable'], animatable:false})
 	.addNode();
 xseen.nodes._defineNode ('Camera', 'Controls', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', [0,0,10])

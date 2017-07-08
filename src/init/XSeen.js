@@ -262,7 +262,9 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		// for each X-Scene tag, parse and load the contents
 		var t=[];
 		for (var i=0; i<xseen.sceneInfo.length; i++) {
+			xseen.sceneInfo[i].ORIGIN = xseen.ORIGIN;
 			xseen.sceneInfo[i].stacks['Viewpoints'] = new xseen.utils.StackHandler('Viewpoints');
+			xseen.sceneInfo[i].stacks['Navigation'] = new xseen.utils.StackHandler('Navigation');
 			console.log("Processing 'scene' element #" + i);
 			xseen.debug.logInfo("Processing 'scene' element #" + i);
 			t[i] = new Date().getTime();
@@ -275,9 +277,10 @@ xseen.rerouteSetAttribute = function(node, browser) {
 /*
  * Animation/render function loop
  *
- *	Run each animation frame. This is not well done as everything is tossed in here
- *	Most of the stuff belongs, but perhaps in separate functions/methods
- *	Camera animation should not be in here at all. That should be animated separately in XSeen code
+ *	Run each animation frame. 
+ *	Various types of animation (anything that changes frame-to-frame) goes here
+ *	.controls is for navigation. See example code at https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_orbit.html
+ *	lines 75-80 + render loop
  */
 	xseen.renderFrame = function () 
 		{
@@ -285,10 +288,21 @@ xseen.rerouteSetAttribute = function(node, browser) {
 /*
  *	This is not the way to do animation. Code should not be in the loop
  *	Various objects needing animation should register for an event ... or something
- *	Animate circling camera with a period (P) of 16 seconds (16000 milliseconds)
+ *
+ *	controls are not handling navigation. Currently only working with orbit controls.
+ *	Don't know if the problem is events (not generating, not getting), not processing events, or not updating things
  */
-			var deltaT, radians, x, y, z, P, radius, vp;
 			TWEEN.update();
+			xseen.updateAnimation (xseen.sceneInfo[0]);
+			xseen.updateCamera (xseen.sceneInfo[0]);
+			
+			var renderObj = xseen.sceneInfo[0].element._xseen.renderer;
+			renderObj.controls.update();
+
+/*
+ * Existing code moved to updateAnimation & updateCamera to better handle navigation
+ *
+			var deltaT, radians, x, y, z, P, radius, vp;
 			var nodeAframe = document.getElementById ('aframe_nodes');
 			P = 16000;
 			deltaT = xseen.sceneInfo[0].clock.getDelta();
@@ -310,12 +324,28 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			}
 			//currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
 			currentCamera.lookAt(xseen.ORIGIN);
-			// End of animation
+ */
+			// End of animation (objects & camera/navigation)
 			// StereoEffect renderer
-			var activeRender = xseen.sceneInfo[0].element._xseen.renderer.activeRender;
+			var activeRender = renderObj.activeRender;
+			var currentCamera = renderObj.activeCamera;
 			activeRender.render (xseen.sceneInfo[0].scene, currentCamera);
-//			xseen.sceneInfo[0].effect.render (xseen.sceneInfo[0].scene, currentCamera);
-//			xseen.sceneInfo[0].renderer.render (xseen.sceneInfo[0].scene, xseen.sceneInfo[0].element._xseen.renderer.camera);
+		};
+
+	xseen.updateAnimation = function (scene)
+		{
+			var deltaT = scene.clock.getDelta();
+			for (var i=0; i<scene.mixers.length; i++) {
+				scene.mixers[i].update(deltaT);
+			}
+		};
+	xseen.updateCamera = function (scene)
+		{
+			var deltaT
+			deltaT = scene.clock.getDelta();
+			var navigation = scene.stacks.Navigation.getActive();
+			
+			xseen.Navigation[navigation.type] (navigation.speed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
 		};
     
 	// Replace with code that calls THREE's unload methods

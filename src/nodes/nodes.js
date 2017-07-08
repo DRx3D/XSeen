@@ -27,32 +27,6 @@ function parsing (s, e) {
 	xseen.debug.logInfo ('Parsing init details stub for ' + s);
 }
 
-xseen.node.unk_Viewpoint = {
-	'init'	: function (e,p)
-		{	// This should really go in a separate push-down list for Viewpoints
-			e._xseen.fields._radius0 = Math.sqrt(	e._xseen.fields.position[0]*e._xseen.fields.position[0] + 
-													e._xseen.fields.position[1]*e._xseen.fields.position[1] + 
-													e._xseen.fields.position[2]*e._xseen.fields.position[2]);
-			if (!e._xseen.sceneInfo.tmp.activeViewpoint) {
-				e._xseen.sceneInfo.stacks.Viewpoints.pushDown(e);
-				e._xseen.sceneInfo.tmp.activeViewpoint = true;
-			}
-			
-			e._xseen.handlers = {};
-			e._xseen.handlers.setactive = this.setactive;
-		},
-	'fin'	: function (e,p) {},
-
-	'setactive'	: function (ev)
-		{
-			// TODO: This works, except when going from Stereo to Mono. Only the left half of the screen shows
-			this.destination._xseen.sceneInfo.element._xseen.renderer.activeCamera = 
-				this.destination._xseen.sceneInfo.element._xseen.renderer.cameras[this.destination._xseen.fields.type];
-			this.destination._xseen.sceneInfo.element._xseen.renderer.activeRender = 
-				this.destination._xseen.sceneInfo.element._xseen.renderer.renderEffects[this.destination._xseen.fields.type];
-			//this.destination._xseen.animating.start();
-		},
-};
 
 xseen.node.unk_Shape = {
 	'init'	: function (e,p) {},
@@ -105,48 +79,6 @@ xseen.node.grouping_Transform = {
 					e._xseen.sceneNode.add(child);
 				});
 			p._xseen.children.push(e._xseen.sceneNode);
-		}
-};
-
-xseen.node.lighting_Light = {
-	'init'	: function (e,p) 
-		{
-			var color = xseen.types.Color3toInt (e._xseen.fields.color);
-			var intensity = e._xseen.fields.intensity - 0;
-			var lamp, type=e._xseen.fields.type.toLowerCase();
-/*
-			if (typeof(p._xseen.children) == 'undefined') {
-				console.log('Parent of Light does not have children...');
-				p._xseen.children = [];
-			}
- */
-
-			if (type == 'point') {
-				// Ignored field -- e._xseen.fields.location
-				lamp = new THREE.PointLight (color, intensity);
-				lamp.distance = Math.max(0.0, e._xseen.fields.radius - 0);
-				lamp.decay = Math.max (.1, e._xseen.fields.attenuation[1]/2 + e._xseen.fields.attenuation[2]);
-
-			} else if (type == 'spot') {
-				lamp = new THREE.SpotLight (color, intensity);
-				lamp.position.set(0-e._xseen.fields.direction[0], 0-e._xseen.fields.direction[1], 0-e._xseen.fields.direction[2]);
-				lamp.distance = Math.max(0.0, e._xseen.fields.radius - 0);
-				lamp.decay = Math.max (.1, e._xseen.fields.attenuation[1]/2 + e._xseen.fields.attenuation[2]);
-				lamp.angle = Math.max(0.0, Math.min(1.5707963267948966192313216916398, e._xseen.fields.cutoffangle));
-				lamp.penumbra = 1 - Math.max(0.0, Math.min(lamp.angle, e._xseen.fields.beamwidth)) / lamp.angle;
-
-			} else {											// DirectionalLight (by default)
-				lamp = new THREE.DirectionalLight (color, intensity);
-				lamp.position.x = 0-e._xseen.fields.direction[0];
-				lamp.position.y = 0-e._xseen.fields.direction[1];
-				lamp.position.z = 0-e._xseen.fields.direction[2];
-			}
-			p._xseen.children.push(lamp);
-			lamp = null;
-		}
-		,
-	'fin'	: function (e,p)
-		{
 		}
 };
 
@@ -227,16 +159,47 @@ console.log ('...Adding ' + child.type + ' (' + child.name + ') to Inline Group?
  * repeat the definitions and canvas creation
  */
 xseen.node.core_Scene = {
+	'DEFAULT'	: {
+			'Viewpoint'	: {
+				'Position'		: new THREE.Vector3 (0, 0, 10),
+				'Orientation'	: '0 1 0 0',		// TODO: fix (and below) when handling orientation
+				'Type'			: 'perpsective',
+			},
+			'Navigation' : {
+				'Speed'		: 1/(16.0*1000),		// 16 spr (1 revolution per 16 seconds), in mseconds.
+				'Type'		: 'turntable',
+			}
+		},
 	'init'	: function (e,p)
 		{
+			// Create default Viewpoint and Navigation
+			xseen.sceneInfo[0].stacks.Viewpoints.setDefault(
+				{
+					'position'	: this.DEFAULT.Viewpoint.Position,
+					'type'		: this.DEFAULT.Viewpoint.Type,
+					'domNode'	: e,
+					'fields'	: {},
+				}
+			);
+			xseen.sceneInfo[0].stacks.Navigation.setDefault(
+				{
+					'speed'		: this.DEFAULT.Navigation.Speed,
+					'type'		: this.DEFAULT.Navigation.Type,
+					'domNode'	: e,
+					'fields'	: {},
+				}
+			);
+
 			var width = e._xseen.sceneInfo.size.width;
 			var height = e._xseen.sceneInfo.size.height;
 			var x_renderer = new THREE.WebGLRenderer();
 			x_renderer.setSize (width, height);
 			var perspectiveCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
 			var orthoCamera = new THREE.OrthographicCamera( 75, width / height, 0.1, 1000 );
-			perspectiveCamera.translateX(0).translateY(0).translateZ(10);	// Default position
-			orthoCamera.translateX(0).translateY(0).translateZ(10);			// Default position
+			//perspectiveCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);	// Default position
+			//orthoCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);			// Default position
+			perspectiveCamera.position = this.DEFAULT.Viewpoint.Position;	// Default position
+			orthoCamera.position = this.DEFAULT.Viewpoint.Position;			// Default position
 
 			// Stereo viewing effect
 			// from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
@@ -261,6 +224,7 @@ xseen.node.core_Scene = {
 											},
 						'activeRender'	: {},
 						'activeCamera'	: {},
+						'controls'		: {},		// Used for navigation
 						};
 			e._xseen.renderer.activeRender = e._xseen.renderer.renderEffects.normal;
 			e._xseen.renderer.activeCamera = e._xseen.renderer.cameras.perspective;
@@ -296,10 +260,11 @@ xseen.node.core_Scene = {
  *	Also, .fields.position is the initial specified location; not the navigated/animated one
  */
 			var vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
+			var nav = xseen.sceneInfo[0].stacks.Navigation.getActive();
 			var currentCamera = e._xseen.renderer.activeCamera;
-			currentCamera.position.x = vp._xseen.fields.position[0];
-			currentCamera.position.y = vp._xseen.fields.position[1];
-			currentCamera.position.z = vp._xseen.fields.position[2];
+			var currentRenderer = e._xseen.renderer.activeRender;
+			currentCamera.position = vp.position.clone();
+			e._xseen.renderer.controls = xseen.Navigation.setup[nav.setup] (currentCamera, currentRenderer);
 			xseen.debug.logInfo("Ready to kick off rendering loop");
 			xseen.renderFrame();
 		},

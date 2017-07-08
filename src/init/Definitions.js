@@ -28,6 +28,7 @@ var xseen = {
 	utils			: {},
 	eventManager	: {},
 	Events			: {},
+	Navigation		: {},
 
 	loadMgr			: {},
 	loader			: {

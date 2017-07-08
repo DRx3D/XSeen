@@ -25,7 +25,7 @@ xseen.utils.StackHandler = function (label) {
 	this._internals				= {};		// Internal class storage
 	this._internals.label		= label;	// Unique user-supplied name for this stack
 	this._internals.stack		= [];		// Maintains the stack. Last entry on stack is active
-	this._internals.active		= -1;		// Entry of currently active list element
+	this._internals.active		= -1;		// Index of currently active list element
 	this._internals.activeNode	= {};		// Entry of currently active list element
 	this._internals.defaultNode	= {};		// The default entry to be active if nothing else is
 
@@ -47,12 +47,19 @@ xseen.utils.StackHandler = function (label) {
 		this._setActiveNode();
 	}
 
-	this.popOff = function() {			// Pop new node onto stack and make active
+	this.popOff = function() {			// Pop node off stack and make next one active
 		this._internals.stack.pop();
 		this._setActiveNode();
 	}
 
 	this.getActive = function() {
 		return this._internals.activeNode;
+	}
+	
+	this.setDefault = function(node) {
+		this._internals.defaultNode = node;
+		if (Object.keys(this._internals.activeNode).length === 0) {
+			this._internals.activeNode = this._internals.defaultNode;
+		}
 	}
 }

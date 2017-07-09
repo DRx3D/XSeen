@@ -215,13 +215,18 @@ xseen.rerouteSetAttribute = function(node, browser) {
  *	These handle all mouse/cursor/button controls when the cursor is
  *	in the XSeen region of the page
  */
+
 			x_element.addEventListener ('dblclick', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('click', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('mousedown', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);		// Last chance for XSeen handling of event
-			
+/*
+	x_element.addEventListener ('mousedown', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
+	x_element.addEventListener ('mouseup', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
+	x_element.addEventListener ('mousemove', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
+ */
 			xseen.sceneInfo.push ({
 									'size'		: {'width':divWidth, 'height':divHeight},
 									'scene'		: x_canvas, 
@@ -297,7 +302,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			xseen.updateCamera (xseen.sceneInfo[0]);
 			
 			var renderObj = xseen.sceneInfo[0].element._xseen.renderer;
-			renderObj.controls.update();
+			//renderObj.controls.update();
 
 /*
  * Existing code moved to updateAnimation & updateCamera to better handle navigation

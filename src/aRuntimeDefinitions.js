@@ -122,7 +122,6 @@ xseen.updateOnLoad = function ()
 				canvasHandler: function (ev)
 					{
 						//console.log ('Primary canvas event handler for event type: ' + ev.type);
-						ev.stopPropagation();		// No propagation beyond this tag
 						var sceneInfo = ev.currentTarget._xseen.sceneInfo;
 						var localXseen = sceneInfo.xseen;
 						var lEvents = localXseen.Events;
@@ -147,6 +146,7 @@ xseen.updateOnLoad = function ()
 							// Generate an XSeen (Custom)Event of the same type and dispatch it
 							var newEv = lEvents.createEvent (ev, lEvents.object);
 							lEvents.object.object.userData.dispatchEvent(newEv);
+							ev.stopPropagation();		// No propagation beyond this tag
 						} else {
 							//console.log ('Navigation mode...');
 						}
@@ -222,7 +222,11 @@ xseen.updateOnLoad = function ()
 				// Generic notification handler for XSeen's canvas
 				XSeenHandler: function (ev)
 					{
-						//console.log ('XSeen Event handler, original type: ' + ev.detail.originalType);
+						console.log ('XSeen DEBUG Event Bubble handler ('+ev.type+'/'+ev.eventPhase+').');
+					},
+				XSeenDebugHandler : function (ev)
+					{
+						console.log ('XSeen DEBUG Event Capture handler ('+ev.type+'/'+ev.eventPhase+').');
 					},
 			};
 

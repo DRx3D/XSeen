@@ -198,8 +198,12 @@ xseen.node.core_Scene = {
 			var orthoCamera = new THREE.OrthographicCamera( 75, width / height, 0.1, 1000 );
 			//perspectiveCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);	// Default position
 			//orthoCamera.translateX(this.DEFAULT.Viewpoint.Position.x).translateY(this.DEFAULT.Viewpoint.Position.y).translateZ(this.DEFAULT.Viewpoint.Position.z);			// Default position
-			perspectiveCamera.position = this.DEFAULT.Viewpoint.Position;	// Default position
-			orthoCamera.position = this.DEFAULT.Viewpoint.Position;			// Default position
+			perspectiveCamera.position.x = this.DEFAULT.Viewpoint.Position.x;	// Default position
+			perspectiveCamera.position.y = this.DEFAULT.Viewpoint.Position.y;	// Default position
+			perspectiveCamera.position.z = this.DEFAULT.Viewpoint.Position.z;	// Default position
+			orthoCamera.position.x = this.DEFAULT.Viewpoint.Position.x;			// Default position
+			orthoCamera.position.y = this.DEFAULT.Viewpoint.Position.y;			// Default position
+			orthoCamera.position.z = this.DEFAULT.Viewpoint.Position.z;			// Default position
 
 			// Stereo viewing effect
 			// from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
@@ -263,7 +267,9 @@ xseen.node.core_Scene = {
 			var nav = xseen.sceneInfo[0].stacks.Navigation.getActive();
 			var currentCamera = e._xseen.renderer.activeCamera;
 			var currentRenderer = e._xseen.renderer.activeRender;
-			currentCamera.position = vp.position.clone();
+			currentCamera.position.x = vp.position.x;
+			currentCamera.position.y = vp.position.y;
+			currentCamera.position.z = vp.position.z;
 			e._xseen.renderer.controls = xseen.Navigation.setup[nav.setup] (currentCamera, currentRenderer);
 			xseen.debug.logInfo("Ready to kick off rendering loop");
 			xseen.renderFrame();

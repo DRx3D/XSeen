@@ -63,7 +63,7 @@ xseen.Navigation = {
 			{
 				var controls;
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', render ); // remove when using animation loop
+				//controls.addEventListener( 'change', render ); // remove when using animation loop
 				// enable animation loop when using damping or autorotation
 				//controls.enableDamping = true;
 				//controls.dampingFactor = 0.25;

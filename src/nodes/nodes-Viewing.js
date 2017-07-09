@@ -22,7 +22,11 @@ xseen.node.unk_Viewpoint = {
 													e._xseen.fields.position[2]*e._xseen.fields.position[2]);
 			e._xseen.domNode = e;	// Back-link to node if needed later on
 			e._xseen.position = new THREE.Vector3(e._xseen.fields.position[0], e._xseen.fields.position[1], e._xseen.fields.position[2]);
-			e._xseen.type = e._xseen.fields.type;
+			e._xseen.type = e._xseen.fields.cameratype;
+			e._xseen.motion = e._xseen.fields.motion;
+			e._xseen.motionspeed = e._xseen.fields.motionspeed * 1000;
+			if (e._xseen.motion == 'turntable' || e._xseen.motion == 'tilt') {e._xseen.motionspeed = 1.0/e._xseen.motionspeed;}
+
 			if (!e._xseen.sceneInfo.tmp.activeViewpoint) {
 				e._xseen.sceneInfo.stacks.Viewpoints.pushDown(e._xseen);
 				e._xseen.sceneInfo.tmp.activeViewpoint = true;
@@ -54,6 +58,7 @@ xseen.node.controls_Navigation = {
 			e._xseen.domNode = e;	// Back-link to node if needed later on
 			e._xseen.speed = e._xseen.fields.speed;
 			e._xseen.type = e._xseen.fields.type;
+			e._xseen.type = 'none';
 			e._xseen.setup = e._xseen.fields.type;
 			if (!(e._xseen.type == 'none' || e._xseen.type == 'turntable' || e._xseen.type == 'tilt')) {e._xseen.type = 'none';}
 			if (!(e._xseen.setup == 'orbit')) {e._xseen.setup = 'none';}

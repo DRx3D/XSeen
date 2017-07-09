@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>XSeen Event Development Test</title>
+		<title>Event: HTML -> XSeen Test</title>
 		<style>
 body { margin: 0; }
 canvas { width: 67%; height: 67% }
@@ -61,16 +61,13 @@ canvas { width: 67%; height: 67% }
 .leftRegion {float:left; border:0px solid green;  }
 .rightRegion  {border:0px solid purple; margin-left: 1em; float:left; }
 		</style>
-		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>		
-		<script src="../ExternalLibraries/three.js"></script>
-		<script src="../ExternalLibraries/Tween.js"></script>
-		<script src="../ExternalLibraries/StereoEffect.js"></script>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>		
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
 		<script src="../Release/XSeen.js"></script>
 	</head>
 	<body>
 		<scene id='xscene' height='450' width='800'>
-<Viewpoint position='0 2 20'></Viewpoint>
+<Viewpoint position='0 2 20' motion='tilt'></Viewpoint>
 <light intentsity='.5' direction='0 0 -1'></light>
 <light color='0 .5 0' intensity='.5' direction='1 0 0'></light>
 <Transform>
@@ -95,12 +92,8 @@ canvas { width: 67%; height: 67% }
 		</Appearance>
 	</Shape>
 </Transform>
-	<route source='BoxShape' event='mousedown' destination='AnimateRotation' field='pause'></route>
-	<route source='BoxShape' event='mouseup' destination='AnimateRotation' field='resetstart'></route>
 	<route source='AnimationPause' event='click' destination='AnimatePosition' field='pause'></route>
 	<route source='AnimationResume' event='click' destination='AnimatePosition' field='resetstart'></route>
-	<route source='ConeShape' handler='eventFromXseen'></route>
-	<route source='BoxShape' handler='eventFromXseen'></route>
 		</scene>
 		<form name='XseenControl' onsubmit='return false;'>
 			<div class='leftRegion'>
@@ -108,32 +101,6 @@ canvas { width: 67%; height: 67% }
 				<br>
 				<input id='AnimationResume' type='submit' value='Resume Translation'>
 			</div>
-			<div class='rightRegion'>
-				<div id='BackgroundInfo'>
-					<div id='BackgroundLocation'>Coordinates: (<span id='PositionX'></span>, <span id='PositionY'></span>, <span id='PositionZ'></span>)</div>
-					<div id='BackgroundTexture'>Texture: (<span id='TextureX'></span>, <span id='TextureY'></span>)</div>
-					<div id='BackgroundClient'>Window: (<span id='ClientX'></span>, <span id='ClientY'></span>)</div>
-					<div id='BackgroundScreen'>Screen: (<span id='ScreenX'></span>, <span id='ScreenY'></span>)</div>
-				</div>
-			</div>
 		</form>
-<script>
-function eventFromXseen (ev) {
-	if (ev.detail.type == 'click') {
-		$('#PositionX').text(ev.detail.position.x);
-		$('#PositionY').text(ev.detail.position.y);
-		$('#PositionZ').text(ev.detail.position.z);
-		$('#ScreenX').text(ev.detail.screenX);
-		$('#ScreenY').text(ev.detail.screenY);
-		$('#ClientX').text(ev.detail.clientX);
-		$('#ClientY').text(ev.detail.clientY);
-		$('#TextureX').text(ev.detail.uv.x);
-		$('#TextureY').text(ev.detail.uv.y);
-		ev.stopPropagation();
-	} else {
-		console.log ('Bubbling XSeen event of type: ' + ev.detail.type + ' @ ' + ev.timeStamp);
-	}
-}
-</script>
 	</body>
 </html>

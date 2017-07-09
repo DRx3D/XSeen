@@ -164,10 +164,13 @@ xseen.node.core_Scene = {
 				'Position'		: new THREE.Vector3 (0, 0, 10),
 				'Orientation'	: '0 1 0 0',		// TODO: fix (and below) when handling orientation
 				'Type'			: 'perpsective',
+				'Motion'		: 'none',
+				'MotionSpeed'	: 1.0,
 			},
 			'Navigation' : {
-				'Speed'		: 1/(16.0*1000),		// 16 spr (1 revolution per 16 seconds), in mseconds.
-				'Type'		: 'turntable',
+				'Speed'		: 1.0,		// 16 spr (1 revolution per 16 seconds), in mseconds.
+				'Type'		: 'none',
+				'Setup'		: 'none',
 			}
 		},
 	'init'	: function (e,p)
@@ -177,14 +180,17 @@ xseen.node.core_Scene = {
 				{
 					'position'	: this.DEFAULT.Viewpoint.Position,
 					'type'		: this.DEFAULT.Viewpoint.Type,
+					'motion'	: this.DEFAULT.Viewpoint.Motion,
+					'motionspeed': this.DEFAULT.Viewpoint.MotionSpeed / 1000,
 					'domNode'	: e,
 					'fields'	: {},
 				}
 			);
 			xseen.sceneInfo[0].stacks.Navigation.setDefault(
 				{
-					'speed'		: this.DEFAULT.Navigation.Speed,
+					'speed'		: this.DEFAULT.Navigation.Speed / 1000,
 					'type'		: this.DEFAULT.Navigation.Type,
+					'setup'		: this.DEFAULT.Navigation.Setup,
 					'domNode'	: e,
 					'fields'	: {},
 				}

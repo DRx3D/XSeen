@@ -14,11 +14,11 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Date, SpashText;
 	Major		= 0;
 	Minor		= 4;
-	Patch		= 3;
+	Patch		= 4;
 	PreRelease	= '';
-	Release		= 20;
+	Release		= 21;
 	Version		= '';
-	Date		= '2017-07-08';
+	Date		= '2017-07-09';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
 /*
  * All X3D and A-Frame pre-defined solids, fixed camera, directional light, Material texture only, glTF model loader with animations, Assets and reuse, Viewpoint, Background, Lighting, Image Texture, [Indexed]TriangleSet, IndexedFaceSet, [Indexed]QuadSet<br>\nNext work<ul><li>Event Model/Animation</li><li>Extrusion</li><li>Navigation</li></ul>",
@@ -32,6 +32,8 @@ xseen.generateVersion = function () {
  * V0.4.2+18 Feature -- Split screen VR display
  * V0.4.3+19 Rebuild and fix loading caused by new Stereo library
  * V0.4.3+20 Feature -- Navigation (rotate), including Stack update for Viewpoint and restructuring the rendering loop
+ * V0.4.3+21 Feature -- Changed handling of Viewpoint to include camera motion
+ * V0.4.4+22 Fix -- Internal event handling in passing on events of the proper type
  *
  * In progress
  */

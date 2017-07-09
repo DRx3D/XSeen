@@ -348,9 +348,9 @@ xseen.rerouteSetAttribute = function(node, browser) {
 		{
 			var deltaT
 			deltaT = scene.clock.getDelta();
-			var navigation = scene.stacks.Navigation.getActive();
+			var viewpoint = scene.stacks.Viewpoints.getActive();
 			
-			xseen.Navigation[navigation.type] (navigation.speed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
+			xseen.Navigation[viewpoint.motion] (viewpoint.motionspeed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
 		};
     
 	// Replace with code that calls THREE's unload methods

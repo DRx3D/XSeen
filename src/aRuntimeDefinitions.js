@@ -214,7 +214,10 @@ xseen.updateOnLoad = function ()
 								});
 						} else {								// XSeen event
 							source.addEventListener ('xseen', function(ev) {
-								handler.handler(ev)
+								//console.log ('New event of original type: |'+ev.detail.originalType+'|; Desired type: |'+handler.type+'|');
+								if (ev.detail.originalType == handler.type) {
+									handler.handler(ev)
+								}
 								});
 						}
 					},
@@ -222,7 +225,7 @@ xseen.updateOnLoad = function ()
 				// Generic notification handler for XSeen's canvas
 				XSeenHandler: function (ev)
 					{
-						console.log ('XSeen DEBUG Event Bubble handler ('+ev.type+'/'+ev.eventPhase+').');
+						//console.log ('XSeen DEBUG Event Bubble handler ('+ev.type+'/'+ev.eventPhase+').');
 					},
 				XSeenDebugHandler : function (ev)
 					{

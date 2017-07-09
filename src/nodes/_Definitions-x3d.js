@@ -99,12 +99,15 @@ xseen.nodes._defineNode ('Viewpoint', 'Controls', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', '0 0 10')
 	.addField('orientation', 'SFRotation', xseen.types.SFRotation('0 1 0 0',''))
 	.addField('description', 'SFString', '')
+	.addField({name:'cameratype', datatype:'EnumerateString', defaultValue:'perspective', enumerated:['perspective', 'stereo', 'orthographic'], animatable:false})
 	.addField({name:'type', datatype:'EnumerateString', defaultValue:'perspective', enumerated:['perspective', 'stereo', 'orthographic'], animatable:false})
+	.addField({name:'motion', datatype:'EnumerateString', defaultValue:'none', enumerated:['none', 'turntable', 'tilt'], animatable:false})
+	.addField('motionspeed', 'SFFloat', 16)
 	.addField('active', 'SFBool', true)				// incoming event
 	.addNode();
 xseen.nodes._defineNode ('NavigationMode', 'Controls', 'controls_Navigation')
 	.addField('speed', 'SFFloat', 1.)
-	.addField({name:'type', datatype:'EnumerateString', defaultValue:'none', enumerated:['none', 'orbit', 'fly', 'turntable', 'tilt'], animatable:false})
+	.addField({name:'type', datatype:'EnumerateString', defaultValue:'none', enumerated:['none', 'orbit', 'fly', 'examine', 'trackball'], animatable:false})
 	.addNode();
 xseen.nodes._defineNode ('Camera', 'Controls', 'unk_Viewpoint')
 	.addField('position', 'SFVec3f', [0,0,10])

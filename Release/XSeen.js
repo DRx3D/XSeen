@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.3.6+12_b17c405
- *  Built Fri Jun 23 14:35:00 2017
+ *  XSeen V0.3.6+12_6e139de
+ *  Built Fri Jun 23 22:05:41 2017
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -9257,7 +9257,7 @@ THREE.GLTFLoader = ( function () {
 // File: utils/JSONParser.js
 ﻿"use strict";
 
-var JSONParser = function(scene)
+var JSONParser = function()
 {
 }
 
@@ -9270,7 +9270,7 @@ JSONParser.prototype.constructor = JSONParser;
 JSONParser.prototype.parseJavaScript = function(jsobj) {
 		var child = this.CreateElement('scene');
 		this.ConvertToX3DOM(jsobj, "", child);
-		// console.log(jsobj, child);
+		console.log(jsobj, child);
 		return child;
 	};
 

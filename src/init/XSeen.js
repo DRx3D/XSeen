@@ -210,6 +210,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			// Stereo camera effect
 			// from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
 			var x_effect = new THREE.StereoEffect(x_renderer);
+			x_renderer.controls = {'update' : function() {return;}};
 
 /*
  * Add event handler to XSeen tag (x_element)
@@ -304,34 +305,8 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			xseen.updateCamera (xseen.sceneInfo[0]);
 			
 			var renderObj = xseen.sceneInfo[0].element._xseen.renderer;
-			renderObj.controls.update();
+			if (renderObj.controls !== null) {renderObj.controls.update();}
 
-/*
- * Existing code moved to updateAnimation & updateCamera to better handle navigation
- *
-			var deltaT, radians, x, y, z, P, radius, vp;
-			var nodeAframe = document.getElementById ('aframe_nodes');
-			P = 16000;
-			deltaT = xseen.sceneInfo[0].clock.getDelta();
-			for (var i=0; i<xseen.sceneInfo[0].mixers.length; i++) {
-				xseen.sceneInfo[0].mixers[i].update(deltaT);
-			}
-			deltaT = (new Date()).getTime() - xseen.timeStart;
-			radians = deltaT/P * 2 * Math.PI;
-			vp = xseen.sceneInfo[0].stacks.Viewpoints.getActive();
-			radius = vp._xseen.fields._radius0;
-			y = vp._xseen.fields.position[1] * Math.cos(1.5*radians);
-			var currentCamera = xseen.sceneInfo[0].element._xseen.renderer.activeCamera;
-			currentCamera.position.y = y;		// This uses Viewpoint initial 'y' coordinate for range
-			if (xseen.sceneInfo[0].turntable) {
-				x = radius * Math.sin(radians);
-				currentCamera.position.x = x;
-				currentCamera.position.z = radius * Math.cos(radians);
-				if (nodeAframe !== null) {nodeAframe._xseen.sceneNode.position.x = -x;}
-			}
-			//currentCamera.lookAt(xseen.types.Vector3([0,0,0]));
-			currentCamera.lookAt(xseen.ORIGIN);
- */
 			// End of animation (objects & camera/navigation)
 			// StereoEffect renderer
 			var activeRender = renderObj.activeRender;

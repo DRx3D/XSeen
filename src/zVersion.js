@@ -35,6 +35,7 @@ xseen.generateVersion = function () {
  * V0.4.3+21 Feature -- Changed handling of Viewpoint to include camera motion
  * V0.4.4+22 Fix -- Internal event handling in passing on events of the proper type
  * V0.4.5+23 Feature -- Navigation (trackball)
+ * V0.4.5+24 Fix -- when there is no navigation
  *
  * In progress
  */

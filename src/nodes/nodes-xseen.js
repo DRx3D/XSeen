@@ -90,13 +90,13 @@ xseen.node.x_Route = {
 			// For toNode routing, check existence of source and destination elements
 			var eSource = document.getElementById (e._xseen.fields.source);
 			if (! externalHandler) {
-				eDestination = document.getElementById (dest);
+				var eDestination = document.getElementById (dest);
 				if (typeof(eSource) === 'undefined' || typeof(eDestination) === 'undefined') {
 					xseen.debug.logError ('Source or Destination node does not exist. No route setup');
 					return;
 				}
 				// Get field information -- perhaps there is some use in the Animate node?
-				fField = xseen.nodes._getFieldInfo (eDestination.nodeName, e._xseen.fields.field);
+				var fField = xseen.nodes._getFieldInfo (eDestination.nodeName, e._xseen.fields.field);
 				if (typeof(fField) === 'undefined' || !fField.good) {
 					xseen.debug.logError ('Destination field does not exist or incorrectly specified. No route setup');
 					return;

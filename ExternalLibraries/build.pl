@@ -9,6 +9,7 @@
 #
 use strict;
 use File::Basename;
+require '../sourceCompressor.pl';
 
 my $dirname = dirname(__FILE__);
 chdir ($dirname);
@@ -28,6 +29,8 @@ my @filesInLibrary = ();
 my $noOutput = 0;
 
 my (@files, @output, @preamble);
+unlink ("$releaseDirectory$outputFilename.js");
+unlink ("$releaseDirectory$outputFilename.min.js");
 
 foreach my $file (@inputFiles) {
 	open (FILE, "<$file") or die "Unable to open $file\n$!\n";
@@ -56,8 +59,19 @@ foreach my $dir (@inputDirectories) {
 	}
 }
 
+my @preamble = ();
+push @preamble, ("/*", " * XSeen support libraries.\n * This is a convenience build and contains the libraries listed below");
+push @preamble, " * You can replace any library by including it after this file is included in your HTML.";
+push @preamble, " * No claim is made on any of the included files, including (but not limited to) copyright and license.";
+push @preamble, (" *", " * Libraries:");
+push @preamble, " *  - ";
+for (my $ii=0; $ii<=$#filesInLibrary; $ii++) {
+	push @preamble, " *  - " . $filesInLibrary[$ii];
+}
+push @preamble, " */";
+
 # --> Compress the JS (in @output)
-#my @compressed = compressJS(@output);
+my @compressed = compressJS(@output);
 
 print "\n";
 if ($noOutput) {
@@ -67,13 +81,21 @@ if ($noOutput) {
 open (FILE, ">$releaseDirectory$outputFilename.js") or die "Unable to open $releaseDirectory$outputFilename.js\n$!\n";
 binmode FILE;
 print "Writing $releaseDirectory$outputFilename.js\n";
-print FILE "/*\n * XSeen support libraries.\n * This is a convenience build and contains the libraries listed below\n";
-print FILE " * You can replace any library by including it after this file is included in your HTML.\n";
-print FILE " * No claim is made on any of the included files, including (but not limited to) copyright and license.\n";
-print FILE " *\n * Libraries:\n";
-print FILE " *  - " . join("\n *  - ", @filesInLibrary) . "\n";
-print FILE " */\n";
+##print FILE "/*\n * XSeen support libraries.\n * This is a convenience build and contains the libraries listed below\n";
+##print FILE " * You can replace any library by including it after this file is included in your HTML.\n";
+##print FILE " * No claim is made on any of the included files, including (but not limited to) copyright and license.\n";
+##print FILE " *\n * Libraries:\n";
+##print FILE " *  - " . join("\n *  - ", @filesInLibrary) . "\n";
+##print FILE " */\n";
+print FILE join("\n", @preamble) . "\n";
 print FILE join("\n", @output);
+close FILE;
+
+open (FILE, ">$releaseDirectory$outputFilename.min.js") or die "Unable to open $releaseDirectory$outputFilename.min.js\n$!\n";
+binmode FILE;
+print "Writing $releaseDirectory$outputFilename.min.js\n";
+print FILE join("\n", @preamble) . "\n";
+print FILE join("\n", @compressed);
 close FILE;
 
 exit;

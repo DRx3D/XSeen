@@ -71,5 +71,26 @@ xseen.Navigation = {
 				controls.enableZoom = true;
 				return controls;
 			},
+
+		'trackball'		: function (camera, renderer)
+			{
+				var controls;
+				controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+				// These are from the example code at https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_trackball.html
+				controls.rotateSpeed = 1.0;
+				controls.zoomSpeed = 1.2;
+				controls.panSpeed = 0.8;
+				controls.noZoom = false;
+				controls.noPan = false;
+				controls.staticMoving = true;
+				controls.dynamicDampingFactor = 0.3;
+				controls.keys = [ 65, 83, 68 ];
+
+				// Render function is 'xseen.renderFrame'
+				// remove when using animation loop
+				//controls.addEventListener( 'change', xseen.renderFrame );
+				return controls;
+			},
 		},
 };

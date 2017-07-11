@@ -36,8 +36,8 @@
 
 xseen.nodes = {
 	'_defineNode' : function(nodeName, nodeComponent, nodeMethod) {
-		methodBase = 'xseen.node.';
-		methodBase = '';
+		//methodBase = 'xseen.node.';
+		var methodBase = '';
 		node = {
 				'tag'		: nodeName,
 				'taglc'		: nodeName.toLowerCase(),

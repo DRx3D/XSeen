@@ -194,6 +194,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			} else {
 				turntable = false;
 			}
+			turntable = false;
 /*
  *	Removed because camera is stored in the Scene node (x_element._xseen.renderer.camera
  *	Leave variable definition so other code works...
@@ -222,6 +223,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			x_element.addEventListener ('mousemove', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('mouseup', xseen.Events.canvasHandler, true);	
 			x_element.addEventListener ('xseen', xseen.Events.XSeenHandler);		// Last chance for XSeen handling of event
+	x_element.addEventListener ('change', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
 /*
 	x_element.addEventListener ('mousedown', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
 	x_element.addEventListener ('mouseup', xseen.Events.XSeenDebugHandler, true);		// Early catch of 'change' event
@@ -302,7 +304,7 @@ xseen.rerouteSetAttribute = function(node, browser) {
 			xseen.updateCamera (xseen.sceneInfo[0]);
 			
 			var renderObj = xseen.sceneInfo[0].element._xseen.renderer;
-			//renderObj.controls.update();
+			renderObj.controls.update();
 
 /*
  * Existing code moved to updateAnimation & updateCamera to better handle navigation

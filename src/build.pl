@@ -11,6 +11,7 @@
 #		It is assumed that this string defines an object with the fields: 'major', 'minor', 'revision', and 'date'
 use strict;
 use File::Basename;
+require '../sourceCompressor.pl';
 
 my $dirname = dirname(__FILE__);
 chdir ($dirname);
@@ -112,21 +113,3 @@ sub getVersion {
 	return %version;
 }
 
-sub compressJS {
-	my (@records) = @_;
-	my (@compressed, $blockComment);
-	$blockComment = 0;
-	foreach my $line (@records) {
-		if ($line !~ /^\s*$/ && $line !~ /^\s*\/\//) {
-			$line =~ s/^\s+//;
-			if (!$blockComment && $line =~ /^\/\*/) {
-				$blockComment = 1;
-			} elsif ($blockComment && $line =~ /^\*\//) {
-				$blockComment = 0;
-			} elsif (!$blockComment) {
-				push @compressed, $line;
-			}
-		}
-	}
-	return @compressed;
-}

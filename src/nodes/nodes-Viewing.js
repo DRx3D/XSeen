@@ -57,11 +57,11 @@ xseen.node.controls_Navigation = {
 
 			e._xseen.domNode = e;	// Back-link to node if needed later on
 			e._xseen.speed = e._xseen.fields.speed;
-			e._xseen.type = e._xseen.fields.type;
+			if (e._xseen.setup == 'examine') {e._xseen.setup == 'trackball';}
+			//e._xseen.type = e._xseen.fields.type;
 			e._xseen.type = 'none';
 			e._xseen.setup = e._xseen.fields.type;
-			if (!(e._xseen.type == 'none' || e._xseen.type == 'turntable' || e._xseen.type == 'tilt')) {e._xseen.type = 'none';}
-			if (!(e._xseen.setup == 'orbit')) {e._xseen.setup = 'none';}
+			if (!(e._xseen.setup == 'orbit' || e._xseen.setup == 'trackball')) {e._xseen.setup = 'none';}
 
 			if (!e._xseen.sceneInfo.tmp.activeNavigation) {
 				e._xseen.sceneInfo.stacks.Navigation.pushDown(e._xseen);

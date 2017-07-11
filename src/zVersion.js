@@ -14,9 +14,9 @@ xseen.generateVersion = function () {
 	var Major, Minor, Patch, PreRelease, Release, Version, RDate, SplashText;
 	Major		= 0;
 	Minor		= 4;
-	Patch		= 5;
-	PreRelease	= '';
-	Release		= 23;
+	Patch		= 6;
+	PreRelease	= 'rc1';
+	Release		= 25;
 	Version		= '';
 	RDate		= '2017-07-10';
 	SplashText	= ["XSeen 3D Language parser.", "XSeen <a href='http://tools.realism.com/specification/xseen' target='_blank'>Documentation</a>."];
@@ -36,6 +36,7 @@ xseen.generateVersion = function () {
  * V0.4.4+22 Fix -- Internal event handling in passing on events of the proper type
  * V0.4.5+23 Feature -- Navigation (trackball)
  * V0.4.5+24 Fix -- when there is no navigation
+ * V0.4.6+25 Update -- JSON Parser (contributed by John Carlson)
  *
  * In progress
  */

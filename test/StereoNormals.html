@@ -59,20 +59,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			canvas { width: 67%; height: 67% }
 			#xscene {width:800px; height:450px; border:1px red dashed; }
 		</style>
-		<script src='../ExternalLibraries/jquery-3.2.1.min.js'></script>		
-		<script src="../ExternalLibraries/three.js"></script>
-		<script src="../ExternalLibraries/Tween.js"></script>
-		<script src="../ExternalLibraries/StereoEffect.js"></script>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>		
 		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
 		<script src="../Release/XSeen.js"></script>
-		<script src="../src/aRuntimeDefinitions.js"></script>
 		<script src="../src/nodes/nodes-xseen.js"></script>
-		<script src="../src/nodes/nodes.js"></script>
 	</head>
 	<body>
 		<scene id='xscene' height='450' width='800' turntable='on'>
-<Viewpoint id='MonoVP' type='perspective' position='0 4 4'></Viewpoint>
-<Viewpoint id='StereoVP' type='stereo' position='0 4 4'></Viewpoint>
+<Viewpoint id='MonoVP' type='perspective' position='0 4 4' motion='turntable' motionspeed='16'></Viewpoint>
+<Viewpoint id='StereoVP' type='stereo' position='0 4 4' motion='turntable' motionspeed='16'></Viewpoint>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 40 -20'></DirectionalLight>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 -20 40'></DirectionalLight>
 <DirectionalLight intensity='.6' color='1 1 1' direction='0 -20 0'></DirectionalLight>

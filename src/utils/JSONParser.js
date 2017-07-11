@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var JSONParser = function(scene)
+var JSONParser = function()
 {
 }
 
@@ -13,7 +13,7 @@ JSONParser.prototype.constructor = JSONParser;
 JSONParser.prototype.parseJavaScript = function(jsobj) {
 		var child = this.CreateElement('scene');
 		this.ConvertToX3DOM(jsobj, "", child);
-		// console.log(jsobj, child);
+		console.log(jsobj, child);
 		return child;
 	};
 

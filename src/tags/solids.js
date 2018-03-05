@@ -68,8 +68,10 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'color') {				// Different operation for each attribute
-					e._xseen.tagObject.children[0].material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
-					e._xseen.tagObject.children[0].material.needsUpdate = true;
+//					e._xseen.tagObject.children[0].material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
+//					e._xseen.tagObject.children[0].material.needsUpdate = true;
+					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
+					e._xseen.tagObject.material.needsUpdate = true;
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}

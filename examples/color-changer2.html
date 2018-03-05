@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='Constants.js'></script>
+		<script src='Logging.js'></script>
+		<script src='onLoad.js'></script>
+		<script src='Tag.js'></script>
+		<!--script src='tags/background.js'></script-->
+		<script src='tags/camera.js'></script>
+		<script src='tags/group.js'></script>
+		<script src='tags/light.js'></script>
+		<script src='tags/solids.js'></script>
+		<script src='tags/scene.js'></script>
+		<script src='tags/style3d.js'></script>
+		<script src='XSeen.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<h1>Color Change Example</h1>
+		<h2>Changes using mutation of solid objects</h2>
+		<form method='get' onsubmit='return false;'>
+			Change color of
+			<select id='ObjectId'>
+				<option value='c-3-3+3'>Left Box</option>
+				<option value='p-3-3+3'>Left Cone</option>
+				<option value='m-3-3+3'>Left Cylinder</option>
+				<option value='y-3-3+3'>Left Sphere</option>
+				<option value='y3-3+3'>Right Box</option>
+				<option value='m3-3+3'>Right Cone</option>
+				<option value='c3-3+3'>Right Cylinder</option>
+				<option value='p3-3+3'>Right Sphere</option>
+				<option value='TorusBack'>Torus</option>
+				<option value='LeftObjects'>Left Objects</option>
+				<option value='RightObjects'>Right Objects</option>
+				<option value='Cylinders'>All Cylinders</option>
+				<option value='Cones'>All Cones</option>
+				<option value='Boxes'>All Boxes</option>
+				<option value='Spheres'>All Spheres</option>
+			</select>
+			to
+			<select id='NewColor'>
+				<option value='0x00FFFF'>Aqua</option>
+				<option value='0xF0FFFF'>Azure</option>
+				<option value='0xF5F5DC'>Beige</option>
+				<option value='0x000000'>Black</option>
+				<option value='0x0000FF'>Blue</option>
+				<option value='0xA52A2A'>Brown</option>
+				<option value='0x7FFF00'>Chartreuse</option>
+				<option value='0xFF7F50'>Coral</option>
+				<option value='0xDC143C'>Crimson</option>
+				<option value='0x00FFFF'>Cyan</option>
+				<option value='0x1E90FF'>DodgerBlue</option>
+				<option value='0xB22222'>FireBrick</option>
+				<option value='0xFFFAF0'>FloralWhite</option>
+				<option value='0x228B22'>ForestGreen</option>
+				<option value='0xFF00FF'>Fuchsia</option>
+				<option value='0xFFD700'>Gold</option>
+				<option value='0xDAA520'>GoldenRod</option>
+				<option value='0x808080'>Gray</option>
+				<option value='0x008000'>Green</option>
+				<option value='0xF0FFF0'>HoneyDew</option>
+				<option value='0xFF69B4'>HotPink</option>
+				<option value='0x4B0082'>Indigo</option>
+				<option value='0xFFFFF0'>Ivory</option>
+				<option value='0xF0E68C'>Khaki</option>
+				<option value='0xE6E6FA'>Lavender</option>
+				<option value='0x7CFC00'>LawnGreen</option>
+				<option value='0xFFFACD'>LemonChiffon</option>
+				<option value='0xADD8E6'>LightBlue</option>
+				<option value='0x00FF00'>Lime</option>
+				<option value='0x32CD32'>LimeGreen</option>
+				<option value='0xFF00FF'>Magenta</option>
+				<option value='0x800000'>Maroon</option>
+				<option value='0x191970'>MidnightBlue</option>
+				<option value='0xFFDEAD'>NavajoWhite</option>
+				<option value='0x000080'>Navy</option>
+				<option value='0x808000'>Olive</option>
+				<option value='0xFFA500'>Orange</option>
+				<option value='0xDA70D6'>Orchid</option>
+				<option value='0xFFC0CB'>Pink</option>
+				<option value='0xDDA0DD'>Plum</option>
+				<option value='0xB0E0E6'>PowderBlue</option>
+				<option value='0x800080'>Purple</option>
+				<option value='0xFF0000'>Red</option>
+				<option value='0x4169E1'>RoyalBlue</option>
+				<option value='0xFA8072'>Salmon</option>
+				<option value='0x2E8B57'>SeaGreen</option>
+				<option value='0xA0522D'>Sienna</option>
+				<option value='0xC0C0C0'>Silver</option>
+				<option value='0x87CEEB'>SkyBlue</option>
+				<option value='0xFFFAFA'>Snow</option>
+				<option value='0x00FF7F'>SpringGreen</option>
+				<option value='0x4682B4'>SteelBlue</option>
+				<option value='0xD2B48C'>Tan</option>
+				<option value='0x008080'>Teal</option>
+				<option value='0x40E0D0'>Turquoise</option>
+				<option value='0xEE82EE'>Violet</option>
+				<option value='0xFFFFFF'>White</option>
+				<option value='0xFFFF00'>Yellow</option>
+			</select>
+			<input id='Change' type='submit' value='Do It!'>
+		</form>
+		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+			<div class='sceneLabels' style='display:none;'>
+				<div id='HUD'>
+					<div style='font-weight:bold;'>HUD</div>
+					<div id='HUD-text'>
+					</div>
+				</div>
+			</div>
+			<x-style3d id='LeftObjects' selector='.left' property='color' value=''></x-style3d>
+			<x-style3d id='RightObjects' selector='.right' property='color' value=''></x-style3d>
+			<x-style3d id='Cones' selector='x-cone' property='color' value=''></x-style3d>
+			<x-style3d id='Cylinders' selector='x-cylinder' property='color' value=''></x-style3d>
+			<x-style3d id='Spheres' selector='x-sphere' property='color' value=''></x-style3d>
+			<x-style3d id='Boxes' selector='x-box' property='color' value=''></x-style3d>
+			<x-class3d id='half'>
+				<x-style3d property='radius' value='.5'></x-style3d>
+				<x-style3d property='radius-top' value='.5'></x-style3d>
+				<x-style3d property='radius-bottom' value='.5'></x-style3d>
+			</x-class3d>
+			<x-class3d id='quarter'>
+				<x-style3d property='radius' value='.25'></x-style3d>
+				<x-style3d property='radius-top' value='.25'></x-style3d>
+				<x-style3d property='radius-bottom' value='.25'></x-style3d>
+			</x-class3d>
+			<x-style3d id='p' property='color' value='pink'></x-style3d>
+			<x-style3d id='pp' property='color' value='purple'></x-style3d>
+			<x-class3d id='primary'>
+				<x-style3d property='height' value='1.5'></x-style3d>
+				<x-style3d property='radius' value='1.'></x-style3d>
+				<x-style3d property='width' value='.5'></x-style3d>
+				<x-style3d property='length' value='.3'></x-style3d>
+			</x-class3d>
+			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='orbit' position='1 0 10'></x-camera>
+
+			<x-cone class='left' class3d='primary half p' position='-1 -1  1' id='p-3-3+3'></x-cone>
+			<x-box class='left' class3d='primary half' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-box>
+			<x-cylinder class='left' class3d='primary half' color='orange' position='-1  1  1' id='m-3-3+3'></x-cylinder>
+			<x-sphere class='left' radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
+			<x-box class='right' class3d='primary half' color='yellow' position='1 -1  1' id='y3-3+3'></x-box>
+			<x-cone class='right' class3d='primary half' color='orange' position='1  1 -1' id='m3-3+3'></x-cone>
+			<x-cylinder class='right' class3d='primary quarter' color='cyan' position='1  1  1' id='c3-3+3'></x-cylinder>
+			<x-sphere class='right' radius='.3' class3d='p' position='.5 -.5  1' id='p3-3+3'></x-sphere>
+
+			<x-torus id='TorusBack' class3d='pp' radius='2.0' tube='1.0' segments-radial='8' segments-tubular='10' position='0 1 -3'></x-torus>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+		<script src='DoRestOfCubes.js'></script>
+<script>
+window.document.addEventListener('DOMContentLoaded', function(ev)
+	{
+		(jQuery)(document).ready(function(){
+
+			(jQuery)('#Change').click (function() {
+				var obj, objId, colorO, colorV, attrName, shape;
+				obj = document.getElementById('ObjectId');
+				objId = obj.options[obj.selectedIndex].value;
+				colorO = document.getElementById('NewColor');
+				colorV = colorO.options[colorO.selectedIndex].label.toLowerCase();
+				console.log ("New Color: " + colorV);
+				shape = document.getElementById(objId);
+				if (shape.localName == 'x-style3d') {
+					attrName = 'value';
+				} else {
+					attrName = 'color';
+				}
+				shape.setAttribute(attrName, colorV)
+			});
+		});
+	}
+);
+</script>
+	</body>
+</html>
+
+

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='Constants.js'></script>
+		<script src='Logging.js'></script>
+		<script src='onLoad.js'></script>
+		<script src='Tag.js'></script>
+		<script src='tags/background.js'></script>
+		<script src='tags/camera.js'></script>
+		<script src='tags/group.js'></script>
+		<script src='tags/light.js'></script>
+		<script src='tags/solids.js'></script>
+		<script src='tags/scene.js'></script>
+		<script src='tags/style3d.js'></script>
+		<script src='XSeen.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<h1>Background Change Example</h1>
+		<h2>Changes using mutation of 'background'</h2>
+		<form id='bc' method='get' onsubmit='return false;' style='z-index:1000;'>
+			Change background to
+			<select id='BackdropId' name='BackdropChoices'>
+				<option value=' '>Choose New Background</option>
+				<option value='forest_1'>Forest</option>
+				<option value='desert_1'>Desert</option>
+			</select>
+			<input id='Change' type='submit' value='Do It!'>
+		</form>
+		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+			<div class='sceneLabels' style='display:none;'>
+				<div id='HUD'>
+					<div style='font-weight:bold;'>HUD</div>
+					<div id='HUD-text'>
+					</div>
+				</div>
+			</div>
+			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 10'></x-camera>
+			<x-background id='SceneBackground' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-cone height='1.5' radius='.5' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
+			<x-cone height='1.5' radius='.5' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
+			<x-cone height='1.5' radius='.5' color='magenta' position='-1  1  1' id='m-3-3+3'></x-cone>
+			<x-sphere radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
+			<x-cone height='1.5' radius='.5' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
+			<x-cone height='1.5' radius='.5' color='magenta' position='1  1 -1' id='m3-3+3'></x-cone>
+			<x-cone height='1.5' radius='.5' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
+			<x-sphere radius='.3' color='pink' position='.5 -.5  1' id='p3-3+3'></x-sphere>
+
+			<x-cone height='2.0' color='yellow' position='-5 0 2'></x-cone>
+			<x-box height='2.0' width='2.0' depth='2.0' color='green' position='-2 0 2'></x-box>
+			<x-cylinder height='2.0' color='blue' position='+2 0 2'></x-cylinder>
+			<x-sphere radius='2' color='orange' position='+5 0 2'></x-sphere>
+			<x-dodecahedron radius='1.5' color='teal' position='-5 3 0'></x-dodecahedron>
+			<x-icosahedron radius='1.5' color='red' position='-2 3 0'></x-icosahedron>
+			<x-octahedron radius='1.5' color='pink' position='+2 3 0'></x-octahedron>
+			<x-tetrahedron radius='1.5' color='CornflowerBlue' position='+5 3 0'></x-tetrahedron>
+			<x-torus radius='2.0' tube='1.0' segments-radial='8' segments-tubular='6' color='purple' position='0 1 -3'></x-torus>
+		</x-scene>
+		<div id='XSeenLog'></div>
+		<script src='DoRestOfCubes.js'></script>
+
+<script>
+window.document.addEventListener('DOMContentLoaded', function(ev)
+	{
+		(jQuery)(document).ready(function(){
+
+			(jQuery)('#Change').click (function() {
+				var backF, backFile, backdrop;
+				backF = document.getElementById('BackdropId');
+				backFile = backF.options[backF.selectedIndex].value;
+				if (backFile == '') {
+					alert ('Need to choose a background style');
+					return;
+				}
+				console.log ("New Background: " + backFile);
+				backdrop = document.getElementById('SceneBackground');
+				backdrop.setAttribute('src', 'Resources/textures/'+backFile+'_*.jpg');
+			});
+		});
+	}
+);
+</script>
+
+	</body>
+</html>
+
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='Constants.js'></script>
+		<script src='Loader.js'></script>
+		<script src='Logging.js'></script>
+		<script src='onLoad.js'></script>
+		<script src='Tag.js'></script>
+		<script src='tags/background.js'></script>
+		<script src='tags/camera.js'></script>
+		<script src='tags/group.js'></script>
+		<script src='tags/light.js'></script>
+		<script src='tags/model.js'></script>
+		<script src='tags/solids.js'></script>
+		<script src='tags/subscene.js'></script>
+		<script src='tags/scene.js'></script>
+		<script src='XSeen.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
+			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+			<x-subscene src='Resources/scenes/pong-three.json' scale='1 1 1'></x-subscene>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+		<script src='DoRestOfCubes.js'></script>
+	</body>
+</html>
+
+

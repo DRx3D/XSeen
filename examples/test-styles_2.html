@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='Constants.js'></script>
+		<script src='Logging.js'></script>
+		<script src='onLoad.js'></script>
+		<script src='Tag.js'></script>
+		<script src='tags/camera.js'></script>
+		<script src='tags/group.js'></script>
+		<script src='tags/light.js'></script>
+		<script src='tags/solids.js'></script>
+		<script src='tags/scene.js'></script>
+		<script src='tags/style3d.js'></script>
+		<script src='XSeen.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+			<div class='sceneLabels' style='display:none;'>
+				<div id='HUD'>
+					<div style='font-weight:bold;'>HUD</div>
+					<div id='HUD-text'>
+					</div>
+				</div>
+			</div>
+			<x-style3d id='half' property='radius' value='.5'></x-style3d>
+			<x-style3d id='p' property='color' value='pink'></x-style3d>
+			<x-style3d id='pp' property='color' value='purple'></x-style3d>
+			<x-class3d id='primary'>
+				<x-style3d property='height' value='1.5'></x-style3d>
+				<x-style3d property='radius' value='1.'></x-style3d>
+			</x-class3d>
+			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='vr' track='device' position='1 0 10'></x-camera>
+
+			<x-cone height='1.5' class3d='half p' position='-1 -1  1' id='p-3-3+3'></x-cone>
+			<x-cone height='1.5' class3d='half' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
+			<x-cone height='1.5' class3d='half' color='orange' position='-1  1  1' id='m-3-3+3'></x-cone>
+			<x-sphere radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
+			<x-cone height='1.5' class3d='half' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
+			<x-cone height='1.5' class3d='half' color='orange' position='1  1 -1' id='m3-3+3'></x-cone>
+			<x-cone height='1.5' class3d='half' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
+			<x-sphere radius='.3' class3d='p' position='.5 -.5  1' id='p3-3+3'></x-sphere>
+
+			<x-torus class3d='pp' radius='2.0' tube='1.0' segments-radial='8' segments-tubular='10' position='0 1 -3'></x-torus>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+		<script src='DoRestOfCubes.js'></script>
+	</body>
+</html>
+
+

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='Constants.js'></script>
+		<script src='Loader.js'></script>
+		<script src='Logging.js'></script>
+		<script src='onLoad.js'></script>
+		<script src='Tag.js'></script>
+		<script src='tags/background.js'></script>
+		<script src='tags/camera.js'></script>
+		<script src='tags/group.js'></script>
+		<script src='tags/light.js'></script>
+		<script src='tags/model.js'></script>
+		<script src='tags/solids.js'></script>
+		<script src='tags/scene.js'></script>
+		<script src='XSeen.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+
+			<div class='sceneLabels' style='display:none;'>
+				<div id='HUD'>
+					<div style='font-weight:bold;'>HUD</div>
+					<div id='HUD-text'>
+					</div>
+				</div>
+			</div>
+			<x-light id='White_Direction' type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light id='Green_Direction' type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='vr' track='device' position='1 0 14'></x-camera>
+			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-cone id='Cone_Pink1' height='1.5' radius='.5' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
+			<x-cone id='Cone_Cyan1' height='1.5' radius='.5' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
+			<x-cone id='Cone_Magenta1' height='1.5' radius='.5' color='magenta' position='-1  1  1' id='m-3-3+3'></x-cone>
+			<x-sphere id='Sphere_Yellow' radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
+			<x-cone id='Cone_Yellow' height='1.5' radius='.5' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
+			<x-cone id='Cone_Magenta2' height='1.5' radius='.5' color='magenta' position='1  1 -1' id='m3-3+3'></x-cone>
+			<x-cone id='Cone_Cyan2' height='1.5' radius='.5' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
+			<x-sphere id='Sphere_Pink' radius='.3' color='pink' position='.5 -.5  1' id='p3-3+3'></x-sphere>
+
+			<x-cone id='Cone_Pink' height='2.0' color='yellow' position='-5 0 2'></x-cone>
+			<x-box id='Box_Green' height='2.0' width='2.0' depth='2.0' color='green' position='-2 0 2'></x-box>
+			<x-cylinder id='Cylinder_Blue' height='2.0' color='blue' position='+2 0 2'></x-cylinder>
+			<x-sphere id='Sphere_Orange' radius='2' color='orange' position='+5 0 2'></x-sphere>
+			<x-dodecahedron id='D20_Teal' radius='1.5' color='teal' position='-5 3 0'></x-dodecahedron>
+			<x-icosahedron id='D12_Red' radius='1.5' color='red' position='-2 3 0'></x-icosahedron>
+			<x-octahedron id='D8_Pink' radius='1.5' color='pink' position='+2 3 0'></x-octahedron>
+			<x-tetrahedron id='D4_Blue' radius='1.5' color='CornflowerBlue' position='+5 3 0'></x-tetrahedron>
+			<x-torus id='Torus' radius='2.0' tube='1.0' segments-radial='8' segments-tubular='6' color='purple' position='0 1 -3'></x-torus>
+
+			<x-model id='model_Monster' src='Resources/models/Monster/Monster.gltf' playonload='*' duration='3' position='0 -1 7' scale='.067 .067 .067'></x-model>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+		<script src='DoRestOfCubes.js'></script>
+	</body>
+</html>
+
+

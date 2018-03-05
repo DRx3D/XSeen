@@ -1,0 +1,43 @@
+{
+    "scene": {
+        "-children": [
+            {
+              "camera": {
+                "@position": "0 3 6"
+              }
+            },
+            {
+              "WorldInfo": {}
+            },
+            {
+              "light": {
+                "@intentsity": ".5",
+                "@direction": "0 0 -1"
+              }
+            },
+            {
+              "light": {
+                "@color": "0 .5 0",
+                "@intensity": ".5",
+                "@direction": "1 0 0"
+              }
+            },
+            {
+              "transform": {
+                "@translation": "-5 -2 0",
+                "@scale": ".2 .2 .2",
+                "-children": [
+                  {
+                    "model": {
+                      "@id": "gltf_RiggedAnimation",
+                      "@src": "Monster.glbl",
+                      "@playonload": "*",
+                      "@duration": "3.0"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+	}
+}

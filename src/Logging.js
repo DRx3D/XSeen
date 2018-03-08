@@ -7,7 +7,6 @@
  *
  * 
  */
-//var XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 if (typeof(XSeen) === 'undefined') {var XSeen = {};}
 if (typeof(XSeen.definitions) === 'undefined') {XSeen.definitions = {};}
 
@@ -26,13 +25,13 @@ XSeen.definitions.Logging = {
 						'Warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
 						'Error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
 					},
-					'maximumLevel'	: 9,
-					'defaultLevel'	: 'Error',
-					'active'			: true,
-					'init'			: false,
+					'maximumLevel'		: 9,
+					'defaultLevel'		: 'Error',
+					'active'			: false,
+					'init'				: false,
 					'maxLinesLogged'	: 10000,
-					'lineCount'		: 0,
-					'logContainer'	: null,
+					'lineCount'			: 0,
+					'logContainer'		: null,
 				},
 	'init'		: function (show, element) {
 

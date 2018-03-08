@@ -47,6 +47,11 @@ XSeen.Tags.scene = {
 				});
 			//XSeen.Parser.dumpTable ();
 //			XSeen.LogDebug("Rendered all elements -- Starting animation");
+
+/*
+ *	Add an event listener to this node for resize events
+ */
+			window.addEventListener ('resize', XSeen.Runtime.Resize, false);
 /*
  * TODO: Need to get current top-of-stack for all stack-bound nodes and set them as active.
  *	This only happens the initial time for each XSeen tag in the main HTML file
@@ -65,6 +70,12 @@ XSeen.Tags.scene = {
 				//XSeen.Runtime.Renderer.animate( XSeen.RenderFrame() );
 				XSeen.Runtime.Animate();
 			}
+		},
+	'resize': function () {
+			var thisTag = XSeen.Runtime.RootTag;
+			XSeen.Runtime.Camera.aspect = thisTag.offsetWidth / thisTag.offsetHeight;
+			XSeen.Runtime.Camera.updateProjectionMatrix();
+			XSeen.Runtime.Renderer.setSize (thisTag.offsetWidth, thisTag.offsetHeight)
 		},
 	'event'	: function (ev, attr)
 		{

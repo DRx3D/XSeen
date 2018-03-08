@@ -42,7 +42,7 @@ XSeen.onLoad = function() {
 
 	var allowedAttributes, defaultValues, value, attributeCharacteristics;
 	allowedAttributes = ['src', 'showlog', 'showstat', 'showprogress', 'cubetest'];
-	defaultValues = {'src':'', 'showlog':true, 'showstat':false, 'showprogress':false, 'cubetest':false};
+	defaultValues = {'src':'', 'showlog':false, 'showstat':false, 'showprogress':false, 'cubetest':false};
 	attributeCharacteristics = {
 								'src'	: {
 									'name'		: 'src',
@@ -148,8 +148,8 @@ XSeen.onLoad = function() {
 XSeen.updateDisplaySize = function (sceneRoot) {
 	var MinimumValue = 50;
 	var size = Array();
-	size.width = (sceneRoot.clientWidth >= MinimumValue) ? sceneRoot.clientWidth : MinimumValue;
-	size.height = (sceneRoot.clientHeight >= MinimumValue) ? sceneRoot.clientHeight : MinimumValue;
+	size.width = (sceneRoot.offsetWidth >= MinimumValue) ? sceneRoot.offsetWidth : MinimumValue;
+	size.height = (sceneRoot.offsetHeight >= MinimumValue) ? sceneRoot.offsetHeight : MinimumValue;
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;

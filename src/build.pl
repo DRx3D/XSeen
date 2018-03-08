@@ -27,6 +27,7 @@ my %directoryOrder = (	'Full'		=> ['.', 'tags'],
 						);
 my $versionFile = './XSeen.js';
 my $releaseDirectory = '../Release/';
+my @releaseDirectories = ('../Release/', '../../Release/');
 my $preambleFile = '../LICENSE';
 my $outputFilename = 'XSeen';
 my %version = getVersion ($versionFile);
@@ -76,19 +77,21 @@ if ($noOutput) {
 	print STDERR "Not creating output file: $releaseFile[0]\n";
 	exit;
 }
-foreach my $outFile (@releaseFile) {
-	open (FILE, ">$releaseDirectory$outFile.js") or die "Unable to open $releaseDirectory$outFile.js\n$!\n";
-	binmode FILE;
-	print "Writing $releaseDirectory$outFile.js\n";
-	print FILE join("\n", @preamble);
-	print FILE join("\n", @output);
-	close FILE;
-	open (FILE, ">$releaseDirectory$outFile.min.js") or die "Unable to open $releaseDirectory$outFile.min.js\n$!\n";
-	binmode FILE;
-	print "Writing $releaseDirectory$outFile.min.js\n";
-	print FILE join("\n", @preamble);
-	print FILE join("\n", @compressed);
-	close FILE;
+foreach my $outDir (@releaseDirectories) {
+	foreach my $outFile (@releaseFile) {
+		open (FILE, ">$outDir$outFile.js") or die "Unable to open $outDir$outFile.js\n$!\n";
+		binmode FILE;
+		print "Writing $outDir$outFile.js\n";
+		print FILE join("\n", @preamble);
+		print FILE join("\n", @output);
+		close FILE;
+		open (FILE, ">$outDir$outFile.min.js") or die "Unable to open $outDir$outFile.min.js\n$!\n";
+		binmode FILE;
+		print "Writing $outDir$outFile.min.js\n";
+		print FILE join("\n", @preamble);
+		print FILE join("\n", @compressed);
+		close FILE;
+	}
 }
 
 exit;

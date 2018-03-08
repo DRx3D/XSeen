@@ -25,6 +25,7 @@ my $releaseDirectory = './';
 my @inputFiles = ();
 my @inputDirectories = ('.', 'THREE');
 my $outputFilename = 'XSeenExternals';
+my @releaseDirectories = ('./', '../Release/', '../../Release/');
 my @filesInLibrary = ();
 my $noOutput = 0;
 
@@ -80,17 +81,19 @@ if ($noOutput) {
 }
 
 # --> Create result files
-foreach my $file (@outputFiles) {
-	open (FILE, ">$file") or die "Unable to open $file\n$!\n";
-	binmode FILE;
-	print "Writing $file\n";
-	print FILE join("\n", @preamble) . "\n";
-	if (index($file, '.min.') > 0) {
-		print FILE join("\n", @compressed);
-	} else {
-		print FILE join("\n", @output);
+foreach my $outDir (@releaseDirectories) {
+	foreach my $file (@outputFiles) {
+		open (FILE, ">$outDir$file") or die "Unable to open $outDir$file\n$!\n";
+		binmode FILE;
+		print "Writing $outDir$file\n";
+		print FILE join("\n", @preamble) . "\n";
+		if (index($file, '.min.') > 0) {
+			print FILE join("\n", @compressed);
+		} else {
+			print FILE join("\n", @output);
+		}
+		close FILE;
 	}
-	close FILE;
 }
 
 exit;

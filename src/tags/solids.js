@@ -17,10 +17,14 @@ XSeen.Tags.Solids = {};
 XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
-				e._xseen.texture = XSeen.loader.ImageLoader.load(e._xseen.attributes['map']);
+//				e._xseen.texture = XSeen.Loader.load(e._xseen.attributes['map']);
+				e._xseen.texture = new THREE.TextureLoader().load (e._xseen.attributes['map']);
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
+			e._xseen.attributes['side_THREE'] = THREE.FrontSide;
+			if (e._xseen.attributes['side'] == 'back') e._xseen.attributes['side_THREE'] = THREE.BackSide;
+			if (e._xseen.attributes['side'] == 'both') e._xseen.attributes['side_THREE'] = THREE.DoubleSide;
 
 			var parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
@@ -34,6 +38,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
+							'side'					: e._xseen.attributes['side_THREE'],
 							'wireframe'				: e._xseen.attributes['wireframe'],
 							'wireframeLinewidth'	: e._xseen.attributes['wireframe-linewidth'],
 							};
@@ -244,6 +249,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.defineAttribute ({'name':'normal-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'roughness', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'side', dataType:'string', 'defaultValue':'front', enumeration:['front','back','both'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'spherical-env-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'wireframe', dataType:'boolean', 'defaultValue':false})

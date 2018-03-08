@@ -22,12 +22,12 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 0,
+					'_Patch'		: 1,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 0,
+					'_Release'		: 1,
 					'_Version'		: '',
-					'_RDate'		: '2017-12-28',
-					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseeb.org/docs' target='_blank'>Documentation</a>."],
+					'_RDate'		: '2017-03-08',
+					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
 					};
@@ -79,6 +79,14 @@ XSeen.Runtime = {
 											XSeen.RenderFrame();
 										} else {
 											XSeen.Runtime.Renderer.animate (XSeen.RenderFrame);
+										}
+									},
+			'Resize'				: function () {
+										if (!XSeen.Runtime.isStereographic) {
+											XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);
+											XSeen.Runtime.Camera.aspect = XSeen.Runtime.Size.width / XSeen.Runtime.Size.height;
+											XSeen.Runtime.Camera.updateProjectionMatrix();
+											XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height)
 										}
 									},
 			'rulesets'				: [],			// Style ruleset array structure

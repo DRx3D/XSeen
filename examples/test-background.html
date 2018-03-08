@@ -22,6 +22,8 @@ See details at http://xseen.org/license
 		<script src='../ExternalLibraries/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
 		<script src='../Release/XSeen.js'></script>
+		<script src='../src/Logging.js'></script>
+		<script src='../src/tags/scene.js'></script>
 
 		<style>
 .sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
@@ -33,13 +35,6 @@ See details at http://xseen.org/license
 	</head>
 	<body>
 		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
-			<div class='sceneLabels' style='display:none;'>
-				<div id='HUD'>
-					<div style='font-weight:bold;'>HUD</div>
-					<div id='HUD-text'>
-					</div>
-				</div>
-			</div>
 			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
 			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
 			<x-camera id='SceneCamera' type='vr' track='device' position='1 0 10'></x-camera>

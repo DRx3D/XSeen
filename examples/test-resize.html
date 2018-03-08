@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/Logging.js'></script>
+		<script src='../src/onLoad.js'></script>
+		<script src='../src/tags/scene.js'></script>
+		<script src='../src/XSeen.js'></script>
+	</head>
+	<body>
+		<x-scene>
+			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
+			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
+			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-group rotation='0 3.14 0'>
+				<x-cone height='1.5' radius='.5' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
+				<x-cone height='1.5' radius='.5' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
+				<x-cone height='1.5' radius='.5' color='magenta' position='-1  1  1' id='m-3-3+3'></x-cone>
+				<x-sphere radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
+				<x-cone height='1.5' radius='.5' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
+				<x-cone height='1.5' radius='.5' color='magenta' position='1  1 -1' id='m3-3+3'></x-cone>
+				<x-cone height='1.5' radius='.5' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
+				<x-sphere radius='.3' color='pink' position='.5 -.5  1' id='p3-3+3'></x-sphere>
+
+				<x-cone height='2.0' color='yellow' position='-5 0 2'></x-cone>
+				<x-box height='2.0' width='2.0' depth='2.0' color='green' position='-2 0 2'></x-box>
+				<x-cylinder height='2.0' color='blue' position='+2 0 2'></x-cylinder>
+				<x-sphere radius='2' color='orange' position='+5 0 2'></x-sphere>
+				<x-dodecahedron radius='1.5' color='teal' position='-5 3 0'></x-dodecahedron>
+				<x-icosahedron radius='1.5' color='red' position='-2 3 0'></x-icosahedron>
+				<x-octahedron radius='1.5' color='pink' position='+2 3 0'></x-octahedron>
+				<x-tetrahedron radius='1.5' color='CornflowerBlue' position='+5 3 0'></x-tetrahedron>
+				<x-torus radius='2.0' tube='1.0' segments-radial='8' segments-tubular='6' color='purple' position='0 1 -3'></x-torus>
+			</x-group>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+		<script src='DoRestOfCubes.js'></script>
+	</body>
+</html>
+
+

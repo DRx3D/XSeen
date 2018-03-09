@@ -21,6 +21,7 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
+			if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) e._xseen.track = 'orbit';
 			e._xseen.sceneInfo.Camera.position.set (
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
@@ -59,7 +60,7 @@ XSeen.Tags.camera = {
 				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
 					// TODO: check for proper enabling of DeviceControls
 					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
-				} else if (e._xseen.track == 'orbit' || (!e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device')) {
+				} else if (e._xseen.track == 'orbit') {
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.Renderer.domElement );
 				} else if (e._xseen.track == 'trackball') {
 				}

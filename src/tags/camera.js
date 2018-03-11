@@ -45,6 +45,7 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 					e._xseen.sceneInfo.rendererHasControls = false;
 					e._xseen.sceneInfo.isStereographic = true;
+					if (e._xseen.track != 'none') e._xseen.track = 'device';
 					//e._xseen.sceneInfo.Renderer.controls = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 					//e._xseen.sceneInfo.Renderer.controls = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.Renderer.domElement );
 					//controls.addEventListener( 'change', render ); // remove when using animation loop

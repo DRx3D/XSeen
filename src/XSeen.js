@@ -22,11 +22,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 1,
+					'_Patch'		: 2,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 2,
+					'_Release'		: 3,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-09',
+					'_RDate'		: '2017-03-10',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -73,7 +73,7 @@ XSeen.Runtime = {
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
 			'Animate'				: function() {	// XSeen animation loop control
-										console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
+										//console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
 										if (XSeen.Runtime.isStereographic) {
 											requestAnimationFrame (XSeen.Runtime.Animate);
 											XSeen.RenderFrame();
@@ -122,7 +122,6 @@ XSeen.RenderFrame = function()
 		XSeen.Update.Mixers (XSeen.Runtime);
 		//XSeen.Update.Tween (XSeen.Runtime);
 
-		//console.log ('Calling THREE renderer ' + XSeen.Runtime.currentTime);
 		XSeen.Runtime.Renderer.render( XSeen.Runtime.SCENE, XSeen.Runtime.Camera );
 	};
 	
@@ -152,8 +151,6 @@ XSeen.Update = {
 		},
 	'Camera'	: function (Runtime)
 		{
-//			var viewpoint = scene.stacks.Viewpoints.getActive();
-//			XSeen.Navigation[viewpoint.motion] (viewpoint.motionspeed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
 			if (!Runtime.rendererHasControls) {
 				Runtime.CameraControl.update();
 			}

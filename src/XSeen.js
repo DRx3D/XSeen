@@ -10,9 +10,8 @@
  * Based on code originally provided by
  * Philip Taylor: http://philip.html5.org
  *
- * Removed code for
- * - ActiveX 
- * - Flash
+ *	0.6.2: Fixed Camera and navigation bug
+ *	0.6.3: Added Plane and Ring
  * 
  */
 
@@ -22,9 +21,9 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 2,
+					'_Patch'		: 3,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 3,
+					'_Release'		: 4,
 					'_Version'		: '',
 					'_RDate'		: '2017-03-10',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],

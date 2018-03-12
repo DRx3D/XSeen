@@ -226,6 +226,59 @@ XSeen.Tags.torus = {
 	'event'	: function (ev, attr) {},
 };
 
+/*
+ * 2D Shapes
+ */
+ 
+XSeen.Tags.plane = {
+	'init'	: function (e,p)
+		{
+/*
+			var depth = Math.min (e._xseen.attributes.width, e._xseen.attributes.height) * .01
+			var geometry = new THREE.BoxGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										depth,
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										1
+									);
+ */
+
+			var geometry = new THREE.PlaneGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+									);
+			XSeen.Tags._solid (e, p, geometry);
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+XSeen.Tags.ring = {
+	'init'	: function (e,p)
+		{
+			var geometry = new THREE.RingGeometry(
+										e._xseen.attributes['radius-inner'], 
+										e._xseen.attributes['radius-outer'], 
+										e._xseen.attributes['segments-theta'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+			XSeen.Tags._solid (e, p, geometry);
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+
+/*
+ * ===================================================================================
+ * Parsing definitions
+ */
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'ambient-occlusion-map', dataType:'string', 'defaultValue':''})
@@ -388,4 +441,34 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})
 		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':6});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'plane',
+						'init'	: XSeen.Tags.plane.init,
+						'fin'	: XSeen.Tags.plane.fin,
+						'event'	: XSeen.Tags.plane.event,
+						'tick'	: XSeen.Tags.plane.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})
+		.defineAttribute ({'name':'segments-width', dataType:'integer', 'defaultValue':1});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'ring',
+						'init'	: XSeen.Tags.ring.init,
+						'fin'	: XSeen.Tags.ring.fin,
+						'event'	: XSeen.Tags.ring.event,
+						'tick'	: XSeen.Tags.ring.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'radius-inner', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'radius-outer', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':0.0})
+		.defineAttribute ({'name':'theta-length', dataType:'float', 'defaultValue':360.0})
+		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})
+		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8});
 XSeen.Parser._addStandardAppearance (tag);

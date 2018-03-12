@@ -90,14 +90,16 @@ XSeen.onLoad = function() {
 	}
 	
 	// Set up display characteristics, especially for VR
-	navigator.getVRDisplays()
-		.then( function ( displays ) {
-			if ( displays.length > 0 ) {
-				XSeen.Runtime.isVrCapable = true;
-			} else {
-				XSeen.Runtime.isVrCapable = false;
-			}
-		} );
+	if (navigator.getVRDisplays) {
+		navigator.getVRDisplays()
+			.then( function ( displays ) {
+				if ( displays.length > 0 ) {
+					XSeen.Runtime.isVrCapable = true;
+				} else {
+					XSeen.Runtime.isVrCapable = false;
+				}
+			} );
+	}
 /*
 	// Stereo camera effect -- from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
 	var x_effect = new THREE.StereoEffect(Renderer);

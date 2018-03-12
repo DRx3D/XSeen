@@ -143,13 +143,23 @@ XSeen.onLoad = function() {
 };
 
 
-// Find all XSeen root tag occurrences
+// Determine the size of the XSeen display area
 
 XSeen.updateDisplaySize = function (sceneRoot) {
 	var MinimumValue = 50;
 	var size = Array();
-	size.width = (sceneRoot.offsetWidth >= MinimumValue) ? sceneRoot.offsetWidth : MinimumValue;
-	size.height = (sceneRoot.offsetHeight >= MinimumValue) ? sceneRoot.offsetHeight : MinimumValue;
+	size.width = sceneRoot.offsetWidth;
+	size.height = sceneRoot.offsetHeight;
+	if (size.width < MinimumValue) {
+		var t = sceneRoot.getAttribute('width');
+		if (t < MinimumValue) {t = MinimumValue;}
+		size.width = t;
+	}
+	if (size.height < MinimumValue) {
+		var t = sceneRoot.getAttribute('height');
+		if (t < MinimumValue) {t = MinimumValue;}
+		size.height = t;
+	}
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;

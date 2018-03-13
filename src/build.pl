@@ -13,6 +13,11 @@ use strict;
 use File::Basename;
 require '../sourceCompressor.pl';
 
+my $fullVersion = 0;
+if ($ARGV[0] eq '--full') {
+	$fullVersion = 1;
+}
+
 my $dirname = dirname(__FILE__);
 chdir ($dirname);
 
@@ -26,8 +31,10 @@ my %directoryOrder = (	'Full'		=> ['.', 'tags'],
 						'Partial'	=> ['.', 'tags']
 						);
 my $versionFile = './XSeen.js';
-my $releaseDirectory = '../Release/';
-my @releaseDirectories = ('../Release/', '../../Release/');
+my @releaseDirectories = ('../Release/');
+if ($fullVersion) {
+	push @releaseDirectories, ('../../Release/');
+}
 my $preambleFile = '../LICENSE';
 my $outputFilename = 'XSeen';
 my %version = getVersion ($versionFile);
@@ -56,6 +63,7 @@ push @preamble, " */\n";
 foreach my $dir (@{$directoryOrder{$partialBuild}}) {
 	opendir (DIR, "$dir") or die "Unable to open $dir\n$!\n";
 	@files = grep /.*\.js$/, readdir DIR;
+	@files = sort { "\L$a" cmp "\L$b" } @files;
 	closedir DIR;
 	foreach my $file (@files) {
 		open (FILE, "<$dir/$file") or die "Unable to open $dir/$file\n$!\n";

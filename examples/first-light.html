@@ -13,7 +13,7 @@ See details at http://xseen.org/license
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<title>XSeen: First Light</title>
 		<style>
 			body { margin: 0; }
 			#xscene {border:0; }
@@ -25,9 +25,12 @@ See details at http://xseen.org/license
 	</head>
 	<body>
 		<x-scene>
-			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
-			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
-			<x-subscene src='Resources/scenes/pong-three.json' scale='1 1 1'></x-subscene>
+			<x-camera type='perspective' track='orbit' position='0 0 5'></x-camera>
+			<x-light type='directional' color='red' direction='1 0 -2'></x-light>
+			<x-light type='directional' color='#00ffff' direction='-1 0 -1'></x-light>
+			<x-light type='directional' color='white' direction='0 1 0'></x-light>
+			<x-cone emissive='#ffff00' position='-4 0 0'></x-cone>
+			<x-cone color='#ffff00' position='+4 0 0'></x-cone>
 		</x-scene>
 	</body>
 </html>

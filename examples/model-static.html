@@ -13,7 +13,7 @@ See details at http://xseen.org/license
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<title>XSeen: Static Model</title>
 		<style>
 			body { margin: 0; }
 			#xscene {border:0; }
@@ -25,9 +25,13 @@ See details at http://xseen.org/license
 	</head>
 	<body>
 		<x-scene>
-			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
-			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
-			<x-subscene src='Resources/scenes/pong-three.json' scale='1 1 1'></x-subscene>
+			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light type='directional' color='#aa5522' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='orbit' position='1 1 2'></x-camera>
+			<x-background skycolor='tan'></x-background>
+
+			<x-plane width='20' height='20' position='0 -.285 0' emissive='#7c573a' rotation='-1.57 0 0'></x-plane>
+			<x-model id='MER' src='Resources/models/MarsRover3.gltf'></x-model>
 		</x-scene>
 	</body>
 </html>

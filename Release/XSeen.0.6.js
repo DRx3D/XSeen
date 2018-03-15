@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.0-alpha.1+0_a92169a
- *  Built Sun Mar  4 19:03:36 2018
+ *  XSeen V0.6.4-alpha.1+5_ff8989a
+ *  Built Mon Mar 12 08:23:10 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -542,7 +542,6 @@ XSeen.onLoadCallBack.push (XSeen.Loader.onLoad);
  *
  * 
  */
-//var XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 if (typeof(XSeen) === 'undefined') {var XSeen = {};}
 if (typeof(XSeen.definitions) === 'undefined') {XSeen.definitions = {};}
 
@@ -561,13 +560,13 @@ XSeen.definitions.Logging = {
 						'Warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
 						'Error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
 					},
-					'maximumLevel'	: 9,
-					'defaultLevel'	: 'Error',
-					'active'			: true,
-					'init'			: false,
+					'maximumLevel'		: 9,
+					'defaultLevel'		: 'Error',
+					'active'			: false,
+					'init'				: false,
 					'maxLinesLogged'	: 10000,
-					'lineCount'		: 0,
-					'logContainer'	: null,
+					'lineCount'			: 0,
+					'logContainer'		: null,
 				},
 	'init'		: function (show, element) {
 
@@ -664,7 +663,7 @@ XSeen.onLoad = function() {
 
 	var allowedAttributes, defaultValues, value, attributeCharacteristics;
 	allowedAttributes = ['src', 'showlog', 'showstat', 'showprogress', 'cubetest'];
-	defaultValues = {'src':'', 'showlog':true, 'showstat':false, 'showprogress':false, 'cubetest':false};
+	defaultValues = {'src':'', 'showlog':false, 'showstat':false, 'showprogress':false, 'cubetest':false};
 	attributeCharacteristics = {
 								'src'	: {
 									'name'		: 'src',
@@ -765,13 +764,23 @@ XSeen.onLoad = function() {
 };
 
 
-// Find all XSeen root tag occurrences
+// Determine the size of the XSeen display area
 
 XSeen.updateDisplaySize = function (sceneRoot) {
 	var MinimumValue = 50;
 	var size = Array();
-	size.width = (sceneRoot.clientWidth >= MinimumValue) ? sceneRoot.clientWidth : MinimumValue;
-	size.height = (sceneRoot.clientHeight >= MinimumValue) ? sceneRoot.clientHeight : MinimumValue;
+	size.width = sceneRoot.offsetWidth;
+	size.height = sceneRoot.offsetHeight;
+	if (size.width < MinimumValue) {
+		var t = sceneRoot.getAttribute('width');
+		if (t < MinimumValue) {t = MinimumValue;}
+		size.width = t;
+	}
+	if (size.height < MinimumValue) {
+		var t = sceneRoot.getAttribute('height');
+		if (t < MinimumValue) {t = MinimumValue;}
+		size.height = t;
+	}
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
@@ -1321,9 +1330,9 @@ XSeen.Parser = {
  * Based on code originally provided by
  * Philip Taylor: http://philip.html5.org
  *
- * Removed code for
- * - ActiveX 
- * - Flash
+ *	0.6.2: Fixed Camera and navigation bug
+ *	0.6.3: Added Plane and Ring
+ *	0.6.4: Fixed size determination bug
  * 
  */
 
@@ -1333,12 +1342,12 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 0,
+					'_Patch'		: 4,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 0,
+					'_Release'		: 5,
 					'_Version'		: '',
-					'_RDate'		: '2017-12-28',
-					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseeb.org/docs' target='_blank'>Documentation</a>."],
+					'_RDate'		: '2017-03-10',
+					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
 					};
@@ -1384,12 +1393,20 @@ XSeen.Runtime = {
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
 			'Animate'				: function() {	// XSeen animation loop control
-										console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
+										//console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
 										if (XSeen.Runtime.isStereographic) {
 											requestAnimationFrame (XSeen.Runtime.Animate);
 											XSeen.RenderFrame();
 										} else {
 											XSeen.Runtime.Renderer.animate (XSeen.RenderFrame);
+										}
+									},
+			'Resize'				: function () {
+										if (!XSeen.Runtime.isStereographic) {
+											XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);
+											XSeen.Runtime.Camera.aspect = XSeen.Runtime.Size.width / XSeen.Runtime.Size.height;
+											XSeen.Runtime.Camera.updateProjectionMatrix();
+											XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height)
 										}
 									},
 			'rulesets'				: [],			// Style ruleset array structure
@@ -1425,7 +1442,6 @@ XSeen.RenderFrame = function()
 		XSeen.Update.Mixers (XSeen.Runtime);
 		//XSeen.Update.Tween (XSeen.Runtime);
 
-		//console.log ('Calling THREE renderer ' + XSeen.Runtime.currentTime);
 		XSeen.Runtime.Renderer.render( XSeen.Runtime.SCENE, XSeen.Runtime.Camera );
 	};
 	
@@ -1455,8 +1471,6 @@ XSeen.Update = {
 		},
 	'Camera'	: function (Runtime)
 		{
-//			var viewpoint = scene.stacks.Viewpoints.getActive();
-//			XSeen.Navigation[viewpoint.motion] (viewpoint.motionspeed, deltaT, scene, scene.element._xseen.renderer.activeCamera);
 			if (!Runtime.rendererHasControls) {
 				Runtime.CameraControl.update();
 			}
@@ -1601,6 +1615,7 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
+			//if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) e._xseen.track = 'orbit';
 			e._xseen.sceneInfo.Camera.position.set (
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
@@ -1622,8 +1637,8 @@ XSeen.Tags.camera = {
 				} else {									// TODO: create split screen and navigation mode
 					XSeen.LogWarn ('VR display requested, but not capable. Rolling over to stereographic');
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
-					e._xseen.sceneInfo.rendererHasControls = false;
 					e._xseen.sceneInfo.isStereographic = true;
+					e._xseen.sceneInfo.rendererHasControls = false;
 					//e._xseen.sceneInfo.Renderer.controls = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 					//e._xseen.sceneInfo.Renderer.controls = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.Renderer.domElement );
 					//controls.addEventListener( 'change', render ); // remove when using animation loop
@@ -1634,15 +1649,29 @@ XSeen.Tags.camera = {
 					//e._xseen.sceneInfo.Renderer.controls.enableZoom = true;
 				}
 			}
+			console.log("Setting up controls...");
+			console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
+			console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
+			console.log (" - Track: |"+e._xseen.track+"|");
 			XSeen.LogInfo("Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|; Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
 			if (!e._xseen.sceneInfo.rendererHasControls) {
 				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
 					// TODO: check for proper enabling of DeviceControls
+					console.log ('Adding DeviceOrientationControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
-				} else if (e._xseen.track == 'orbit' || (!e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device')) {
-					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.Renderer.domElement );
+				} else if (e._xseen.track == 'orbit' || (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation)) {
+					console.log ('Adding OrbitControls');
+					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 				} else if (e._xseen.track == 'trackball') {
+					console.log ('Trackball');
+				} else if (e._xseen.track == 'none') {
+					console.log ('No tracking');
+					e._xseen.sceneInfo.rendererHasControls = true;
+				} else {
+					console.log ('Something else');
 				}
+			} else {
+				console.log ('Renderer has controls...');
 			}
 
 /* For handling events
@@ -1987,6 +2016,11 @@ XSeen.Tags.scene = {
 				});
 			//XSeen.Parser.dumpTable ();
 //			XSeen.LogDebug("Rendered all elements -- Starting animation");
+
+/*
+ *	Add an event listener to this node for resize events
+ */
+			window.addEventListener ('resize', XSeen.Runtime.Resize, false);
 /*
  * TODO: Need to get current top-of-stack for all stack-bound nodes and set them as active.
  *	This only happens the initial time for each XSeen tag in the main HTML file
@@ -2005,6 +2039,12 @@ XSeen.Tags.scene = {
 				//XSeen.Runtime.Renderer.animate( XSeen.RenderFrame() );
 				XSeen.Runtime.Animate();
 			}
+		},
+	'resize': function () {
+			var thisTag = XSeen.Runtime.RootTag;
+			XSeen.Runtime.Camera.aspect = thisTag.offsetWidth / thisTag.offsetHeight;
+			XSeen.Runtime.Camera.updateProjectionMatrix();
+			XSeen.Runtime.Renderer.setSize (thisTag.offsetWidth, thisTag.offsetHeight)
 		},
 	'event'	: function (ev, attr)
 		{
@@ -2046,10 +2086,14 @@ XSeen.Tags.Solids = {};
 XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
-				e._xseen.texture = XSeen.loader.ImageLoader.load(e._xseen.attributes['map']);
+//				e._xseen.texture = XSeen.Loader.load(e._xseen.attributes['map']);
+				e._xseen.texture = new THREE.TextureLoader().load (e._xseen.attributes['map']);
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
+			e._xseen.attributes['side_THREE'] = THREE.FrontSide;
+			if (e._xseen.attributes['side'] == 'back') e._xseen.attributes['side_THREE'] = THREE.BackSide;
+			if (e._xseen.attributes['side'] == 'both') e._xseen.attributes['side_THREE'] = THREE.DoubleSide;
 
 			var parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
@@ -2063,6 +2107,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
+							'side'					: e._xseen.attributes['side_THREE'],
 							'wireframe'				: e._xseen.attributes['wireframe'],
 							'wireframeLinewidth'	: e._xseen.attributes['wireframe-linewidth'],
 							};
@@ -2250,6 +2295,59 @@ XSeen.Tags.torus = {
 	'event'	: function (ev, attr) {},
 };
 
+/*
+ * 2D Shapes
+ */
+ 
+XSeen.Tags.plane = {
+	'init'	: function (e,p)
+		{
+/*
+			var depth = Math.min (e._xseen.attributes.width, e._xseen.attributes.height) * .01
+			var geometry = new THREE.BoxGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										depth,
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										1
+									);
+ */
+
+			var geometry = new THREE.PlaneGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+									);
+			XSeen.Tags._solid (e, p, geometry);
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+XSeen.Tags.ring = {
+	'init'	: function (e,p)
+		{
+			var geometry = new THREE.RingGeometry(
+										e._xseen.attributes['radius-inner'], 
+										e._xseen.attributes['radius-outer'], 
+										e._xseen.attributes['segments-theta'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+			XSeen.Tags._solid (e, p, geometry);
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+
+/*
+ * ===================================================================================
+ * Parsing definitions
+ */
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'ambient-occlusion-map', dataType:'string', 'defaultValue':''})
@@ -2273,6 +2371,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.defineAttribute ({'name':'normal-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'roughness', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'side', dataType:'string', 'defaultValue':'front', enumeration:['front','back','both'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'spherical-env-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'wireframe', dataType:'boolean', 'defaultValue':false})
@@ -2411,6 +2510,36 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})
 		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':6});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'plane',
+						'init'	: XSeen.Tags.plane.init,
+						'fin'	: XSeen.Tags.plane.fin,
+						'event'	: XSeen.Tags.plane.event,
+						'tick'	: XSeen.Tags.plane.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})
+		.defineAttribute ({'name':'segments-width', dataType:'integer', 'defaultValue':1});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'ring',
+						'init'	: XSeen.Tags.ring.init,
+						'fin'	: XSeen.Tags.ring.fin,
+						'event'	: XSeen.Tags.ring.event,
+						'tick'	: XSeen.Tags.ring.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'radius-inner', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'radius-outer', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':0.0})
+		.defineAttribute ({'name':'theta-length', dataType:'float', 'defaultValue':360.0})
+		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})
+		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8});
 XSeen.Parser._addStandardAppearance (tag);
 // File: tags/style3d.js
 /*

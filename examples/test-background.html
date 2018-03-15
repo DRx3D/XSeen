@@ -18,23 +18,13 @@ See details at http://xseen.org/license
 			body { margin: 0; }
 			#xscene {border:0; }
 		</style>
-		<script src='../ExternalLibraries/XSeenExternals.js'></script>
-		<script src='../ExternalLibraries/WebVR.js'></script>
-		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
-		<script src='../Release/XSeen.js'></script>
-		<script src='../src/Logging.js'></script>
-		<script src='../src/tags/scene.js'></script>
-
-		<style>
-.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
-.xseen-screen-drag {cursor:move; border-top-width:10px; }
-.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
-.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
-#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
-		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../../Release/XSeen.js'></script>
 	</head>
 	<body>
-		<x-scene cubetest='false' style='position:absolute; top:0, left:0; width:100%; height:100%; '>
+		<x-scene>
 			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
 			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
 			<x-camera id='SceneCamera' type='vr' track='device' position='1 0 10'></x-camera>
@@ -59,9 +49,6 @@ See details at http://xseen.org/license
 			<x-tetrahedron radius='1.5' color='CornflowerBlue' position='+5 3 0'></x-tetrahedron>
 			<x-torus radius='2.0' tube='1.0' segments-radial='8' segments-tubular='6' color='purple' position='0 1 -3'></x-torus>
 		</x-scene>
-		<div id='XSeenLog'></div>
-
-		<script src='DoRestOfCubes.js'></script>
 	</body>
 </html>
 

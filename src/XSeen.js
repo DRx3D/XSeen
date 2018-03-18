@@ -15,6 +15,7 @@
  *	0.6.4: Fixed size determination bug
  *	0.6.5: Added Fog
  *	0.6.6: Added Metadata
+ *	0.6.7: Added tknot (torus knot)
  * 
  */
 
@@ -24,9 +25,9 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 6,
+					'_Patch'		: 7,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 7,
+					'_Release'		: 8,
 					'_Version'		: '',
 					'_RDate'		: '2017-03-17',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],

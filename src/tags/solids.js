@@ -226,6 +226,23 @@ XSeen.Tags.torus = {
 	'event'	: function (ev, attr) {},
 };
 
+XSeen.Tags.tknot = {
+	'init'	: function (e,p)
+		{
+			var geometry = new THREE.TorusKnotGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.tube, 
+										e._xseen.attributes['segments-tubular'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['wind-p'], 
+										e._xseen.attributes['wind-q'], 
+									);
+			XSeen.Tags._solid (e, p, geometry);
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
 /*
  * 2D Shapes
  */
@@ -441,6 +458,21 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})
 		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':6});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'tknot',
+						'init'	: XSeen.Tags.tknot.init,
+						'fin'	: XSeen.Tags.tknot.fin,
+						'event'	: XSeen.Tags.tknot.event
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'tube', dataType:'float', 'defaultValue':0.4})
+		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})
+		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':64})
+		.defineAttribute ({'name':'wind-p', dataType:'integer', 'defaultValue':2})
+		.defineAttribute ({'name':'wind-q', dataType:'integer', 'defaultValue':3});
 XSeen.Parser._addStandardAppearance (tag);
 
 tag = XSeen.Parser.defineTag ({

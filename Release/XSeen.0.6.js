@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.5-alpha.1+6_dd71b0d
- *  Built Thu Mar 15 16:34:15 2018
+ *  XSeen V0.6.6-alpha.1+7_dd71b0d
+ *  Built Sat Mar 17 18:58:25 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -690,6 +690,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
+console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
@@ -705,9 +706,20 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
+	console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		XSeen.Runtime.RootTag._xseen = {};
-		XSeen.Runtime.RootTag._xseen.sceneInfo = XSeen.Runtime;
+		console.log ('Defining _xseen');
+		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
+									'children'		: [],	// Children of this tag
+									'Metadata'		: [],	// Metadata for this tag
+									'tmp'			: [],	// tmp working space
+									'attributes'	: [],	// attributes for this tag
+									'animate'		: [],	// animatable attributes for this tag
+									'animation'		: [],	// array of animations on this tag
+									'properties'	: [],	// array of properties (active attribute values) on this tag
+									'class3d'		: [],	// 3D classes for this tag
+									'sceneInfo'		: XSeen.Runtime,	// Runtime data added to each tag
+									};
 	}
 	
 	// Set up display characteristics, especially for VR
@@ -758,6 +770,7 @@ XSeen.onLoad = function() {
 
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
+	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 // TODO: Start rendering loop
@@ -989,8 +1002,18 @@ XSeen.Parser = {
 				return;
 			} else {
 				tagEntry = XSeen.Parser.Table[tagName];
-				if (typeof(element._xseen) == 'undefined') {element._xseen = {};}
-				if (typeof(element._xseen.children) == 'undefined') {element._xseen.children = [];}
+				if (typeof(element._xseen) == 'undefined') {
+					element._xseen = {
+									'children'		: [],	// Children of this tag
+									'Metadata'		: [],	// Metadata for this tag
+									'tmp'			: [],	// tmp working space
+									'attributes'	: [],	// attributes for this tag
+									'animate'		: [],	// animatable attributes for this tag
+									'animation'		: [],	// array of animations on this tag
+									'properties'	: [],	// array of properties (active attribute values) on this tag
+									'class3d'		: [],	// 3D classes for this tag
+									};
+				}
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
 				console.log('Calling node: ' + tagName + '. Method: init');
@@ -1000,9 +1023,17 @@ XSeen.Parser = {
 
 			// Parse all of the children in order
 			for (element._xseen.parsingCount=0; element._xseen.parsingCount<element.childElementCount; element._xseen.parsingCount++) {
-				element.children[element._xseen.parsingCount]._xseen = {};
-				element.children[element._xseen.parsingCount]._xseen.children = [];
-				element.children[element._xseen.parsingCount]._xseen.sceneInfo = element._xseen.sceneInfo;
+				element.children[element._xseen.parsingCount]._xseen = {
+									'children'		: [],	// Children of this tag
+									'Metadata'		: [],	// Metadata for this tag
+									'tmp'			: [],	// tmp working space
+									'attributes'	: [],	// attributes for this tag
+									'animate'		: [],	// animatable attributes for this tag
+									'animation'		: [],	// array of animations on this tag
+									'properties'	: [],	// array of properties (active attribute values) on this tag
+									'class3d'		: [],	// 3D classes for this tag
+									'sceneInfo'		: element._xseen.sceneInfo,	// Runtime...
+									};
 				this.Parse (element.children[element._xseen.parsingCount], element);
 			}
 
@@ -1010,6 +1041,10 @@ XSeen.Parser = {
 				element.addEventListener ('XSeen', tagEntry.events);
 				//XSeen.LogInfo('Calling node: ' + tagName + '. Method: fin');
 				tagEntry.fin (element, parent);
+				if (typeof(element._xseen.tmp.meta) !== 'undefined' && element._xseen.tmp.meta.length != 0) {
+					element._xseen.Metadata = element._xseen.tmp.meta;
+					element._xseen.tmp.meta = [];
+				}
 				//XSeen.LogInfo('Return from node: ' + tagName + '. Method: fin');
 				if (typeof(tagEntry.eventHandlers.mutation) !== 'undefined') {
 					XSeen.Parser.AttributeObserver.observe (element, tagEntry.eventHandlers.mutation.options);
@@ -1030,14 +1065,9 @@ XSeen.Parser = {
 
 	'parseAttrs'	: function (element, tagObj)
 		{
-			element._xseen.attributes = [];	// attributes for this tag
-			element._xseen.animate = [];	// animatable attributes for this tag
-			element._xseen.animation = [];	// array of animations on this tag
-			element._xseen.properties = [];	// array of properties (active attribute values) on this tag
 			element._xseen.parseAll = false;
 			var classt = element.getAttribute('class3d');					// Get list of class3d (really IDs)
 			var classes3d = (classt === null) ? [] : classt.split(' ');		// and split it (if defined)
-			element._xseen.class3d = [];
 			for (var ii=0; ii<classes3d.length; ii++) {						// Attaching all referenced class definitions to tag
 				element._xseen.class3d.push (element._xseen.sceneInfo.StyleRules.idLookup[classes3d[ii]]);
 				//element._xseen.sceneInfo.mutation.useClass3d (element, classes3d[ii]);
@@ -1336,6 +1366,7 @@ XSeen.Parser = {
  *	0.6.3: Added Plane and Ring
  *	0.6.4: Fixed size determination bug
  *	0.6.5: Added Fog
+ *	0.6.6: Added Metadata
  * 
  */
 
@@ -1345,11 +1376,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 5,
+					'_Patch'		: 6,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 6,
+					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-10',
+					'_RDate'		: '2017-03-17',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -1923,6 +1954,115 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'direction', dataType:'vec3', 'defaultValue':[0,0,-1], 'isAnimatable':true})
 		.defineAttribute ({'name':'cutoffangle', dataType:'float', 'defaultValue':3.14, 'isAnimatable':true})
 		.defineAttribute ({'name':'beamwidth', dataType:'float', 'defaultValue':1.57, 'isAnimatable':true})
+		.addTag();
+// File: tags/metadata.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2017, Daly Realism, Los Angeles
+ * Dual licensed under the MIT and GPL
+ */
+
+/*
+ * The metadata tag defines metadata for an XSeen tag. Each metadata tag can define an individual value
+ * or a collection of values stored as children elements. Metadata tags do not contain values.
+ * A metadata structure is created by nesting additional metadata tags as children of a metadata tag.
+ * All global HTML attributes are supported (and ignored).
+ *
+ * Changes to any metadata tag causes the entire metadata structure to be rebuilt and resaved
+ * to the parent tag's data structure.
+ *
+ * Metadata is accessible with the getMetadata method called on the XSeen tag. It optionally
+ * takes the name of the top-level metadata element name. Metadata tags without the 'name'
+ * attribute create ascending array elements (using <object>.push).
+ *
+ */
+
+ 
+/*
+ * Need to parse out name and save it. Creation of the metadata structure is not done until 'fin' to
+ * allow for children
+ *
+ *	Goal is to end up with a structure that for each child level there is an array element for each metadata tag
+ *	and if 'name' is defined, there is exist a reference to that array element. Parent tag contains the entire
+ *	structure of their children.
+ *	<[parent] ...>
+ *		<metadata name='c1' value='1'></metadata>
+ *		<metadata name='c2'>
+ *			<metadata name='c2.1' value='-1'></metadata>
+ *			<metadata name='c2.2' value='test'></metadata>
+ *			<metadata value='no name'></metadata>
+ *		</metadata>
+ *		<metadata name='c3' value='label1'></metadata>
+ *			<metadata name='c3.1' value='-1'></metadata>
+ *			<metadata name='c3.2' value='test'></metadata>
+ *		</metadata>
+ *	</[parent]>
+ *
+ * produces:
+ *	[parent].Metadata(
+ *						[0]		=> '1',
+ *						[1]		=> (
+ *									[0]		=> '',
+ *									[1]		=> '-1',
+ *									[2]		=> 'test',
+ *									[3]		=> 'no name',
+ *									['c2.1']=> (-->[1]),
+ *									['c2.2']=> (-->[2])
+ *									)
+ *						[2]		=> (
+ *									[0]		=> 'label1'
+ *									[1]		=> '-1',
+ *									[2]		=> 'test',
+ *									['c3.1']=> (-->[1]),
+ *									['c3.2']=> (-->[2])
+ *									)
+ *						['c1']	=> (-->[0]),
+ *						['c2']	=> (-->[1]),
+ *						['c3']	=> (-->[2])
+ *					]
+ * Metadata init
+ */
+XSeen.Tags.metadata = {
+	'init'	: function (e, p) 
+		{
+			// Get name, value, and type
+			// Parse value according to 'type'
+			// Save this value in e._xseen.Metadata['name' : value]
+			e._xseen.tmp.meta = [];
+			e._xseen.tmp.meta.push (e._xseen.attributes.value);
+			if (typeof(p._xseen.tmp.meta) == 'undefined') {p._xseen.tmp.meta = [];}
+		},
+	'fin'	: function (e, p) 
+		{
+			if (e._xseen.tmp.meta.length == 1) {		// this is a leaf tag
+				p._xseen.tmp.meta.push (e._xseen.tmp.meta[0]);
+				e._xseen.Metadata.push (e._xseen.tmp.meta[0]);
+			} else {
+				p._xseen.tmp.meta.push (e._xseen.tmp.meta);
+				e._xseen.Metadata.push (e._xseen.tmp.meta);
+			}
+			if (e._xseen.attributes.name != '') {p._xseen.tmp.meta[e._xseen.attributes.name] = p._xseen.tmp.meta[p._xseen.tmp.meta.length-1];}
+			e._xseen.tmp.meta = [];
+		},
+	'event'	: function (ev, attr) {},
+	'changeValue'	: function (ev, attr) 
+		{
+			// Change this value and reparse Metadata tree
+		},
+};
+
+// Add tag and attributes to Parsing table
+XSeen.Parser.defineTag ({
+						'name'	: 'metadata',
+						'init'	: XSeen.Tags.metadata.init,
+						'fin'	: XSeen.Tags.metadata.fin,
+						'event'	: XSeen.Tags.metadata.event
+						})
+		.defineAttribute ({'name':'name', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'value', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'string', enumeration:['string','integer', 'float', 'vector', 'object'], isCaseInsensitive:true, 'isAnimatable':false})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.metadata.changeValue}]})
 		.addTag();
 // File: tags/model.js
 /*

@@ -21,95 +21,20 @@ See details at http://xseen.org/license
 		<script src='../../Release/XSeenExternals.js'></script>
 		<script src='../../Release/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
-		<script src='../../Release/XSeen.js'></script>
+		<script src='../Release/XSeen.js'></script>
 		<script src='../src/onLoad.js'></script>
 		<script src='../src/Tag.js'></script>
-		<script src='../src/tags/scene.js'></script>
+		<script src='../src/tags/camera.js'></script>
 		<script src='../src/tags/metadata.js'></script>
+		<script src='../src/tags/scene.js'></script>
 	</head>
 	<body>
 		<x-scene>
+			<x-camera id='SceneCamera' type='perspective' track='orbit' position='1 0 -10'></x-camera>
 			<x-metadata name='test' value='1'>
 				<x-metadata name='sub1' value='10'></x-metadata>
 				<x-metadata name='sub2' value='20'></x-metadata>
 			</x-metadata>
-			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
-<!--
-			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
-			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
-			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
-			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
-			<x-fog near='2' far='40'></x-fog>
-
-			<x-group rotation='0 3.14 0'>
-				<x-cone class3d='geom' color='magenta' position='+2 0 5'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 4'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 3'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 2'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 2'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 1'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 0'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -1'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -2'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -3'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -4'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -5'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -6'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -7'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -8'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -9'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -10'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -11'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -12'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -13'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -14'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -15'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -16'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -17'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -18'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -19'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -20'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -21'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -22'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -23'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -24'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -25'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -26'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -27'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -28'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -29'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -30'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -31'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -32'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -33'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -34'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -35'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -36'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -37'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -38'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -39'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -40'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -41'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -42'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -43'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -44'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -45'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -46'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -47'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -48'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -49'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -50'></x-cone>
-
-				<x-cone class3d='geom' color='magenta' position='+2 0 -60'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -70'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -80'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -90'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -100'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -150'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -200'></x-cone>
-				<x-cone class3d='geom' color='magenta' position='+2 0 -500'></x-cone>
-			</x-group>
--->
 		</x-scene>
 	</body>
 </html>

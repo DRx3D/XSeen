@@ -16,6 +16,8 @@
  *	0.6.5: Added Fog
  *	0.6.6: Added Metadata
  *	0.6.7: Added tknot (torus knot)
+ *	0.6.8: Added PBR
+ *	0.6.9: Preliminary fix for display size
  * 
  */
 
@@ -25,11 +27,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 7,
+					'_Patch'		: 9,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 8,
+					'_Release'		: 10,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-17',
+					'_RDate'		: '2017-03-18',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

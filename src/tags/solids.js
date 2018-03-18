@@ -17,16 +17,51 @@ XSeen.Tags.Solids = {};
 XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
-//				e._xseen.texture = XSeen.Loader.load(e._xseen.attributes['map']);
 				e._xseen.texture = new THREE.TextureLoader().load (e._xseen.attributes['map']);
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
-			e._xseen.attributes['side_THREE'] = THREE.FrontSide;
-			if (e._xseen.attributes['side'] == 'back') e._xseen.attributes['side_THREE'] = THREE.BackSide;
-			if (e._xseen.attributes['side'] == 'both') e._xseen.attributes['side_THREE'] = THREE.DoubleSide;
+			if (e._xseen.attributes['env-map'] == 'desert') {
+				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
+														.setPath('Resources/textures/')
+														.load ([
+															'desert_1_right.jpg',
+															'desert_1_left.jpg',
+															'desert_1_top.jpg',
+															'desert_1_bottom.jpg',
+															'desert_1_front.jpg',
+															'desert_1_back.jpg',
+															]);
+			} else if (e._xseen.attributes['env-map'] == 'forest') {
+				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
+														.setPath('Resources/textures/')
+														.load ([
+															'forest_1_right.jpg',
+															'forest_1_left.jpg',
+															'forest_1_top.jpg',
+															'forest_1_bottom.jpg',
+															'forest_1_front.jpg',
+															'forest_1_back.jpg',
+															]);
+			} else if (e._xseen.attributes['env-map'] !== '') {
+				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
+														.setPath('Resources/textures/')
+														.load ([
+															'gray99-right.jpg',
+															'gray99-left.jpg',
+															'gray99-top.jpg',
+															'gray99-bottom.jpg',
+															'gray99-front.jpg',
+															'gray99-back.jpg',
+															]);
+			}
+			e._xseen.properties['side'] = THREE.FrontSide;
+			if (e._xseen.attributes['side'] == 'back') e._xseen.properties['side'] = THREE.BackSide;
+			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
 
-			var parameters = {
+			var parameters, appearance;
+			if (e._xseen.attributes.type == 'phong') {
+				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
 							'color'					: e._xseen.attributes['color'],
@@ -38,32 +73,80 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
-							'side'					: e._xseen.attributes['side_THREE'],
+							'side'					: e._xseen.properties['side'],
 							'wireframe'				: e._xseen.attributes['wireframe'],
 							'wireframeLinewidth'	: e._xseen.attributes['wireframe-linewidth'],
+// General material properties
+							'emissiveIntensity'		: e._xseen.attributes['emissive-intensity'],
+							'opacity'				: e._xseen.attributes['opacity'],
+							'transparent'			: e._xseen.attributes['transparent'],
+// General material properties that only apply to Phong or PBR
+							'reflectivity'			: e._xseen.attributes['reflectivity'],
+							'refractionRatio'		: e._xseen.attributes['refraction-ratio'],
+// Phong properties
+							'shininess'				: e._xseen.attributes['shininess'],
+							'specular'				: e._xseen.attributes['specular'],
 							};
-			var appearance = new THREE.MeshPhongMaterial(parameters);
+				appearance = new THREE.MeshPhongMaterial(parameters);
+			} else if (e._xseen.attributes.type == 'pbr') {
+				parameters = {
+							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
+							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
+							'color'					: e._xseen.attributes['color'],
+							'displacementMap'		: e._xseen.attributes['displacement-map'],
+							'displacementScale'		: e._xseen.attributes['displacement-scale'],
+							'displacementBias'		: e._xseen.attributes['displacement-bias'],
+							'emissive'				: e._xseen.attributes['emissive'],
+							'envMap'				: e._xseen.properties.envMap,
+							'map'					: e._xseen.texture,
+							'normalMap'				: e._xseen.attributes['normal-map'],
+							'normalScale'			: e._xseen.attributes['normal-scale'],
+							'side'					: e._xseen.properties['side'],
+							'wireframe'				: e._xseen.attributes['wireframe'],
+							'wireframeLinewidth'	: e._xseen.attributes['wireframe-linewidth'],
+// General material properties
+							'emissiveIntensity'		: e._xseen.attributes['emissive-intensity'],
+							'opacity'				: e._xseen.attributes['opacity'],
+							'transparent'			: e._xseen.attributes['transparent'],
+// General material properties that only apply to Phong or PBR
+							'reflectivity'			: e._xseen.attributes['reflectivity'],
+							'refractionRatio'		: e._xseen.attributes['refraction-ratio'],
+// PBR properties
+							'metalness'				: e._xseen.attributes['metalness'],
+							'roughness'				: e._xseen.attributes['roughness'],
+							};
+				appearance = new THREE.MeshPhysicalMaterial(parameters);
+			} else {
+				parameters = {
+							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
+							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
+							'color'					: e._xseen.attributes['color'],
+							'displacementMap'		: e._xseen.attributes['displacement-map'],
+							'displacementScale'		: e._xseen.attributes['displacement-scale'],
+							'displacementBias'		: e._xseen.attributes['displacement-bias'],
+							'emissive'				: e._xseen.attributes['emissive'],
+							'envMap'				: e._xseen.attributes['env-map'],
+							'map'					: e._xseen.texture,
+							'normalMap'				: e._xseen.attributes['normal-map'],
+							'normalScale'			: e._xseen.attributes['normal-scale'],
+							'side'					: e._xseen.properties['side'],
+							'wireframe'				: e._xseen.attributes['wireframe'],
+							'wireframeLinewidth'	: e._xseen.attributes['wireframe-linewidth'],
+// General material properties
+							'emissiveIntensity'		: e._xseen.attributes['emissive-intensity'],
+							'opacity'				: e._xseen.attributes['opacity'],
+							'transparent'			: e._xseen.attributes['transparent'],
+							};
+				appearance = new THREE.MeshBasicMaterial(parameters);
+			}
 			//geometry.needsUpdate = true;
 	
 			var mesh = new THREE.Mesh (geometry, appearance);
 			mesh.userData = e;
 			XSeen.Tags._setSpace(mesh, e._xseen.attributes);
-/*
-			mesh.position.set (
-							e._xseen.attributes.position[0],
-							e._xseen.attributes.position[1],
-							e._xseen.attributes.position[2]);
- */
 			p._xseen.sceneInfo.selectable.push(mesh);
 			mesh.name = 'Solid: ' + e.id;
 
-/*
-			var group = new THREE.Group();			// TODO: Using Group to contain mesh. Perhaps not necessary?
-			group.name = 'Solid: ' + e.id;
-			group.add (mesh);
-			e._xseen.tagObject = group;
-			p._xseen.children.push(group);
- */
 			e._xseen.tagObject = mesh;
 			p._xseen.children.push(mesh);
 
@@ -73,8 +156,6 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'color') {				// Different operation for each attribute
-//					e._xseen.tagObject.children[0].material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
-//					e._xseen.tagObject.children[0].material.needsUpdate = true;
 					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
 					e._xseen.tagObject.material.needsUpdate = true;
 				} else {
@@ -250,18 +331,6 @@ XSeen.Tags.tknot = {
 XSeen.Tags.plane = {
 	'init'	: function (e,p)
 		{
-/*
-			var depth = Math.min (e._xseen.attributes.width, e._xseen.attributes.height) * .01
-			var geometry = new THREE.BoxGeometry(
-										e._xseen.attributes.width, 
-										e._xseen.attributes.height, 
-										depth,
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-										1
-									);
- */
-
 			var geometry = new THREE.PlaneGeometry(
 										e._xseen.attributes.width, 
 										e._xseen.attributes.height, 
@@ -295,19 +364,41 @@ XSeen.Tags.ring = {
 /*
  * ===================================================================================
  * Parsing definitions
+ *
+ * //1 ==> Commented out during PBR development
  */
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+
+// General material properties
+		.defineAttribute ({'name':'emissive-intensity', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'opacity', dataType:'float', 'defaultValue':1.0})
+		.defineAttribute ({'name':'transparent', dataType:'boolean', 'defaultValue':false})
+
+// General material properties that only apply to Phong or PBR
+		.defineAttribute ({'name':'reflectivity', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'refraction-ratio', dataType:'float', 'defaultValue':0.98})
+
+// PBR properties
+		.defineAttribute ({'name':'metalness', dataType:'float', 'defaultValue':0.5})
+		.defineAttribute ({'name':'roughness', dataType:'float', 'defaultValue':0.5})
+
+// Phong properties
+		.defineAttribute ({'name':'shininess', dataType:'float', 'defaultValue':30})
+		.defineAttribute ({'name':'specular', dataType:'color', 'defaultValue':'x111111'})
+
+// Uncategorized properties
 		.defineAttribute ({'name':'ambient-occlusion-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'ambient-occlusion-map-intensity', dataType:'float', 'defaultValue':1.0})
-		.defineAttribute ({'name':'ambient-occlusion-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
-		.defineAttribute ({'name':'ambient-occlusion-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
+//1		.defineAttribute ({'name':'ambient-occlusion-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
+//1		.defineAttribute ({'name':'ambient-occlusion-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'color', dataType:'color', 'defaultValue':'white'})
 		.defineAttribute ({'name':'displacement-bias', dataType:'float', 'defaultValue':0.5})
 		.defineAttribute ({'name':'displacement-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'displacement-scale', dataType:'float', 'defaultValue':1.0})
-		.defineAttribute ({'name':'displacement-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
-		.defineAttribute ({'name':'displacement-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
+//1		.defineAttribute ({'name':'displacement-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
+//1		.defineAttribute ({'name':'displacement-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'emissive', dataType:'color', 'defaultValue':'black'})
 		.defineAttribute ({'name':'env-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'fog', dataType:'boolean', 'defaultValue':true})
@@ -315,13 +406,12 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.defineAttribute ({'name':'metalness', dataType:'float', 'defaultValue':0.0})
 		.defineAttribute ({'name':'normal-map', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'normal-scale', dataType:'vec2', 'defaultValue':[1,1]})
-		.defineAttribute ({'name':'normal-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
-		.defineAttribute ({'name':'normal-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
-		.defineAttribute ({'name':'repeat', dataType:'vec2', 'defaultValue':[1,1]})
-		.defineAttribute ({'name':'roughness', dataType:'float', 'defaultValue':0.5})
+//1		.defineAttribute ({'name':'normal-texture-offset', dataType:'vec2', 'defaultValue':[0,0]})
+//1		.defineAttribute ({'name':'normal-texture-repeat', dataType:'vec2', 'defaultValue':[1,1]})
+//1		.defineAttribute ({'name':'repeat', dataType:'vec2', 'defaultValue':[1,1]})
 		.defineAttribute ({'name':'side', dataType:'string', 'defaultValue':'front', enumeration:['front','back','both'], isCaseInsensitive:true})
-		.defineAttribute ({'name':'spherical-env-map', dataType:'string', 'defaultValue':''})
-		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':''})
+//1		.defineAttribute ({'name':'spherical-env-map', dataType:'string', 'defaultValue':''})
+//1		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'wireframe', dataType:'boolean', 'defaultValue':false})
 		.defineAttribute ({'name':'wireframe-linewidth', dataType:'integer', 'defaultValue':2})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.Solids._changeAttribute}]})

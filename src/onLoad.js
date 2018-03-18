@@ -69,6 +69,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
+console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
@@ -84,20 +85,33 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
+	console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		XSeen.Runtime.RootTag._xseen = {};
-		XSeen.Runtime.RootTag._xseen.sceneInfo = XSeen.Runtime;
+		console.log ('Defining _xseen');
+		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
+									'children'		: [],	// Children of this tag
+									'Metadata'		: [],	// Metadata for this tag
+									'tmp'			: [],	// tmp working space
+									'attributes'	: [],	// attributes for this tag
+									'animate'		: [],	// animatable attributes for this tag
+									'animation'		: [],	// array of animations on this tag
+									'properties'	: [],	// array of properties (active attribute values) on this tag
+									'class3d'		: [],	// 3D classes for this tag
+									'sceneInfo'		: XSeen.Runtime,	// Runtime data added to each tag
+									};
 	}
 	
 	// Set up display characteristics, especially for VR
-	navigator.getVRDisplays()
-		.then( function ( displays ) {
-			if ( displays.length > 0 ) {
-				XSeen.Runtime.isVrCapable = true;
-			} else {
-				XSeen.Runtime.isVrCapable = false;
-			}
-		} );
+	if (navigator.getVRDisplays) {
+		navigator.getVRDisplays()
+			.then( function ( displays ) {
+				if ( displays.length > 0 ) {
+					XSeen.Runtime.isVrCapable = true;
+				} else {
+					XSeen.Runtime.isVrCapable = false;
+				}
+			} );
+	}
 /*
 	// Stereo camera effect -- from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
 	var x_effect = new THREE.StereoEffect(Renderer);
@@ -135,6 +149,7 @@ XSeen.onLoad = function() {
 
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
+	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 // TODO: Start rendering loop

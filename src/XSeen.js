@@ -13,6 +13,8 @@
  *	0.6.2: Fixed Camera and navigation bug
  *	0.6.3: Added Plane and Ring
  *	0.6.4: Fixed size determination bug
+ *	0.6.5: Added Fog
+ *	0.6.6: Added Metadata
  * 
  */
 
@@ -22,11 +24,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 4,
+					'_Patch'		: 6,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 5,
+					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-10',
+					'_RDate'		: '2017-03-17',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

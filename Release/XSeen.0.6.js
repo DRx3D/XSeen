@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.4-alpha.1+5_ff8989a
- *  Built Mon Mar 12 08:23:10 2018
+ *  XSeen V0.6.5-alpha.1+6_dd71b0d
+ *  Built Thu Mar 15 16:34:15 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -711,14 +711,16 @@ XSeen.onLoad = function() {
 	}
 	
 	// Set up display characteristics, especially for VR
-	navigator.getVRDisplays()
-		.then( function ( displays ) {
-			if ( displays.length > 0 ) {
-				XSeen.Runtime.isVrCapable = true;
-			} else {
-				XSeen.Runtime.isVrCapable = false;
-			}
-		} );
+	if (navigator.getVRDisplays) {
+		navigator.getVRDisplays()
+			.then( function ( displays ) {
+				if ( displays.length > 0 ) {
+					XSeen.Runtime.isVrCapable = true;
+				} else {
+					XSeen.Runtime.isVrCapable = false;
+				}
+			} );
+	}
 /*
 	// Stereo camera effect -- from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
 	var x_effect = new THREE.StereoEffect(Renderer);
@@ -1333,6 +1335,7 @@ XSeen.Parser = {
  *	0.6.2: Fixed Camera and navigation bug
  *	0.6.3: Added Plane and Ring
  *	0.6.4: Fixed size determination bug
+ *	0.6.5: Added Fog
  * 
  */
 
@@ -1342,9 +1345,9 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 4,
+					'_Patch'		: 5,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 5,
+					'_Release'		: 6,
 					'_Version'		: '',
 					'_RDate'		: '2017-03-10',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
@@ -1700,6 +1703,56 @@ XSeen.Parser.defineTag ({
 		.addSceneSpace()
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'perspective', enumeration:['perspective','stereo','orthographic','vr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'track', dataType:'string', 'defaultValue':'none', enumeration:['none', 'orbit', 'fly', 'examine', 'trackball', 'device'], isCaseInsensitive:true})
+		.addTag();
+// File: tags/fog.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2017, Daly Realism, Los Angeles
+ *
+ * portions extracted from or inspired by
+ * X3DOM JavaScript Library
+ * http://www.x3dom.org
+ *
+ * (C)2009 Fraunhofer IGD, Darmstadt, Germany
+ * Dual licensed under the MIT and GPL
+ */
+
+ // Control Node definitions
+
+XSeen.Tags.fog = {
+	'init'	: function (e, p) 
+		{
+			var fog = new THREE.Fog (
+						e._xseen.attributes.color,
+						e._xseen.attributes.near,
+						e._xseen.attributes.far);
+
+			e._xseen.tagObject = fog;
+			e._xseen.sceneInfo.SCENE.fog = fog;
+		},
+	'fin'	: function (e, p) {},
+	'event'	: function (ev, attr)
+		{
+		},
+
+	'tick'	: function (systemTime, deltaTime)
+		{
+		},
+};
+
+// Add tag and attributes to Parsing table
+XSeen.Parser.defineTag ({
+						'name'	: 'fog',
+						'init'	: XSeen.Tags.fog.init,
+						'fin'	: XSeen.Tags.fog.fin,
+						'event'	: XSeen.Tags.fog.event,
+						'tick'	: XSeen.Tags.fog.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'color', dataType:'color', 'defaultValue':'white'})
+		.defineAttribute ({'name':'near', dataType:'float', 'defaultValue':'1'})
+		.defineAttribute ({'name':'far', dataType:'float', 'defaultValue':'1'})
 		.addTag();
 // File: tags/group.js
 /*

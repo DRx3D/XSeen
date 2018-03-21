@@ -21,40 +21,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
-			if (e._xseen.attributes['env-map'] == 'desert') {
-				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
-														.setPath('Resources/textures/')
-														.load ([
-															'desert_1_right.jpg',
-															'desert_1_left.jpg',
-															'desert_1_top.jpg',
-															'desert_1_bottom.jpg',
-															'desert_1_front.jpg',
-															'desert_1_back.jpg',
-															]);
-			} else if (e._xseen.attributes['env-map'] == 'forest') {
-				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
-														.setPath('Resources/textures/')
-														.load ([
-															'forest_1_right.jpg',
-															'forest_1_left.jpg',
-															'forest_1_top.jpg',
-															'forest_1_bottom.jpg',
-															'forest_1_front.jpg',
-															'forest_1_back.jpg',
-															]);
-			} else if (e._xseen.attributes['env-map'] !== '') {
-				e._xseen.properties.envMap = new THREE.CubeTextureLoader()
-														.setPath('Resources/textures/')
-														.load ([
-															'gray99-right.jpg',
-															'gray99-left.jpg',
-															'gray99-top.jpg',
-															'gray99-bottom.jpg',
-															'gray99-front.jpg',
-															'gray99-back.jpg',
-															]);
-			}
+			e._xseen.properties.envMap = XSeen.Tags._process_envMap(e._xseen.attributes['env-map']);
 			e._xseen.properties['side'] = THREE.FrontSide;
 			if (e._xseen.attributes['side'] == 'back') e._xseen.properties['side'] = THREE.BackSide;
 			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
@@ -115,6 +82,22 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'metalness'				: e._xseen.attributes['metalness'],
 							'roughness'				: e._xseen.attributes['roughness'],
 							};
+				parameters = {
+							'color'					: e._xseen.attributes['color'],
+							'emissive'				: 0x000000,
+							'envMap'				: e._xseen.properties.envMap,
+							'side'					: THREE.FrontSide,
+// General material properties
+							'emissiveIntensity'		: 0,
+							'opacity'				: 1.,
+							'transparent'			: false,
+// General material properties that only apply to Phong or PBR
+							'reflectivity'			: .5,
+							'refractionRatio'		: .98,
+// PBR properties
+							'metalness'				: 1,
+							'roughness'				: .5,
+							};
 				appearance = new THREE.MeshPhysicalMaterial(parameters);
 			} else {
 				parameters = {
@@ -158,13 +141,56 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				if (attributeName == 'color') {				// Different operation for each attribute
 					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
 					e._xseen.tagObject.material.needsUpdate = true;
+				} else if (attributeName == 'env-map') {				// Different operation for each attribute
+					e._xseen.properties.envMap = XSeen.Tags._process_envMap(value);
+					e._xseen.tagObject.material.envMap = e._xseen.properties.envMap;
+					e._xseen.tagObject.material.needsUpdate = true;
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
 			} else {
 				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
 			}
-
+};
+XSeen.Tags._process_envMap = function (envMapUrl) {
+			var envMap;
+			if (envMapUrl == 'desert') {
+				envMap = new THREE.CubeTextureLoader()
+											.setPath('Resources/textures/')
+											.load ([
+													'desert_1_right.jpg',
+													'desert_1_left.jpg',
+													'desert_1_top.jpg',
+													'desert_1_bottom.jpg',
+													'desert_1_front.jpg',
+													'desert_1_back.jpg',
+											]);
+			} else if (envMapUrl == 'forest') {
+				envMap = new THREE.CubeTextureLoader()
+											.setPath('Resources/textures/')
+											.load ([
+													'forest_1_right.jpg',
+													'forest_1_left.jpg',
+													'forest_1_top.jpg',
+													'forest_1_bottom.jpg',
+													'forest_1_front.jpg',
+													'forest_1_back.jpg',
+											]);
+			} else if (envMapUrl == 'gray') {
+				envMap = new THREE.CubeTextureLoader()
+											.setPath('Resources/textures/')
+											.load ([
+													'gray99-right.png',
+													'gray99-left.png',
+													'gray99-top.png',
+													'gray99-bottom.png',
+													'gray99-front.png',
+													'gray99-back.png',
+											]);
+			} else {
+				envMap = null;
+			}
+			return envMap;
 };
 
 XSeen.Tags.box = {
@@ -386,7 +412,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 
 // Phong properties
 		.defineAttribute ({'name':'shininess', dataType:'float', 'defaultValue':30})
-		.defineAttribute ({'name':'specular', dataType:'color', 'defaultValue':'x111111'})
+		.defineAttribute ({'name':'specular', dataType:'color', 'defaultValue':'#111111'})
 
 // Uncategorized properties
 		.defineAttribute ({'name':'ambient-occlusion-map', dataType:'string', 'defaultValue':''})

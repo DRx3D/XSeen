@@ -85,6 +85,61 @@ XSeen.Loader = {
 			this.urlQueue.push( {'url':url, 'type':type, 'hint':hint, 'userdata':userdata, 'success':success, 'failure':failed, 'progress':progress} );
 			this.loadNextUrl();
 		},
+/*
+ * Asynchronously loads a texture cube and saves the result
+ *	Arguments:
+ *		pathUrl		The URL to the directory. This may be empty.
+ *		filenames	An array of six URLs/filenames - one for each cube face. The order is 
+ *					+X, -X, +Y, -Y, +Z, -Z. If pathUrl is non-empty, then it is prepended 
+ *					to each of these elements. If an element is empty (''), or the entire array 
+ *					is undefined; then the face name (px, nx, py, ny, pz, nz) is used. 
+ *					If 'pathUrl' and 'filesnames' are undefined, then no texture is loaded.
+ *		filetypes	The type of the image file. It can either be a single value or an array of six values.
+ *					Each value must start with the character after the file name (e.g., '.').
+ *					It is appended to the URL for each face.
+ *		cube		Where the loaded texture cube is stored
+ *		dirtyFlag	Set when the texture is loaded so the rendering system can incorporate the result
+ */
+	'TextureCube'		: function (pathUri, filenames, filetypes, cube, dirtyFlag)
+		{
+			var urlTypes, urls, textureCube;
+			var _Success = function (cube, dirtyFlag) {
+				var texture = cube;
+				var dirty = dirtyFlag;
+				return function (textureCube) {
+					texture = textureCube;
+					dirty = true;
+					console.log ('Successful load of background textures.');
+				}
+			};
+			var _Progress = function (a) {
+				console.log ('Loading background textures...');
+			};
+			var _Failure = function (a) {
+				console.log ('Load failure');
+				console.log ('Failure to load background textures.');
+			};
+
+			if (typeof(filestypes) == 'string') {
+				urlTypes = [filestypes, filestypes, filestypes, filestypes, filestypes, filestypes];
+			} else if (filestypes.length == 6) {
+				urlTypes = filestypes;
+			} else {
+				return;
+			}
+			if (pathUri == '' && (filenames.length != 6 ||
+					(filesnames[0] == '' || filesnames[1] == '' || filesnames[2] == '' || filesnames[3] == '' || filesnames[4] == '' || filesnames[5] == ''))) {return;}
+			urls[0] = pathUri + ((filenames[0] != '') ? filenames[0] : 'px') + urlTypes[0];
+			urls[1] = pathUri + ((filenames[0] != '') ? filenames[1] : 'nx') + urlTypes[1];
+			urls[2] = pathUri + ((filenames[0] != '') ? filenames[2] : 'py') + urlTypes[2];
+			urls[3] = pathUri + ((filenames[0] != '') ? filenames[3] : 'ny') + urlTypes[3];
+			urls[4] = pathUri + ((filenames[0] != '') ? filenames[4] : 'pz') + urlTypes[4];
+			urls[5] = pathUri + ((filenames[0] != '') ? filenames[5] : 'nz') + urlTypes[5];
+
+			textureCube = new THREE.CubeTextureLoader()
+									.setPath ('./')
+									.load (urls, this._Success(), this._Progress, this._Failure);
+		},
 
 //var lmThat = this;
 

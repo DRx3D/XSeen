@@ -18,6 +18,7 @@
  *	0.6.7: Added tknot (torus knot)
  *	0.6.8: Added PBR
  *	0.6.9: Preliminary fix for display size
+ *	0.6.10: Fix for background urls not present
  * 
  */
 

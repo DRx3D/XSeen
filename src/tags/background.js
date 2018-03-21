@@ -46,12 +46,27 @@ XSeen.Tags.background = {
 			var src = attributes.src.split('*');
 			var tail = src[src.length-1];
 			var srcFile = src[0];
+			var urls2load = 0;
 			for (var ii=0;  ii<sides.length; ii++) {
 				urls[sides[ii]] = srcFile + sides[ii] + tail;
 				urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
+				if (urls[sides[ii]] == '' || urls[sides[ii]] == sides[ii]) {
+					urls[sides[ii]] = null;
+				} else {
+					urls2load ++;
+				}
 			}
 
-			var textureCube = new THREE.CubeTextureLoader()
+			if (urls2load > 0) {
+				var dirtyFlag;
+				XSeen.Loader.TextureCube ('./', [urls['right'],
+												 urls['left'],
+												 urls['top'],
+												 urls['bottom'],
+												 urls['front'],
+												 urls['back']], '.jpg', e._xseen.sceneInfo.SCENE.background, dirtyFlag);
+/*
+				var textureCube = new THREE.CubeTextureLoader()
 									.setPath ('./')
 									.load ([urls['right'],
 											urls['left'],
@@ -63,6 +78,8 @@ XSeen.Tags.background = {
 											XSeen.Tags.background.loadProgress,
 											XSeen.Tags.background.loadFailure
 										);
+ */
+			}
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},

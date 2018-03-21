@@ -22,43 +22,88 @@ See details at http://xseen.org/license
 		<script src='../../Release/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
 		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/background.js'></script>
+		<script src='../src/tags/solids.js'></script>
+		<script src='../src/tags/style3d.js'></script>
 	</head>
 	<body>
-		<x-scene>
+		<h1>Environmental Map Change Example</h1>
+		<form id='bc' method='get' onsubmit='return false;' style='z-index:1000;'>
+			Change environmental map to
+			<select id='BackdropId' name='BackdropChoices'>
+				<option value=' '>Choose New Background</option>
+				<option value='gray' selected='selected'>Medium Gray</option>
+				<option value='forest'>Forest</option>
+				<option value='desert'>Desert</option>
+				<option value=''>Nothing</option>
+			</select>
+			<input id='Change' type='submit' value='Do It!'>
+		</form>
+		<x-scene style='position:relative; top:175px, left:0;' width='600' height='600'>
 			<x-class3d id='geometry'>
 				<x-style3d property='radius' value='1'></x-style3d>
 				<x-style3d property='tube' value='.4'></x-style3d>
 				<x-style3d property='segments-radial' value='16'></x-style3d>
 				<x-style3d property='segments-tubular' value='128'></x-style3d>
 			</x-class3d>
-			<x-class3d id='material'>
+			<x-class3d id='material' selector='x-tknot.material'>
 				<x-style3d property='type' value='pbr'></x-style3d>
 				<x-style3d property='color' value='#00ffff'></x-style3d>
 				<x-style3d property='emissive' value='#000000'></x-style3d>
-				<x-style3d property='env-map' value='forest'></x-style3d>
+				<x-style3d property='env-map' value='gray'></x-style3d>
 			</x-class3d>
 			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
 			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
 			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
-			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+<!--			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>	-->
+			<x-background skycolor='tan'></x-background>
 
 			<x-group rotation='0 3.14 0'>
 				<x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>
-
+<!--
 				<x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>
 				<x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>
 				<x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>
 
 				<x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>
+-->
 				<x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>
+<!--
 				<x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>
 
 				<x-tknot class3d='geometry material' metalness='0' roughness='1' position='-5 -5 0'></x-tknot>
 				<x-tknot class3d='geometry material' metalness='.5' roughness='1' position='0 -5 0'></x-tknot>
 				<x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>
-
+-->
 			</x-group>
 		</x-scene>
+<script>
+window.document.addEventListener('DOMContentLoaded', function(ev)
+	{
+		(jQuery)(document).ready(function(){
+
+			(jQuery)('#Change').click (function() {
+				var backF, backFile, material;
+				backF = document.getElementById('BackdropId');
+				backFile = backF.options[backF.selectedIndex].value;
+
+				console.log ("New Background: |" + backFile + '|');
+				//$('#material x-style3d[property="env-map"]').attr('property', backFile);
+				material = $('#material x-style3d[property="env-map"]');
+				material.attr('value', backFile);
+/*
+				material = document.getElementById('material');
+				if (backFile != '') {
+					material.setAttribute('env-map', backFile);
+				} else {
+					material.setAttribute('env-map', '');
+				}
+ */
+			});
+		});
+	}
+);
+</script>
 	</body>
 </html>
 

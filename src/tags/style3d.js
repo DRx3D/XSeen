@@ -40,6 +40,17 @@
 			if (value !== null) {
 				var ruleset, nodeAttributes, styleValue, styleProperty, changeSelector;
 
+/*
+ * TODO: This is not set up right. The local node (e) ruleset is not complete when
+ * changing the style from DOM and the parent node's (e.parentNode) attributes do
+ * not appear to be defined. The end result is the selector is properly applied,
+ * but the attribute and value are empty.
+ *
+ * Another issue is all of the style attributes are applied, even if they are no
+ * different from before. This is a problem if the target element has attributes
+ * that are changed in a different manner than styles (e.g., animation). Reapplying
+ * the entire set of styles would unexpected change those fields.
+ */
 				if (e._xseen.ruleset.complete) {
 					ruleset = e._xseen.ruleset;
 					nodeAttributes = e._xseen.attributes;

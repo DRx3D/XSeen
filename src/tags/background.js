@@ -64,21 +64,7 @@ XSeen.Tags.background = {
 												 urls['top'],
 												 urls['bottom'],
 												 urls['front'],
-												 urls['back']], '.jpg', e._xseen.sceneInfo.SCENE.background, dirtyFlag);
-/*
-				var textureCube = new THREE.CubeTextureLoader()
-									.setPath ('./')
-									.load ([urls['right'],
-											urls['left'],
-											urls['top'],
-											urls['bottom'],
-											urls['front'],
-											urls['back']],
-											XSeen.Tags.background.loadSuccess({'e':e}),
-											XSeen.Tags.background.loadProgress,
-											XSeen.Tags.background.loadFailure
-										);
- */
+												 urls['back']], '', XSeen.Tags.background.loadSuccess({'e':e}));
 			}
 		},
 	'fin'	: function (e, p) {},

@@ -21,7 +21,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
-			e._xseen.properties.envMap = XSeen.Tags._process_envMap(e._xseen.attributes['env-map']);
 			e._xseen.properties['side'] = THREE.FrontSide;
 			if (e._xseen.attributes['side'] == 'back') e._xseen.properties['side'] = THREE.BackSide;
 			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
@@ -36,7 +35,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.attributes['env-map'],
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -64,7 +62,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.properties.envMap,
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -82,22 +79,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'metalness'				: e._xseen.attributes['metalness'],
 							'roughness'				: e._xseen.attributes['roughness'],
 							};
-				parameters = {
-							'color'					: e._xseen.attributes['color'],
-							'emissive'				: 0x000000,
-							'envMap'				: e._xseen.properties.envMap,
-							'side'					: THREE.FrontSide,
-// General material properties
-							'emissiveIntensity'		: 0,
-							'opacity'				: 1.,
-							'transparent'			: false,
-// General material properties that only apply to Phong or PBR
-							'reflectivity'			: .5,
-							'refractionRatio'		: .98,
-// PBR properties
-							'metalness'				: 1,
-							'roughness'				: .5,
-							};
 				appearance = new THREE.MeshPhysicalMaterial(parameters);
 			} else {
 				parameters = {
@@ -108,7 +89,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.attributes['env-map'],
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -132,7 +112,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 
 			e._xseen.tagObject = mesh;
 			p._xseen.children.push(mesh);
-
+			e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, e._xseen.attributes['env-map']);
 };
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
@@ -142,9 +122,8 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
 					e._xseen.tagObject.material.needsUpdate = true;
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
-					e._xseen.properties.envMap = XSeen.Tags._process_envMap(value);
-					e._xseen.tagObject.material.envMap = e._xseen.properties.envMap;
-					e._xseen.tagObject.material.needsUpdate = true;
+					console.log ('Changing envMap to |' + value + '|');
+					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -152,32 +131,17 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
 			}
 };
-XSeen.Tags._process_envMap = function (envMapUrl) {
-			var envMap;
+XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
+			var envMap, basePath = 'Resources/textures/';
 			if (envMapUrl == 'desert') {
-				envMap = new THREE.CubeTextureLoader()
-											.setPath('Resources/textures/')
-											.load ([
-													'desert_1_right.jpg',
-													'desert_1_left.jpg',
-													'desert_1_top.jpg',
-													'desert_1_bottom.jpg',
-													'desert_1_front.jpg',
-													'desert_1_back.jpg',
-											]);
+				XSeen.Loader.TextureCube (basePath + 'desert_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
 			} else if (envMapUrl == 'forest') {
-				envMap = new THREE.CubeTextureLoader()
-											.setPath('Resources/textures/')
-											.load ([
-													'forest_1_right.jpg',
-													'forest_1_left.jpg',
-													'forest_1_top.jpg',
-													'forest_1_bottom.jpg',
-													'forest_1_front.jpg',
-													'forest_1_back.jpg',
-											]);
+				XSeen.Loader.TextureCube (basePath + 'forest_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
 			} else if (envMapUrl == 'gray') {
-				envMap = new THREE.CubeTextureLoader()
+				XSeen.Loader.TextureCube (basePath + 'gray99/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+/*				envMap = new THREE.CubeTextureLoader()
 											.setPath('Resources/textures/')
 											.load ([
 													'gray99-right.png',
@@ -187,10 +151,22 @@ XSeen.Tags._process_envMap = function (envMapUrl) {
 													'gray99-front.png',
 													'gray99-back.png',
 											]);
+ */
 			} else {
 				envMap = null;
 			}
 			return envMap;
+};
+
+XSeen.Tags.Solids.loadSuccess = function (userdata) {
+	var thisEle = userdata.e;
+	return function (textureCube)
+	{
+		//thisEle._xseen.processedUrl = true;
+		thisEle._xseen.tagObject.material.envMap = textureCube;
+		thisEle._xseen.tagObject.material.needsUpdate = true;
+		console.log ('Successful load of environment textures.');
+	}
 };
 
 XSeen.Tags.box = {

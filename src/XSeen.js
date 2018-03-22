@@ -14,11 +14,12 @@
  *	0.6.3: Added Plane and Ring
  *	0.6.4: Fixed size determination bug
  *	0.6.5: Added Fog
- *	0.6.6: Added Metadata
+ *	0.6.6: Added Metadata [Release]
  *	0.6.7: Added tknot (torus knot)
  *	0.6.8: Added PBR
  *	0.6.9: Preliminary fix for display size
  *	0.6.10: Fix for background urls not present
+ *	0.6.11: Created common routine for loading texture cubes - fixed envMap for PBR.
  * 
  */
 
@@ -28,11 +29,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 9,
+					'_Patch'		: 11,
 					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 10,
+					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-18',
+					'_RDate'		: '2017-03-21',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.9-alpha.1+10_9494878
- *  Built Mon Mar 19 18:21:19 2018
+ *  XSeen V0.6.9-alpha.1+10_2142f10
+ *  Built Wed Mar 21 19:50:58 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -399,6 +399,65 @@ XSeen.Loader = {
 		{
 			this.urlQueue.push( {'url':url, 'type':type, 'hint':hint, 'userdata':userdata, 'success':success, 'failure':failed, 'progress':progress} );
 			this.loadNextUrl();
+		},
+/*
+ * Asynchronously loads a texture cube and saves the result
+ *	Arguments:
+ *		pathUrl		The URL to the directory. This may be empty.
+ *		filenames	An array of six URLs/filenames - one for each cube face. The order is 
+ *					+X, -X, +Y, -Y, +Z, -Z. If pathUrl is non-empty, then it is prepended 
+ *					to each of these elements. If an element is empty (''), or the entire array 
+ *					is undefined; then the face name (px, nx, py, ny, pz, nz) is used. 
+ *					If 'pathUrl' and 'filesnames' are undefined, then no texture is loaded.
+ *		filetypes	The type of the image file. It can either be a single value or an array of six values.
+ *					Each value must start with the character after the file name (e.g., '.').
+ *					It is appended to the URL for each face.
+ *		Success		User-provided call-back. This is called when all textures are successfully loaded.
+ *					The function is called with one argument - the texture cube.
+ *		cube		Where the loaded texture cube is stored
+ *		dirtyFlag	Set when the texture is loaded so the rendering system can incorporate the result
+ */
+	'TextureCube'		: function (pathUri, filenames, filetypes, Success)
+		{
+			var urlTypes=Array(6), urls=Array(6), textureCube;
+			var _Success = function (data) {
+				var texture = data.cube, dirty;
+				if (typeof(data.dirty) !== undefined) {dirty = dirtyFlag;}
+				return function (textureCube) {
+					texture = textureCube;
+					if (typeof(dirty) !== 'undefined') {dirty = true;}
+					console.log ('Successful load of background textures.');
+				}
+			};
+			var _Progress = function (a) {
+				console.log ('Loading background textures...');
+			};
+			var _Failure = function (a) {
+				console.log ('Load failure');
+				console.log ('Failure to load background textures.');
+			};
+
+			if (typeof(filetypes) == 'string') {
+				urlTypes = [filetypes, filetypes, filetypes, filetypes, filetypes, filetypes];
+			} else if (filetypes.length == 6) {
+				urlTypes = filetypes;
+			} else {
+				return;
+			}
+			if (pathUri == '' && (filenames.length != 6 ||
+					(filesnames[0] == '' || filesnames[1] == '' || filesnames[2] == '' || filesnames[3] == '' || filesnames[4] == '' || filesnames[5] == ''))) {return;}
+			urls[0] = pathUri + ((filenames.length >= 1 && filenames[0] != '') ? filenames[0] : 'px') + urlTypes[0];
+			urls[1] = pathUri + ((filenames.length >= 2 && filenames[1] != '') ? filenames[1] : 'nx') + urlTypes[1];
+			urls[2] = pathUri + ((filenames.length >= 3 && filenames[2] != '') ? filenames[2] : 'py') + urlTypes[2];
+			urls[3] = pathUri + ((filenames.length >= 4 && filenames[3] != '') ? filenames[3] : 'ny') + urlTypes[3];
+			urls[4] = pathUri + ((filenames.length >= 5 && filenames[4] != '') ? filenames[4] : 'pz') + urlTypes[4];
+			urls[5] = pathUri + ((filenames.length >= 6 && filenames[5] != '') ? filenames[5] : 'nz') + urlTypes[5];
+
+			console.log('Loading cube-map texture...');
+
+			textureCube = new THREE.CubeTextureLoader()
+//									.setPath ('./')
+									.load (urls, Success, _Progress, _Failure);
 		},
 
 //var lmThat = this;
@@ -1570,7 +1629,7 @@ XSeen.Tags.background = {
 			for (var ii=0;  ii<sides.length; ii++) {
 				urls[sides[ii]] = srcFile + sides[ii] + tail;
 				urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
-				if (urls[sides[ii]] == '') {
+				if (urls[sides[ii]] == '' || urls[sides[ii]] == sides[ii]) {
 					urls[sides[ii]] = null;
 				} else {
 					urls2load ++;
@@ -1578,18 +1637,13 @@ XSeen.Tags.background = {
 			}
 
 			if (urls2load > 0) {
-				var textureCube = new THREE.CubeTextureLoader()
-									.setPath ('./')
-									.load ([urls['right'],
-											urls['left'],
-											urls['top'],
-											urls['bottom'],
-											urls['front'],
-											urls['back']],
-											XSeen.Tags.background.loadSuccess({'e':e}),
-											XSeen.Tags.background.loadProgress,
-											XSeen.Tags.background.loadFailure
-										);
+				var dirtyFlag;
+				XSeen.Loader.TextureCube ('./', [urls['right'],
+												 urls['left'],
+												 urls['top'],
+												 urls['bottom'],
+												 urls['front'],
+												 urls['back']], '', XSeen.Tags.background.loadSuccess({'e':e}));
 			}
 		},
 	'fin'	: function (e, p) {},
@@ -2296,7 +2350,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
 			}
-			e._xseen.properties.envMap = XSeen.Tags._process_envMap(e._xseen.attributes['env-map']);
 			e._xseen.properties['side'] = THREE.FrontSide;
 			if (e._xseen.attributes['side'] == 'back') e._xseen.properties['side'] = THREE.BackSide;
 			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
@@ -2311,7 +2364,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.attributes['env-map'],
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -2339,7 +2391,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.properties.envMap,
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -2357,22 +2408,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'metalness'				: e._xseen.attributes['metalness'],
 							'roughness'				: e._xseen.attributes['roughness'],
 							};
-				parameters = {
-							'color'					: e._xseen.attributes['color'],
-							'emissive'				: 0x000000,
-							'envMap'				: e._xseen.properties.envMap,
-							'side'					: THREE.FrontSide,
-// General material properties
-							'emissiveIntensity'		: 0,
-							'opacity'				: 1.,
-							'transparent'			: false,
-// General material properties that only apply to Phong or PBR
-							'reflectivity'			: .5,
-							'refractionRatio'		: .98,
-// PBR properties
-							'metalness'				: 1,
-							'roughness'				: .5,
-							};
 				appearance = new THREE.MeshPhysicalMaterial(parameters);
 			} else {
 				parameters = {
@@ -2383,7 +2418,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
 							'emissive'				: e._xseen.attributes['emissive'],
-							'envMap'				: e._xseen.attributes['env-map'],
 							'map'					: e._xseen.texture,
 							'normalMap'				: e._xseen.attributes['normal-map'],
 							'normalScale'			: e._xseen.attributes['normal-scale'],
@@ -2407,7 +2441,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 
 			e._xseen.tagObject = mesh;
 			p._xseen.children.push(mesh);
-
+			e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, e._xseen.attributes['env-map']);
 };
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
@@ -2417,9 +2451,8 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
 					e._xseen.tagObject.material.needsUpdate = true;
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
-					e._xseen.properties.envMap = XSeen.Tags._process_envMap(value);
-					e._xseen.tagObject.material.envMap = e._xseen.properties.envMap;
-					e._xseen.tagObject.material.needsUpdate = true;
+					console.log ('Changing envMap to |' + value + '|');
+					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -2427,32 +2460,17 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
 			}
 };
-XSeen.Tags._process_envMap = function (envMapUrl) {
-			var envMap;
+XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
+			var envMap, basePath = 'Resources/textures/';
 			if (envMapUrl == 'desert') {
-				envMap = new THREE.CubeTextureLoader()
-											.setPath('Resources/textures/')
-											.load ([
-													'desert_1_right.jpg',
-													'desert_1_left.jpg',
-													'desert_1_top.jpg',
-													'desert_1_bottom.jpg',
-													'desert_1_front.jpg',
-													'desert_1_back.jpg',
-											]);
+				XSeen.Loader.TextureCube (basePath + 'desert_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
 			} else if (envMapUrl == 'forest') {
-				envMap = new THREE.CubeTextureLoader()
-											.setPath('Resources/textures/')
-											.load ([
-													'forest_1_right.jpg',
-													'forest_1_left.jpg',
-													'forest_1_top.jpg',
-													'forest_1_bottom.jpg',
-													'forest_1_front.jpg',
-													'forest_1_back.jpg',
-											]);
+				XSeen.Loader.TextureCube (basePath + 'forest_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
 			} else if (envMapUrl == 'gray') {
-				envMap = new THREE.CubeTextureLoader()
+				XSeen.Loader.TextureCube (basePath + 'gray99/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+/*				envMap = new THREE.CubeTextureLoader()
 											.setPath('Resources/textures/')
 											.load ([
 													'gray99-right.png',
@@ -2462,10 +2480,22 @@ XSeen.Tags._process_envMap = function (envMapUrl) {
 													'gray99-front.png',
 													'gray99-back.png',
 											]);
+ */
 			} else {
 				envMap = null;
 			}
 			return envMap;
+};
+
+XSeen.Tags.Solids.loadSuccess = function (userdata) {
+	var thisEle = userdata.e;
+	return function (textureCube)
+	{
+		//thisEle._xseen.processedUrl = true;
+		thisEle._xseen.tagObject.material.envMap = textureCube;
+		thisEle._xseen.tagObject.material.needsUpdate = true;
+		console.log ('Successful load of environment textures.');
+	}
 };
 
 XSeen.Tags.box = {

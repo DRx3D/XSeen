@@ -152,6 +152,9 @@ XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 													'gray99-back.png',
 											]);
  */
+			} else if (envMapUrl == 'color') {
+				XSeen.Loader.TextureCube (basePath + 'starburst/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
 			} else {
 				envMap = null;
 			}

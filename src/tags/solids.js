@@ -30,7 +30,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
-							'color'					: e._xseen.attributes['color'],
+							'color'					: XSeen.Parser.Types.colorRgbInt (e._xseen.attributes['color']),
 							'displacementMap'		: e._xseen.attributes['displacement-map'],
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
@@ -57,7 +57,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
-							'color'					: e._xseen.attributes['color'],
+							'color'					: XSeen.Parser.Types.colorRgbInt (e._xseen.attributes['color']),
 							'displacementMap'		: e._xseen.attributes['displacement-map'],
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
@@ -84,7 +84,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
-							'color'					: e._xseen.attributes['color'],
+							'color'					: XSeen.Parser.Types.colorRgbInt (e._xseen.attributes['color']),
 							'displacementMap'		: e._xseen.attributes['displacement-map'],
 							'displacementScale'		: e._xseen.attributes['displacement-scale'],
 							'displacementBias'		: e._xseen.attributes['displacement-bias'],
@@ -104,16 +104,46 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			}
 			//geometry.needsUpdate = true;
 	
+			// Create mesh, set userData and animateable fields
 			var mesh = new THREE.Mesh (geometry, appearance);
 			mesh.userData = e;
 			XSeen.Tags._setSpace(mesh, e._xseen.attributes);
+
+			e._xseen.animate['position']			= mesh.position;
+			e._xseen.animate['scale']				= mesh.scale;
+			//e._xseen.animate['rotate'] = mesh.scale;			// Can't do rotation yet
+			e._xseen.animate['color']				= mesh.material.color;
+			e._xseen.animate['emissive']			= mesh.material.emissive;
+			e._xseen.animate['normalScale']			= mesh.material.normalScale;
+			e._xseen.animate['wireframeLinewidth']	= mesh.material.wireframeLinewidth;
+			e._xseen.animate['emissiveIntensity']	= mesh.material.emissiveIntensity;
+			e._xseen.animate['opacity']				= XSeen.Tags.Solids._animateScalar (mesh.material, 'opacity');
+			e._xseen.animate['reflectivity']		= mesh.material.reflectivity;
+			e._xseen.animate['refractionRatio']		= mesh.material.refractionRatio;
+			e._xseen.animate['shininess']			= mesh.material.shininess;
+			e._xseen.animate['specular']			= mesh.material.specular;
+			e._xseen.animate['displacementScale']	= mesh.material.displacementScale;
+			e._xseen.animate['displacementBias']	= mesh.material.displacementBias;
+			e._xseen.animate['emissive']			= mesh.material.emissive;
+			e._xseen.animate['normalScale']			= mesh.material.normalScale;
+			e._xseen.animate['metalness']			= mesh.material.metalness;
+			e._xseen.animate['roughness']			= mesh.material.roughness;
+
 			p._xseen.sceneInfo.selectable.push(mesh);
 			mesh.name = 'Solid: ' + e.id;
-
+			
 			e._xseen.tagObject = mesh;
 			p._xseen.children.push(mesh);
 			e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, e._xseen.attributes['env-map']);
 };
+XSeen.Tags.Solids._animateScalar = function (obj, field) {
+	var target = {'obj':obj, 'field':field};
+	return function (td) {
+		target.obj[target.field] = td.current;
+		//console.log ('_animateScalar return function for populating "' + target.field + '" with ' + td.current);
+	};
+}
+
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			if (value !== null) {

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+		<!--script src='../src/Tag.js'></script-->
+		<script src='../src/tags/animate.js'></script>
+		<script src='../src/tags/solids.js'></script>
+	</head>
+	<body>
+		<x-scene>
+			<x-light id='White_Direction' type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light id='Green_Direction' type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
+			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-dodecahedron id='D20_Teal' radius='1.5' color='teal' position='-5 3 0' transparent='true'>
+				<x-animate attribute='position' to='5 5 0' repeat='-1' duration='3'></x-animate>
+				<x-animate attribute='scale' to='.1 .1 .1' repeat='-1' duration='4'></x-animate>
+				<x-animate attribute='opacity' to='0' repeat='-1' duration='2'></x-animate>
+				<x-animate attribute='color' to='purple' repeat='-1' duration='5'></x-animate>
+			</x-dodecahedron>
+
+			<x-model id='model_Monster' src='Resources/models/Monster/Monster.gltf' playonload='*' duration='3' position='0 -1 7' scale='.067 .067 .067'></x-model>
+		</x-scene>
+	</body>
+</html>
+
+

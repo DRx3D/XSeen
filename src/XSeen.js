@@ -20,6 +20,17 @@
  *	0.6.9: Preliminary fix for display size
  *	0.6.10: Fix for background urls not present
  *	0.6.11: Created common routine for loading texture cubes - fixed envMap for PBR.
+ *	0.6.12: Simple animation (no way-points)
+ *
+ *	Animation
+ *	 - Rotation
+ *	 - Way points
+ *	Events
+ *	Labeling
+ *	Additional PBR
+ *	Fix for style3d (see embedded TODO)
+ *	Audio
+ *	Editor
  * 
  */
 
@@ -29,7 +40,7 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 11,
+					'_Patch'		: 12,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
@@ -88,6 +99,7 @@ XSeen.Runtime = {
 											XSeen.Runtime.Renderer.animate (XSeen.RenderFrame);
 										}
 									},
+			'TweenGroups'			: [],
 			'Resize'				: function () {
 										if (!XSeen.Runtime.isStereographic) {
 											XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);
@@ -127,7 +139,7 @@ XSeen.RenderFrame = function()
  */
 		XSeen.Update.Camera (XSeen.Runtime);
 		XSeen.Update.Mixers (XSeen.Runtime);
-		//XSeen.Update.Tween (XSeen.Runtime);
+		XSeen.Update.Tween (XSeen.Runtime);
 
 		XSeen.Runtime.Renderer.render( XSeen.Runtime.SCENE, XSeen.Runtime.Camera );
 	};
@@ -136,8 +148,10 @@ XSeen.Update = {
 	'Tween'		: function (Runtime)
 		{
 			TWEEN.update();
-			for (var ii=0; ii<scene.TweenGroups.length; ii++) {
-				scene.TweenGroups[ii].update();
+			if (typeof(Runtime.TweenGroups) != 'undefined') {
+				for (var ii=0; ii<Runtime.TweenGroups.length; ii++) {
+					Runtime.TweenGroups[ii].update();
+				}
 			}
 		},
 	'Mixers'	: function (Runtime)

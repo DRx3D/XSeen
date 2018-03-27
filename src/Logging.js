@@ -69,6 +69,7 @@ XSeen.definitions.Logging = {
 			node.setAttribute("class", this.Data.Levels[level].class);
 			node.innerHTML = this.Data.Levels[level].label + ": " + message;
 			this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
+			console.log (node.innerHTML);
 		}
 	},
 

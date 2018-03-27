@@ -63,6 +63,19 @@ XSeen.Parser = {
 								handler (mutation.target, mutation.attributeName, value);
 							}
 						}),
+	'TypeInfo'		: {
+						'string'	: {'isNumeric':false},
+						'boolean'	: {'isNumeric':false},
+						'integer'	: {'isNumeric':false},
+						'color'		: {'isNumeric':true},
+						'float'		: {'isNumeric':true},
+						'vec2'		: {'isNumeric':true},
+						'vec3'		: {'isNumeric':true},
+						'xyz'		: {'isNumeric':true},
+						'vec4'		: {'isNumeric':true},
+						'rotation'	: {'isNumeric':true},
+						'vector'	: {'isNumeric':true},
+					},
 
 	'defineTag' : function (tagObj, init, fin, events)
 		{
@@ -98,9 +111,13 @@ XSeen.Parser = {
 										'dataType'			: dataType,
 										'defaultValue'		: defaultValue,
 										'isCaseInsensitive'	: true,
-										'isAnimatable'		: false,
+										'isAnimatable'		: null,
 										'enumeration'		: []
 									};
+						}
+						console.log ('Data type of ' + attrObj.name + ' is ' + attrObj.dataType);
+						if (typeof(attrObj.isAnimatable) == 'undefined') {
+							attrObj.isAnimatable = (XSeen.Parser.TypeInfo[attrObj.dataType].isNumeric) ? true : false;
 						}
 						var name = attrObj.name.toLowerCase();
 						var t = typeof(attrObj.isCaseInsensitive);
@@ -195,6 +212,7 @@ XSeen.Parser = {
 			var tagEntry;
 			if (typeof(XSeen.Parser.Table[tagName]) == 'undefined') {
 				XSeen.LogDebug("Unknown node: " + tagName + '. Skipping all children.');
+				console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
 				return;
 			} else {
 				tagEntry = XSeen.Parser.Table[tagName];
@@ -487,7 +505,7 @@ XSeen.Parser = {
 
 /*
  * Color parsing order
- *	<integer>; Integer [0-16777215]. Key interger within range.
+ *	<integer>; Integer [0-16777215]. Key integer within range.
  *	#HHHHHH	24-bit hex value indicating color. Key '#'
  *	rgba(r,g,b,a); where r,g,b are either byte-integers [0,255] or percent [0%-100%]; and a is [0.0-0.1] Key 'rgba' and '%'
  *	rgb(r,g,b); where r,g,b are either byte-integers [0,255] or percent [0%-100%]. Key 'rgb' and '%'
@@ -500,24 +518,41 @@ XSeen.Parser = {
 			{
 				if (value === null) {return def;}
 				value = value.trim().toLowerCase();
-				if (!Number.isNaN(value) && Math.round(value) == value && (value-0 <= 16777215) && (value-0 >= 0)) {return value;}
+				if (!Number.isNaN(value) && Math.round(value) == value && (value-0 <= 16777215) && (value-0 >= 0)) {return this.colorIntRgb(value);}
 
 				if (value.substring(0,1) == '#') {
 					value = '0x' + value.substring(1,value.length) - 0;
 					if (Number.isNaN(value) || value < 0 || value > 16777215) {return def;}
-					return value;
+					return this.colorIntRgb(value);
 				}
 				
 				if (value.substring(0,3) == 'rgb') {
 					XSeen.LogWarn("RGB[A] color not yet implemented");
+					console.log ("WARN: RGB[A] color not yet implemented");
 				}
 				if (value.substring(0,3) == 'hsl') {
 					XSeen.LogWarn("HSL[A] color not yet implemented");
+					console.log ("WARN: HSL[A] color not yet implemented");
 				}
 				
 				if (typeof(XSeen.CONST.Colors[value]) === 'undefined') {return def;}
-				return XSeen.CONST.Colors[value];	// TODO: add check on enumeration
+				return this.colorIntRgb(XSeen.CONST.Colors[value]);	// TODO: add check on enumeration
 				//return def;
+			},
+		'colorIntRgb' : function (colorInt)
+			{
+				var r = (colorInt & 0xff0000) >>> 16;
+				var g = (colorInt & 0x00ff00) >>> 8;
+				var b = (colorInt & 0x0000ff);
+				return {'r':r/255., 'g':g/255., 'b':b/255.};
+			},
+		'colorRgbInt' : function (color)
+			{
+				if (typeof (color) !== 'object') return 0;
+				var colorInt =	(Math.round(color.r*255) << 16) |
+								(Math.round(color.g*255) << 8) |
+								(Math.round(color.b*255));
+				return colorInt;
 			},
 
 /*

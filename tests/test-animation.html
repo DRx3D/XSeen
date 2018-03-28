@@ -34,11 +34,20 @@ See details at http://xseen.org/license
 			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
 
 			<x-dodecahedron id='D20_Teal' radius='1.5' color='teal' position='-5 3 0' transparent='true'>
-				<x-animate attribute='position' to='5 5 0' repeat='-1' duration='3'></x-animate>
+				<x-animate attribute='position' duration='2.5' repeat='-1'>
+					<x-key to='5 3 0' duration='.25' easing='inout' easingtype='quadratic'></x-key>
+					<x-key to='5 -3 0' duration='.25' easing='inout' easingtype='sinusoidal'></x-key>
+					<x-key to='-5 -3 0' duration='.25' easing='inout' easingtype='elastic'></x-key>
+					<x-key to='-5 3 0' duration='.25' easing='inout' easingtype='bounce'></x-key>
+				</x-animate>
 				<x-animate attribute='scale' to='.1 .1 .1' repeat='-1' duration='4'></x-animate>
 				<x-animate attribute='opacity' to='0' repeat='-1' duration='2'></x-animate>
-				<x-animate attribute='color' to='purple' repeat='-1' duration='5'></x-animate>
+				<x-animate attribute='color' to='purple' repeat='-1' duration='6'></x-animate>
 			</x-dodecahedron>
+			<x-box position='0 3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box position='5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
+			<x-box position='0 -3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box position='-5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
 
 			<x-model id='model_Monster' src='Resources/models/Monster/Monster.gltf' playonload='*' duration='3' position='0 -1 7' scale='.067 .067 .067'></x-model>
 		</x-scene>

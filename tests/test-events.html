@@ -13,7 +13,7 @@ See details at http://xseen.org/license
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<title>XSeen: Test mouse events on all scene objects</title>
 		<style>
 			body { margin: 0; }
 			#xscene {border:0; }
@@ -22,11 +22,11 @@ See details at http://xseen.org/license
 		<script src='../../Release/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
 		<script src='../Release/XSeen.js'></script>
-		<!--script src='../src/Tag.js'></script-->
 		<script src='../src/Events.js'></script>
+		<script src='../src/tags/model.js'></script>
 	</head>
 	<body>
-		<x-scene>
+		<x-scene id='scene'>
 			<x-light id='White_Direction' type='directional' color='white' direction='0 0 -1'></x-light>
 			<x-light id='Green_Direction' type='directional' color='green' direction='.707 0  .707'></x-light>
 			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
@@ -39,17 +39,34 @@ See details at http://xseen.org/license
 					<x-key to='-5 -3 0' duration='.25' easing='inout' easingtype='elastic'></x-key>
 					<x-key to='-5 3 0' duration='.25' easing='inout' easingtype='bounce'></x-key>
 				</x-animate>
-				<x-animate attribute='scale' to='.1 .1 .1' repeat='-1' duration='4'></x-animate>
+				<!-- x-animate attribute='scale' to='.1 .1 .1' repeat='-1' duration='4'></x-animate -->
 				<x-animate attribute='opacity' to='0' repeat='-1' duration='2'></x-animate>
 				<x-animate attribute='color' to='purple' repeat='-1' duration='6'></x-animate>
 			</x-dodecahedron>
-			<x-box position='0 3 0' height='.09' width='10' depth='.09' color='green'></x-box>
-			<x-box position='5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
-			<x-box position='0 -3 0' height='.09' width='10' depth='.09' color='green'></x-box>
-			<x-box position='-5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
+			<x-box id='box_top' position='0 3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box id='box_right' position='5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
+			<x-box id='box_bottom' position='0 -3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box id='box_left' position='-5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
 
 			<x-model id='model_Monster' src='Resources/models/Monster/Monster.gltf' playonload='*' duration='3' position='0 -1 7' scale='.067 .067 .067'></x-model>
 		</x-scene>
+<script>
+function logEvent (ev) {
+	var str = 'Type: ' + ev.type + ' (' + ev.detail.originalType + ') on ' + ev.detail.name + ' at (';
+	str += Math.round(ev.detail.position.x*100)/100 + ', ';
+	str += Math.round(ev.detail.position.y*100)/100 + ', ';
+	str += Math.round(ev.detail.position.z*100)/100 + ')';
+	console.log ('Processing event ' + str);
+}
+window.document.addEventListener('DOMContentLoaded', function() 
+	{
+		var xs;
+		xs = document.getElementById ('scene')
+		xs.addEventListener ('xseen', logEvent);
+		xs = document.getElementById ('D20_Teal')
+		xs.addEventListener ('xseen', logEvent);
+	});
+</script>
 	</body>
 </html>
 

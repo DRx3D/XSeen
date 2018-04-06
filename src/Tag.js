@@ -115,7 +115,7 @@ XSeen.Parser = {
 										'enumeration'		: []
 									};
 						}
-						console.log ('Data type of ' + attrObj.name + ' is ' + attrObj.dataType);
+						//console.log ('Data type of ' + attrObj.name + ' is ' + attrObj.dataType);
 						if (typeof(attrObj.isAnimatable) == 'undefined') {
 							attrObj.isAnimatable = (XSeen.Parser.TypeInfo[attrObj.dataType].isNumeric) ? true : false;
 						}

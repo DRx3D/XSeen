@@ -147,6 +147,14 @@ console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		XSeen.onLoadCallBack[ii]();
 	}
 
+// Create XSeen event listeners
+	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
+
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
 	console.log ('Starting Parse...');

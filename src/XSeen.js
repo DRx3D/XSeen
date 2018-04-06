@@ -21,10 +21,11 @@
  *	0.6.10: Fix for background urls not present
  *	0.6.11: Created common routine for loading texture cubes - fixed envMap for PBR.
  *	0.6.12: Simple animation (no way-points)
+ *	0.6.13: Way point animation
+ *	0.6.14: Mouse event creation
  *
  *	Animation
  *	 - Rotation
- *	 - Way points
  *	Events
  *	Labeling
  *	Additional PBR
@@ -40,11 +41,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 12,
+					'_Patch'		: 14,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-03-21',
+					'_RDate'		: '2017-04-05',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

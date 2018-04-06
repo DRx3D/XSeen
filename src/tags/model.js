@@ -49,10 +49,18 @@ XSeen.Tags.model = {
 							e._xseen.requestedUrl = false;
 							e._xseen.loadText = response;
 							e._xseen.currentUrl = e._xseen.attributes.src;
-							
+
 							console.log ('Success');
 							console.log("download successful for |"+e.id);
 							e._xseen.loadGroup.add(response.scene);		// This works for glTF
+/*
+ ** TODO: Need to go deeper into the structure
+ * See https://stackoverflow.com/questions/26202064/how-to-select-a-root-object3d-using-raycaster
+ *
+ * Reference to 'root' may be incorrect. See Events.js for details as to how it is used.
+ */
+							XSeen.Tags.model.addReferenceToRoot (response.scene, e);
+							p._xseen.sceneInfo.selectable.push(response.scene)
 							p._xseen.sceneInfo.SCENE.updateMatrixWorld();
 							if (response.animations !== null) {				// This is probably glTF specific
 								e._xseen.mixer = new THREE.AnimationMixer (response.scene);
@@ -75,7 +83,19 @@ XSeen.Tags.model = {
 								}
 							}
 						}
-					}
+					},
+
+	'addReferenceToRoot' : function (ele, root)
+		{
+			console.log ('addReferenceToRoot -- |' + ele.name + '|');
+			//if (ele.isObject) {
+				ele.userData.root = root;
+			//}
+			ele.children.forEach (function(elm) {
+				//p._xseen.sceneInfo.selectable.push(elm);
+				XSeen.Tags.model.addReferenceToRoot (elm, root);
+			});
+		},
 };
 
 // Add tag and attributes to Parsing table

@@ -23,15 +23,14 @@
  *	0.6.12: Simple animation (no way-points)
  *	0.6.13: Way point animation
  *	0.6.14: Mouse event creation
+ *	0.6.15: Rotation animation
  *
- *	Animation
- *	 - Rotation
- *	Events
  *	Labeling
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
+ *	Events
  * 
  */
 
@@ -41,11 +40,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 14,
+					'_Patch'		: 15,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-05',
+					'_RDate'		: '2017-04-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

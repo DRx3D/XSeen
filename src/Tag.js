@@ -100,6 +100,9 @@ XSeen.Parser = {
 						var v = this
 							.defineAttribute ({'name':'position', dataType:'xyz', 'defaultValue':{x:0, y:0, z:0}})
 							.defineAttribute ({'name':'rotation', dataType:'rotation', 'defaultValue':[0,0,0]})
+							.defineAttribute ({'name':'rotate-x', dataType:'float', 'defaultValue':0})
+							.defineAttribute ({'name':'rotate-y', dataType:'float', 'defaultValue':0})
+							.defineAttribute ({'name':'rotate-z', dataType:'float', 'defaultValue':0})
 							.defineAttribute ({'name':'scale', dataType:'xyz', 'defaultValue':{x:1, y:1, z:1}});
 						return v;
 					},

@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.14-alpha.1+6_9a70e32
- *  Built Thu Apr  5 19:55:37 2018
+ *  XSeen V0.6.15-alpha.1+6_9997388
+ *  Built Sun Apr  8 21:14:22 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1099,6 +1099,9 @@ XSeen.Parser = {
 						var v = this
 							.defineAttribute ({'name':'position', dataType:'xyz', 'defaultValue':{x:0, y:0, z:0}})
 							.defineAttribute ({'name':'rotation', dataType:'rotation', 'defaultValue':[0,0,0]})
+							.defineAttribute ({'name':'rotate-x', dataType:'float', 'defaultValue':0})
+							.defineAttribute ({'name':'rotate-y', dataType:'float', 'defaultValue':0})
+							.defineAttribute ({'name':'rotate-z', dataType:'float', 'defaultValue':0})
 							.defineAttribute ({'name':'scale', dataType:'xyz', 'defaultValue':{x:1, y:1, z:1}});
 						return v;
 					},
@@ -1605,15 +1608,14 @@ XSeen.Parser = {
  *	0.6.12: Simple animation (no way-points)
  *	0.6.13: Way point animation
  *	0.6.14: Mouse event creation
+ *	0.6.15: Rotation animation
  *
- *	Animation
- *	 - Rotation
- *	Events
  *	Labeling
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
+ *	Events
  * 
  */
 
@@ -1623,11 +1625,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 14,
+					'_Patch'		: 15,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-05',
+					'_RDate'		: '2017-04-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -3075,7 +3077,9 @@ XSeen.Tags._solid = function (e, p, geometry) {
 
 			e._xseen.animate['position']			= mesh.position;
 			e._xseen.animate['scale']				= mesh.scale;
-			//e._xseen.animate['rotate'] = mesh.scale;			// Can't do rotation yet
+			e._xseen.animate['rotate-x']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateX');
+			e._xseen.animate['rotate-y']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateY');
+			e._xseen.animate['rotate-z']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateZ');
 			e._xseen.animate['color']				= mesh.material.color;
 			e._xseen.animate['emissive']			= mesh.material.emissive;
 			e._xseen.animate['normalScale']			= mesh.material.normalScale;
@@ -3106,6 +3110,34 @@ XSeen.Tags.Solids._animateScalar = function (obj, field) {
 		target.obj[target.field] = td.current;
 		//console.log ('_animateScalar return function for populating "' + target.field + '" with ' + td.current);
 	};
+}
+// Rotation is difference because it is an incremental value that needs to be put into a method
+//	td.current (used in _animateScalar) is the current interpolant. Need to find the difference between
+//	td.current (now) and td.current (previous).
+XSeen.Tags.Solids._animateRotation = function (obj, field) {
+	if (typeof(obj.userData.previousRotation) == 'undefined') {obj.userData.previousRotation = {'x':0, 'y':0, 'z':0};}
+	var target = {'obj':obj, 'field':field};
+	if (field == 'rotateX') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.x;
+			target.obj.rotateX(rotation);
+			target.obj.userData.previousRotation.x = td.current;
+		};
+	}
+	if (field == 'rotateY') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.y;
+			target.obj.rotateY(rotation);
+			target.obj.userData.previousRotation.y = td.current;
+		};
+	}
+	if (field == 'rotateZ') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.z;
+			target.obj.rotateZ(rotation);
+			target.obj.userData.previousRotation.z = td.current;
+		};
+	}
 }
 
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {

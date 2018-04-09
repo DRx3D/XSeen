@@ -111,7 +111,9 @@ XSeen.Tags._solid = function (e, p, geometry) {
 
 			e._xseen.animate['position']			= mesh.position;
 			e._xseen.animate['scale']				= mesh.scale;
-			//e._xseen.animate['rotate'] = mesh.scale;			// Can't do rotation yet
+			e._xseen.animate['rotate-x']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateX');
+			e._xseen.animate['rotate-y']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateY');
+			e._xseen.animate['rotate-z']			= XSeen.Tags.Solids._animateRotation (mesh, 'rotateZ');
 			e._xseen.animate['color']				= mesh.material.color;
 			e._xseen.animate['emissive']			= mesh.material.emissive;
 			e._xseen.animate['normalScale']			= mesh.material.normalScale;
@@ -142,6 +144,34 @@ XSeen.Tags.Solids._animateScalar = function (obj, field) {
 		target.obj[target.field] = td.current;
 		//console.log ('_animateScalar return function for populating "' + target.field + '" with ' + td.current);
 	};
+}
+// Rotation is difference because it is an incremental value that needs to be put into a method
+//	td.current (used in _animateScalar) is the current interpolant. Need to find the difference between
+//	td.current (now) and td.current (previous).
+XSeen.Tags.Solids._animateRotation = function (obj, field) {
+	if (typeof(obj.userData.previousRotation) == 'undefined') {obj.userData.previousRotation = {'x':0, 'y':0, 'z':0};}
+	var target = {'obj':obj, 'field':field};
+	if (field == 'rotateX') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.x;
+			target.obj.rotateX(rotation);
+			target.obj.userData.previousRotation.x = td.current;
+		};
+	}
+	if (field == 'rotateY') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.y;
+			target.obj.rotateY(rotation);
+			target.obj.userData.previousRotation.y = td.current;
+		};
+	}
+	if (field == 'rotateZ') {
+		return function (td) {
+			var rotation = td.current - target.obj.userData.previousRotation.z;
+			target.obj.rotateZ(rotation);
+			target.obj.userData.previousRotation.z = td.current;
+		};
+	}
 }
 
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {

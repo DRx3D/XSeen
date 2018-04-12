@@ -24,13 +24,14 @@
  *	0.6.13: Way point animation
  *	0.6.14: Mouse event creation
  *	0.6.15: Rotation animation
+ *	0.6.16: Added Label tag
  *
- *	Labeling
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
- *	Events
+ *	Events (add events as needed)
+ *	Labeling (add space positioning)
  * 
  */
 
@@ -40,11 +41,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 15,
+					'_Patch'		: 16,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-08',
+					'_RDate'		: '2017-04-11',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -90,6 +91,7 @@ XSeen.Runtime = {
 			'Camera'				: {},
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
+			'perFrame'				: [],			// List of methods with data to execute per frame
 			'Animate'				: function() {	// XSeen animation loop control
 										//console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
 										if (XSeen.Runtime.isStereographic) {
@@ -128,8 +130,9 @@ XSeen.RenderFrame = function()
 		XSeen.Runtime.deltaTime = XSeen.Runtime.Time.getDelta();
 		XSeen.Runtime.currentTime = XSeen.Runtime.Time.getElapsedTime();
 		XSeen.Runtime.frameNumber ++;
-		
-		// TODO: Create RenderFrame event 
+
+		var newEv = new CustomEvent('xseen', XSeen.Events.propertiesRenderFrame(XSeen.Runtime));
+		XSeen.Runtime.RootTag.dispatchEvent(newEv);
 		
 /*
  *	Do various subsystem updates. Order is potentially important. 
@@ -140,6 +143,7 @@ XSeen.RenderFrame = function()
 		XSeen.Update.Camera (XSeen.Runtime);
 		XSeen.Update.Mixers (XSeen.Runtime);
 		XSeen.Update.Tween (XSeen.Runtime);
+		if (XSeen.Runtime.frameNumber > 1) XSeen.Update.Ticks (XSeen.Runtime);
 
 		XSeen.Runtime.Renderer.render( XSeen.Runtime.SCENE, XSeen.Runtime.Camera );
 	};
@@ -161,14 +165,12 @@ XSeen.Update = {
 				Runtime.Mixers[i].update(Runtime.deltaTime);
 			}
 		},
-	'Ticks'		: function (Runtime)		// Not certain if this should be here. It may be superceded by the render frame event
+	'Ticks'		: function (Runtime)
 		{
-/*
-			var deltaT = scene.clock.getDelta();
-			for (var i=0; i<scene.ticks.length; i++) {
-				scene.ticks[i].method (0, deltaT, scene.ticks[i]);
+			for (var i=0; i<Runtime.perFrame.length; i++) {
+				Runtime.perFrame[i].method (Runtime, Runtime.perFrame[i].userdata);
 			}
- */
+
 		},
 	'Camera'	: function (Runtime)
 		{

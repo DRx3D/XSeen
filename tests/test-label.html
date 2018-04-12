@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Test object rotation animation</title>
+		<style>
+body { margin: 0; }
+#xscene {border:0; }
+#D12d {left:500px; top:600px; }
+#D12f {left:900px; top:100px; }
+#D12t {left:100px; top:300px; }
+		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<!-- link rel='stylesheet' type='text/css' href='../../Release/xseen.css' -->
+		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/label.js'></script>
+	</head>
+	<body>
+		<x-scene id='scene'>
+			<x-light id='White_Direction' type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light id='Green_Direction' type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
+			<x-background id='Background' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-dodecahedron id='D20_Teal' radius='1.5' color='teal' position='-5 3 0' transparent='true'>
+				<x-animate attribute='rotate-x' duration='1' repeat='-1' to='3.1415'></x-animate>
+				<x-animate attribute='rotate-y' duration='2' repeat='-1' to='3.1415'></x-animate>
+				<x-animate attribute='rotate-z' duration='.5' repeat='-1' to='3.1415'></x-animate>
+				<x-animate attribute='position' duration='2.5' repeat='-1'>
+					<x-key to='5 3 0' duration='.25' easing='inout' easingtype='quadratic'></x-key>
+					<x-key to='5 -3 0' duration='.25' easing='inout' easingtype='sinusoidal'></x-key>
+					<x-key to='-5 -3 0' duration='.25' easing='inout' easingtype='elastic'></x-key>
+					<x-key to='-5 3 0' duration='.25' easing='inout' easingtype='bounce'></x-key>
+				</x-animate>
+				<!-- x-animate attribute='scale' to='.1 .1 .1' repeat='-1' duration='4'></x-animate -->
+				<x-animate attribute='opacity' to='0' repeat='-1' duration='2'></x-animate>
+				<x-animate attribute='color' to='purple' repeat='-1' duration='6'></x-animate>
+			</x-dodecahedron>
+			<x-box id='box_top' position='0 3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box id='box_right' position='5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
+			<x-box id='box_bottom' position='0 -3 0' height='.09' width='10' depth='.09' color='green'></x-box>
+			<x-box id='box_left' position='-5 0 0' height='6' width='.09' depth='.09' color='green'></x-box>
+
+			<x-model id='model_Monster' src='Resources/models/Monster/Monster.gltf' playonload='*' duration='3' position='0 -1 7' scale='.067 .067 .067'></x-model>
+			<x-label type='fixed'>
+				<x-leader target='D20_Teal'></x-leader>
+				<div id='D12f' class='xseen-label'>Simple fixed label</div>
+			</x-label>
+			<x-label type='tracking' leadercolor='green'>
+				<x-leader target='D20_Teal'></x-leader>
+				<div id='D12t' class='xseen-label'>Simple tracking label</div>
+			</x-label>
+			<x-label type='draggable' leadercolor='#ff99ff'>
+				<x-leader target='D20_Teal'></x-leader>
+				<div id='D12d' class='xseen-label-drag draggable'>Simple dragging label</div>
+			</x-label>
+
+		</x-scene>
+<script>
+function logEvent (ev) {
+	console.log ('Detected event ' + ev.detail.type);
+	if (ev.detail.type == 'mousedown' || ev.detail.type == 'mouseup' || ev.detail.type == 'mouseover') {
+		var str = 'Type: ' + ev.type + ' (' + ev.detail.originalType + ') on ' + ev.detail.name + ' at (';
+		str += Math.round(ev.detail.position.x*100)/100 + ', ';
+		str += Math.round(ev.detail.position.y*100)/100 + ', ';
+		str += Math.round(ev.detail.position.z*100)/100 + ')';
+		console.log ('Processing event ' + str);
+	}
+}
+window.document.addEventListener('DOMContentLoaded', function() 
+	{
+		var xs;
+		xs = document.getElementById ('scene')
+		xs.addEventListener ('xseen', logEvent);
+		xs = document.getElementById ('D20_Teal')
+		xs.addEventListener ('xseen', logEvent);
+	});
+</script>
+	</body>
+</html>
+
+

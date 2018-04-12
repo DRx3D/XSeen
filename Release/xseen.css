@@ -25,6 +25,8 @@ canvas {width:100%; height:100%; }
 .xseen-logEXCEPTION {color:#ffff00; }
 .xseen-logContainer {color:#009900; }
 
+.xseen-label, .xseen-label-drag {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.xseen-label-drag {border-top-width:10px; border-bottom-width:10px; }
 /*
  * Don't think that any of these are needed. Whole block commented out just in case
  *

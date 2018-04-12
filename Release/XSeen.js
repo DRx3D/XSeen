@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.15-alpha.1+6_9997388
- *  Built Sun Apr  8 21:14:22 2018
+ *  XSeen V0.6.16-alpha.1+6_29a805d
+ *  Built Wed Apr 11 18:29:29 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -400,6 +400,26 @@ XSeen.Events = {
 								'bubbles':		ev.bubbles,
 								'cancelable':	ev.cancelable,
 								'composed':		ev.composed,
+							};
+						return  properties;
+					},
+
+		'propertiesRenderFrame'	: function (Runtime)
+					{
+						var properties = {
+								'detail':		{					// This object contains all of the XSeen data
+										'type'			: 'renderframe',
+										'originalType'	: 'renderframe',
+										'originator'	: Runtime.RootTag,			// Reference to scene object
+										'name'			: Runtime.RootTag.name,		// Name of scene object
+										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
+										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
+										'frameNumber'	: Runtime.frameNumber,		// Number of frame about to be rendered
+										'Runtime'		: Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
 							};
 						return  properties;
 					},
@@ -1609,13 +1629,14 @@ XSeen.Parser = {
  *	0.6.13: Way point animation
  *	0.6.14: Mouse event creation
  *	0.6.15: Rotation animation
+ *	0.6.16: Added Label tag
  *
- *	Labeling
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
- *	Events
+ *	Events (add events as needed)
+ *	Labeling (add space positioning)
  * 
  */
 
@@ -1625,11 +1646,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 15,
+					'_Patch'		: 16,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-08',
+					'_RDate'		: '2017-04-11',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -1675,6 +1696,7 @@ XSeen.Runtime = {
 			'Camera'				: {},
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
+			'perFrame'				: [],			// List of methods with data to execute per frame
 			'Animate'				: function() {	// XSeen animation loop control
 										//console.log ('Rendering loop, isStereographic: ' + XSeen.Runtime.isStereographic);
 										if (XSeen.Runtime.isStereographic) {
@@ -1713,8 +1735,9 @@ XSeen.RenderFrame = function()
 		XSeen.Runtime.deltaTime = XSeen.Runtime.Time.getDelta();
 		XSeen.Runtime.currentTime = XSeen.Runtime.Time.getElapsedTime();
 		XSeen.Runtime.frameNumber ++;
-		
-		// TODO: Create RenderFrame event 
+
+		var newEv = new CustomEvent('xseen', XSeen.Events.propertiesRenderFrame(XSeen.Runtime));
+		XSeen.Runtime.RootTag.dispatchEvent(newEv);
 		
 /*
  *	Do various subsystem updates. Order is potentially important. 
@@ -1725,6 +1748,7 @@ XSeen.RenderFrame = function()
 		XSeen.Update.Camera (XSeen.Runtime);
 		XSeen.Update.Mixers (XSeen.Runtime);
 		XSeen.Update.Tween (XSeen.Runtime);
+		if (XSeen.Runtime.frameNumber > 1) XSeen.Update.Ticks (XSeen.Runtime);
 
 		XSeen.Runtime.Renderer.render( XSeen.Runtime.SCENE, XSeen.Runtime.Camera );
 	};
@@ -1746,14 +1770,12 @@ XSeen.Update = {
 				Runtime.Mixers[i].update(Runtime.deltaTime);
 			}
 		},
-	'Ticks'		: function (Runtime)		// Not certain if this should be here. It may be superceded by the render frame event
+	'Ticks'		: function (Runtime)
 		{
-/*
-			var deltaT = scene.clock.getDelta();
-			for (var i=0; i<scene.ticks.length; i++) {
-				scene.ticks[i].method (0, deltaT, scene.ticks[i]);
+			for (var i=0; i<Runtime.perFrame.length; i++) {
+				Runtime.perFrame[i].method (Runtime, Runtime.perFrame[i].userdata);
 			}
- */
+
 		},
 	'Camera'	: function (Runtime)
 		{
@@ -1933,33 +1955,12 @@ XSeen.Tags.animate = {
 
 				var fieldTHREE, useUpdate, tween, startingValue;
 				if (typeof(p._xseen.animate[toAttribute]) == 'function') { 
-					//e._xseen.previousValue = p._xseen.properties[toAttribute];
-					//fieldTHREE = p._xseen.properties[toAttribute];		// THREE field for animation
 					fieldTHREE = p._xseen.attributes[toAttribute];		// THREE field for animation
-					//var setter = {'_xseen':p._xseen, '_x-property':p._xseen.animate[toAttribute], '_x-startingValue':fieldTHREE, '_x-to':target.to, '_x-previous':fieldTHREE, 'value':fieldTHREE, 'increment':target.to/duration};
-					//var setter = {'_xseen':p._xseen, '_x-property':toAttribute, '_x-startingValue':fieldTHREE, '_x-to':target.to, '_x-previous':fieldTHREE, 'value':fieldTHREE, 'increment':target.to/duration};
 					var setter = {'from':fieldTHREE, 'current':fieldTHREE, 'attribute':toAttribute};
 					useUpdate = true;
 					tween = new TWEEN.Tween (setter, e._xseen.tagObject)
 										.to({'current':target.to}, duration)
 										.onUpdate(p._xseen.animate[toAttribute]);
-/*
-					tween = new TWEEN.Tween (setter, e._xseen.tagObject)
-										.onUpdate(function(tweenData) {
-											//var field = tweenData * this['_x-to'];
-											var delta = tweenData.increment;
-											//this['_x-previous'] = field;
-											tweenData._xseen.tagObject[tweenData['_x-property']](delta);
-										});
-
-					tween = new TWEEN.Tween(setter, e._xseen.tagObject)
-							.onUpdate(function(tweenData) {
-								var field = tweenData * this['_x-to'];
-								var delta = field - this['_x-previous'];
-								this['_x-previous'] = field;
-								this._xseen.tagObject[this['_x-property']](delta);
-							});
- */
 					startingValue = fieldTHREE;
 
 				} else {
@@ -2556,6 +2557,186 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'rotatex', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatey', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatez', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
+		.addTag();
+// File: tags/label.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2017, Daly Realism, Los Angeles
+ * Dual licensed under the MIT and GPL
+ */
+
+ // Control Node definitions
+
+XSeen.Tags.label = {
+	'selectedLabel'	: {},
+	'init'	: function (e, p) 
+		{
+			var type = e._xseen.attributes.type;
+			if (!(type == 'fixed' || type == 'tracking' || type == 'draggable')) {type = 'fixed';}
+			e._xseen.labelType = type;
+			e._xseen.targets = [];
+			e._xseen.tagObject = [];
+		},
+	
+	'fin'	: function (e, p)
+		{
+			var labelElement, targetElement, targetPosition, labelPosition, positionedInSpace;
+			var material;
+			labelElement = e.getElementsByTagName('div')[0];
+			labelPosition = new THREE.Vector3(0, 0, -1);	// center of near-clipping plane
+			positionedInSpace = false;
+			if (e._xseen.attributes.position.x != 0 || e._xseen.attributes.position.y != 0) {
+				e._xseen.attributes.position.z = -1;
+				positionedInSpace = true;
+			}
+			material = new THREE.LineBasicMaterial( {color: XSeen.Parser.Types.colorRgbInt(e._xseen.attributes['leadercolor']), } );
+
+			e._xseen.labelObj = [];
+			for (var ii=0; ii<e._xseen.targets.length; ii++) {
+				targetElement = e._xseen.targets[ii];
+				targetPosition = new THREE.Vector3();
+				targetElement._xseen.tagObject.getWorldPosition(targetPosition);
+
+				var geometry = new THREE.Geometry();
+				var line = new THREE.Line( geometry, material );
+
+				var labelObj = {
+						'method'		: XSeen.Tags.label.tick,
+						'position'		: XSeen.Tags.label['position_'+e._xseen.labelType],
+						'node'			: e,
+						'_xseen'		: e._xseen,
+						'RunTime'		: e._xseen.sceneInfo,
+						'target'		: targetElement,
+						'targetWorld'	: new THREE.Vector3(),
+						'label'			: labelElement,
+						'labelWorld'	: new THREE.Vector3(0, 0, -1),
+						'labelDelta'	: {x: 0, y: 0},
+						'line'			: line,
+						'initialized'	: false,
+						'spacePosition'	: positionedInSpace,
+				};
+				targetElement._xseen.tagObject.getWorldPosition(labelObj.targetWorld);
+				geometry.vertices.push(
+						labelObj.targetWorld,
+						labelObj.labelWorld);
+				labelObj.line.geometry.verticesNeedUpdate = true;
+				e._xseen.sceneInfo.perFrame.push ({'method':XSeen.Tags.label.tick, 'userdata':labelObj});
+				e._xseen.tagObject.push (line);
+				p._xseen.children.push (line);
+			}
+
+			// Set up event handlers
+			e.addEventListener ('xseen', XSeen.Tags.label.tick, true);						// Render frame
+			if (e._xseen.labelType == 'draggable') {
+				labelElement.addEventListener ('mousedown', XSeen.Tags.label.MouseDown);	// label movement if type='draggable'
+			}
+		},
+	'event'	: function (ev, attr) {},
+	'tick'	: function (rt, label)
+		{
+			label.position (rt, label);
+			label.target._xseen.tagObject.getWorldPosition(label.targetWorld);
+			label.line.geometry.verticesNeedUpdate = true;
+		},
+		
+// Event handler for mouse dragging of label
+	'MouseDown' : function (ev)
+		{
+			XSeen.Tags.label.selectedLabel.state = 'down';
+			XSeen.Tags.label.selectedLabel.element = ev.target;
+			XSeen.Tags.label.selectedLabel.pointerOffset = [ev.x-this.offsetLeft, ev.y-this.offsetTop];
+			this.addEventListener ('mousemove', XSeen.Tags.label.MouseMove);
+			this.addEventListener ('mouseup', XSeen.Tags.label.MouseUp);
+//			console.log ('Mouse Down on movable at Event: ' + ev.x + ', ' + ev.y + '; Offset [' + 
+//					XSeen.Tags.label.selectedLabel.pointerOffset[0] + ', ' + 
+//					XSeen.Tags.label.selectedLabel.pointerOffset[1] + ']');
+		},
+	'MouseUp'	: function (ev)
+		{
+			XSeen.Tags.label.selectedLabel.element.removeEventListener ('mousemove', XSeen.Tags.label.MouseMove);
+			XSeen.Tags.label.selectedLabel.element.removeEventListener ('mouseup', XSeen.Tags.label.MouseUp);
+			XSeen.Tags.label.selectedLabel.state = '';
+			XSeen.Tags.label.selectedLabel.element = {};
+			//console.log ('Mouse Up on movable at Event: ');
+		},
+	'MouseMove'	: function (ev)
+		{
+			XSeen.Tags.label.selectedLabel.state = 'move';
+			this.style.left = ev.x - XSeen.Tags.label.selectedLabel.pointerOffset[0] + 'px';
+			this.style.top  = ev.y - XSeen.Tags.label.selectedLabel.pointerOffset[1] + 'px';
+			ev.cancelBubble = true;
+			//console.log ('Mouse Move on movable at Event: ');
+		},
+
+// The 'position_*' methods correspond to the type attribute
+	'position_draggable'	: function (rt, label)
+		{
+			label.position = XSeen.Tags.label.position_fixed;
+			label.position (rt, label);
+		},
+	'position_fixed'	: function (rt, label)
+		{
+			label.labelWorld.x = 0 -1 + 2 * (label.label.offsetLeft + label.label.offsetWidth/2)   * rt.Size.iwidth;
+			label.labelWorld.y = 0 +1 - 2 * (label.label.offsetTop  + label.label.offsetHeight/2) * rt.Size.iheight;
+			label.labelWorld.z = -1;
+			label.labelWorld = label.labelWorld.unproject (rt.Camera);
+			label.labelWorld.initialized = true;
+		},
+
+	'position_tracking'	: function (rt, label)
+		{
+			var projected = label.targetWorld.clone();
+			projected.project(rt.Camera);
+			var w2, h2, labelx, labely;
+			w2 = rt.Size.width / 2;
+			h2 = rt.Size.height / 2;
+			projected.x = w2 + (projected.x * w2);
+			projected.y = h2 - (projected.y * h2);
+			if (!label.initialized) {
+				label.labelDelta.x = projected.x - label.label.offsetLeft;
+				label.labelDelta.y = projected.y - label.label.offsetTop;
+				label.initialized = true;
+			}
+
+			labelx = projected.x - label.labelDelta.x;
+			labely = projected.y - label.labelDelta.y;
+			label.label.style.left = labelx + 'px';
+			label.label.style.top  = labely + 'px';
+
+			XSeen.Tags.label.position_fixed (rt, label);
+		},
+	
+};
+XSeen.Tags.leader = {
+	'init'	: function (e, p) 
+		{
+			var targetElement = document.getElementById (e._xseen.attributes.target);
+			if (typeof(targetElement) === 'undefined' || targetElement === null) {return;}
+			p._xseen.targets.push (targetElement);
+		},
+	'fin'	: function (e, p) {},
+	'event'	: function (ev, attr) {},
+};
+
+// Add tag and attributes to Parsing table
+XSeen.Parser.defineTag ({
+						'name'	: 'label',
+						'init'	: XSeen.Tags.label.init,
+						'fin'	: XSeen.Tags.label.fin,
+						'event'	: XSeen.Tags.label.event
+						})
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'fixed', enumeration:['fixed', 'draggable', 'tracking'], isCaseInsensitive:true, 'isAnimatable':false})
+		.defineAttribute ({'name':'position', dataType:'xyz', 'defaultValue':{x:0, y:0, z:0}})
+		.defineAttribute ({'name':'leadercolor', dataType:'color', 'defaultValue':{'r':1,'g':1,'b':0}})
+		.addTag();
+XSeen.Parser.defineTag ({
+						'name'	: 'leader',
+						'init'	: XSeen.Tags.leader.init,
+						'fin'	: XSeen.Tags.leader.fin,
+						'event'	: XSeen.Tags.leader.event
+						})
+		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.addTag();
 // File: tags/light.js
 /*

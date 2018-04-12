@@ -165,33 +165,12 @@ XSeen.Tags.animate = {
 
 				var fieldTHREE, useUpdate, tween, startingValue;
 				if (typeof(p._xseen.animate[toAttribute]) == 'function') { 
-					//e._xseen.previousValue = p._xseen.properties[toAttribute];
-					//fieldTHREE = p._xseen.properties[toAttribute];		// THREE field for animation
 					fieldTHREE = p._xseen.attributes[toAttribute];		// THREE field for animation
-					//var setter = {'_xseen':p._xseen, '_x-property':p._xseen.animate[toAttribute], '_x-startingValue':fieldTHREE, '_x-to':target.to, '_x-previous':fieldTHREE, 'value':fieldTHREE, 'increment':target.to/duration};
-					//var setter = {'_xseen':p._xseen, '_x-property':toAttribute, '_x-startingValue':fieldTHREE, '_x-to':target.to, '_x-previous':fieldTHREE, 'value':fieldTHREE, 'increment':target.to/duration};
 					var setter = {'from':fieldTHREE, 'current':fieldTHREE, 'attribute':toAttribute};
 					useUpdate = true;
 					tween = new TWEEN.Tween (setter, e._xseen.tagObject)
 										.to({'current':target.to}, duration)
 										.onUpdate(p._xseen.animate[toAttribute]);
-/*
-					tween = new TWEEN.Tween (setter, e._xseen.tagObject)
-										.onUpdate(function(tweenData) {
-											//var field = tweenData * this['_x-to'];
-											var delta = tweenData.increment;
-											//this['_x-previous'] = field;
-											tweenData._xseen.tagObject[tweenData['_x-property']](delta);
-										});
-
-					tween = new TWEEN.Tween(setter, e._xseen.tagObject)
-							.onUpdate(function(tweenData) {
-								var field = tweenData * this['_x-to'];
-								var delta = field - this['_x-previous'];
-								this['_x-previous'] = field;
-								this._xseen.tagObject[this['_x-property']](delta);
-							});
- */
 					startingValue = fieldTHREE;
 
 				} else {

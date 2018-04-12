@@ -153,6 +153,26 @@ XSeen.Events = {
 						return  properties;
 					},
 
+		'propertiesRenderFrame'	: function (Runtime)
+					{
+						var properties = {
+								'detail':		{					// This object contains all of the XSeen data
+										'type'			: 'renderframe',
+										'originalType'	: 'renderframe',
+										'originator'	: Runtime.RootTag,			// Reference to scene object
+										'name'			: Runtime.RootTag.name,		// Name of scene object
+										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
+										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
+										'frameNumber'	: Runtime.frameNumber,		// Number of frame about to be rendered
+										'Runtime'		: Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						return  properties;
+					},
+
 };
 /*
 Events

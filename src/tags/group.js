@@ -20,12 +20,12 @@ XSeen.Tags.group = {
 			var rotation = {'x':0, 'y':0, 'z':0, 'w':0};
 			//var rotation = XSeen.types.Rotation2Quat(e._XSeen.attributes.rotation);	TODO: Figure out rotations
 			group.name = 'Transform children [' + e.id + ']';
-			group.position.x	= e._xseen.attributes.translation[0];
-			group.position.y	= e._xseen.attributes.translation[1];
-			group.position.z	= e._xseen.attributes.translation[2];
-			group.scale.x		= e._xseen.attributes.scale[0];
-			group.scale.y		= e._xseen.attributes.scale[1];
-			group.scale.z		= e._xseen.attributes.scale[2];
+			group.position.x	= e._xseen.attributes.position.x;
+			group.position.y	= e._xseen.attributes.position.y;
+			group.position.z	= e._xseen.attributes.position.z;
+			group.scale.x		= e._xseen.attributes.scale.x;
+			group.scale.y		= e._xseen.attributes.scale.y;
+			group.scale.z		= e._xseen.attributes.scale.z;
 			group.setRotationFromQuaternion (e._xseen.attributes.rotation);
 			
 			var bx, by, bz, q, tx, ty, tz;
@@ -42,12 +42,19 @@ XSeen.Tags.group = {
 			e._xseen.properties['rotatey'] = Math.atan2 (by.z, by.x);
 			e._xseen.properties['rotatez'] = Math.atan2 (bz.y, bz.x);
 				
-			e._xseen.animate['translation'] = group.position;
+			//e._xseen.animate['translation'] = group.position;
 			e._xseen.animate['rotation'] = group.quaternion;
-			e._xseen.animate['scale'] = group.scale;
+			//e._xseen.animate['scale'] = group.scale;
 			e._xseen.animate['rotatex'] = 'rotateX';
 			e._xseen.animate['rotatey'] = 'rotateY';
 			e._xseen.animate['rotatez'] = 'rotateZ';
+			
+			e._xseen.animate['position']	= group.position;
+			e._xseen.animate['scale']		= group.scale;
+			e._xseen.animate['rotate-x']	= XSeen.Tags.Solids._animateRotation (group, 'rotateX');
+			e._xseen.animate['rotate-y']	= XSeen.Tags.Solids._animateRotation (group, 'rotateY');
+			e._xseen.animate['rotate-z']	= XSeen.Tags.Solids._animateRotation (group, 'rotateZ');
+
 			e._xseen.loadGroup = group;
 			e._xseen.tagObject = e._xseen.loadGroup;
 			e._xseen.update = XSeen.Tags.group.animateObject;
@@ -79,10 +86,14 @@ XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.group.event,
 						'tick'	: XSeen.Tags.group.tick
 						})
+		.addSceneSpace()
+		.addTag();
+
+/*
 		.defineAttribute ({'name':'translation', dataType:'vec3', 'defaultValue':[0,0,0], 'isAnimatable':true})
 		.defineAttribute ({'name':'scale', dataType:'vec3', 'defaultValue':[1,1,1], 'isAnimatable':true})
 		.defineAttribute ({'name':'rotation', dataType:'rotation', 'defaultValue':'0 0 0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatex', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatey', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatez', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
-		.addTag();
+ */

@@ -55,23 +55,23 @@ XSeen.Tags.camera = {
 					//e._xseen.sceneInfo.Renderer.controls.enableZoom = true;
 				}
 			}
-			console.log("Setting up controls...");
-			console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
-			console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
-			console.log (" - Track: |"+e._xseen.track+"|");
+			//console.log("Setting up controls...");
+			//console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
+			//console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
+			//console.log (" - Track: |"+e._xseen.track+"|");
 			XSeen.LogInfo("Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|; Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
 			if (!e._xseen.sceneInfo.rendererHasControls) {
 				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
 					// TODO: check for proper enabling of DeviceControls
-					console.log ('Adding DeviceOrientationControls');
+					//console.log ('Adding DeviceOrientationControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 				} else if (e._xseen.track == 'orbit' || (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation)) {
-					console.log ('Adding OrbitControls');
+					//console.log ('Adding OrbitControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 				} else if (e._xseen.track == 'trackball') {
-					console.log ('Trackball');
+					//console.log ('Trackball');
 				} else if (e._xseen.track == 'none') {
-					console.log ('No tracking');
+					//console.log ('No tracking');
 					e._xseen.sceneInfo.rendererHasControls = true;
 				} else {
 					console.log ('Something else');

@@ -233,7 +233,7 @@ XSeen.Parser = {
 				}
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
-				console.log('Calling node: ' + tagName + '. Method: init');
+				//console.log('Calling node: ' + tagName + '. Method: init');
 				XSeen.LogInfo('Calling node: ' + tagName + '. Method: init');
 				tagEntry.init (element, parent);
 			}

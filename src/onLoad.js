@@ -25,7 +25,7 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	console.log ("'onLoad' method");
+	//console.log ("'onLoad' method");
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
@@ -69,7 +69,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
@@ -85,9 +85,9 @@ console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
-	console.log ('Checking _xseen');
+	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		console.log ('Defining _xseen');
+		//console.log ('Defining _xseen');
 		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
 									'children'		: [],	// Children of this tag
 									'Metadata'		: [],	// Metadata for this tag
@@ -157,7 +157,7 @@ console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	console.log ('Starting Parse...');
+	//console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 // TODO: Start rendering loop

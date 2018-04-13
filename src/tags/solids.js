@@ -17,6 +17,7 @@ XSeen.Tags.Solids = {};
 XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
+				console.log ('Loading texture: |'+e._xseen.attributes['map']+'|');
 				e._xseen.texture = new THREE.TextureLoader().load (e._xseen.attributes['map']);
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -131,7 +132,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.animate['metalness']			= mesh.material.metalness;
 			e._xseen.animate['roughness']			= mesh.material.roughness;
 
-			p._xseen.sceneInfo.selectable.push(mesh);
+			if (e._xseen.attributes.selectable) p._xseen.sceneInfo.selectable.push(mesh);
 			mesh.name = 'Solid: ' + e.id;
 			
 			e._xseen.tagObject = mesh;
@@ -434,6 +435,7 @@ XSeen.Tags.ring = {
  */
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
+		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
 
 // General material properties

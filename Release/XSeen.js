@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.16-alpha.1+6_29a805d
- *  Built Wed Apr 11 18:29:29 2018
+ *  XSeen V0.6.18-alpha.1+6_ccc350e
+ *  Built Thu Apr 12 17:34:18 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -526,6 +526,8 @@ XSeen.Loader = {
 	'totalResponses'	: 0,
 	'requestCount'		: 0,
 	'lmThat'			: this,
+	'manager'			: new THREE.LoadingManager(),
+	'loadersComplete'	: true,
 	'ContentType'		: {
 							'jpg'	: 'image',
 							'jpeg'	: 'image',
@@ -602,7 +604,7 @@ XSeen.Loader = {
 
 			console.log('Loading cube-map texture...');
 
-			textureCube = new THREE.CubeTextureLoader()
+			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 //									.setPath ('./')
 									.load (urls, Success, _Progress, _Failure);
 		},
@@ -648,6 +650,7 @@ XSeen.Loader = {
 				this.internalLoader (url, success, failure, progress, userdata, type);
 			} else {
 				MimeLoader.loader.load (url, success, progress, failure);
+				XSeen.Loader.loadersComplete = false;
 			}
 		},
 	
@@ -718,6 +721,7 @@ XSeen.Loader = {
 };
 
 XSeen.Loader.onLoad = function() {
+	var mgr = XSeen.Loader.manager;
 	XSeen.Loader.ContentLoaders = {
 							'image'		: {'loader': null, needHint: false, },
 							'text'		: {'loader': null, needHint: false, },
@@ -725,14 +729,19 @@ XSeen.Loader.onLoad = function() {
 							'xml'		: {'loader': null, needHint: false, },
 							'json'		: {'loader': null, needHint: false, },
 							'gltf'		: {'loader': null, needHint: 2, },
-							'collada'	: {'loader': new THREE.ColladaLoader(), needHint: false, },
-							'obj'		: {'loader': new THREE.OBJLoader2(), needHint: false, },
-							'x3d'		: {'loader': new THREE.ColladaLoader(), needHint: false, },
-							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(), needHint: false, }, 
-							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(), needHint: false, }, 
+							'collada'	: {'loader': new THREE.ColladaLoader(mgr), needHint: false, },
+							'obj'		: {'loader': new THREE.OBJLoader2(mgr), needHint: false, },
+							'x3d'		: {'loader': new THREE.ColladaLoader(mgr), needHint: false, },
+							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(mgr), needHint: false, }, 
+							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(mgr), needHint: false, }, 
 						};
 	console.log ('Created ContentLoaders object');
+	mgr.onLoad = function() {XSeen.Loader.loadersComplete = true;}
 };
+XSeen.Loader.loadingComplete = function() {
+	if (XSeen.Loader.urlQueue.length == 0 && XSeen.Loader.loadersComplete) return true;
+	return false;
+}
 if (typeof(XSeen.onLoadCallBack) === 'undefined') {
 	XSeen.onLoadCallBack = [];
 }
@@ -853,7 +862,7 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	console.log ("'onLoad' method");
+	//console.log ("'onLoad' method");
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
@@ -897,7 +906,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
@@ -913,9 +922,9 @@ console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
-	console.log ('Checking _xseen');
+	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		console.log ('Defining _xseen');
+		//console.log ('Defining _xseen');
 		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
 									'children'		: [],	// Children of this tag
 									'Metadata'		: [],	// Metadata for this tag
@@ -985,7 +994,7 @@ console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	console.log ('Starting Parse...');
+	//console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 // TODO: Start rendering loop
@@ -1252,7 +1261,7 @@ XSeen.Parser = {
 				}
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
-				console.log('Calling node: ' + tagName + '. Method: init');
+				//console.log('Calling node: ' + tagName + '. Method: init');
 				XSeen.LogInfo('Calling node: ' + tagName + '. Method: init');
 				tagEntry.init (element, parent);
 			}
@@ -1630,6 +1639,8 @@ XSeen.Parser = {
  *	0.6.14: Mouse event creation
  *	0.6.15: Rotation animation
  *	0.6.16: Added Label tag
+ *	0.6.17: Fixed a number of issues - asynchronous model loading, group
+ *	0.6.18: Allowed user identified non-selectable geometry
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -1646,11 +1657,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 16,
+					'_Patch'		: 18,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-11',
+					'_RDate'		: '2017-04-12',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -1732,6 +1743,13 @@ XSeen.RenderFrame = function()
 	{
 		if (XSeen.Runtime.isProcessingResize) {return;}		// Only do one thing at a time
 
+		if (XSeen.Runtime.frameNumber == 0) {
+			if (XSeen.Loader.loadingComplete()) {
+				XSeen.Tags.scene.addScene();
+			} else {
+				return;
+			}
+		}
 		XSeen.Runtime.deltaTime = XSeen.Runtime.Time.getDelta();
 		XSeen.Runtime.currentTime = XSeen.Runtime.Time.getElapsedTime();
 		XSeen.Runtime.frameNumber ++;
@@ -2367,23 +2385,23 @@ XSeen.Tags.camera = {
 					//e._xseen.sceneInfo.Renderer.controls.enableZoom = true;
 				}
 			}
-			console.log("Setting up controls...");
-			console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
-			console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
-			console.log (" - Track: |"+e._xseen.track+"|");
+			//console.log("Setting up controls...");
+			//console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
+			//console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
+			//console.log (" - Track: |"+e._xseen.track+"|");
 			XSeen.LogInfo("Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|; Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
 			if (!e._xseen.sceneInfo.rendererHasControls) {
 				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
 					// TODO: check for proper enabling of DeviceControls
-					console.log ('Adding DeviceOrientationControls');
+					//console.log ('Adding DeviceOrientationControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 				} else if (e._xseen.track == 'orbit' || (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation)) {
-					console.log ('Adding OrbitControls');
+					//console.log ('Adding OrbitControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 				} else if (e._xseen.track == 'trackball') {
-					console.log ('Trackball');
+					//console.log ('Trackball');
 				} else if (e._xseen.track == 'none') {
-					console.log ('No tracking');
+					//console.log ('No tracking');
 					e._xseen.sceneInfo.rendererHasControls = true;
 				} else {
 					console.log ('Something else');
@@ -2492,12 +2510,12 @@ XSeen.Tags.group = {
 			var rotation = {'x':0, 'y':0, 'z':0, 'w':0};
 			//var rotation = XSeen.types.Rotation2Quat(e._XSeen.attributes.rotation);	TODO: Figure out rotations
 			group.name = 'Transform children [' + e.id + ']';
-			group.position.x	= e._xseen.attributes.translation[0];
-			group.position.y	= e._xseen.attributes.translation[1];
-			group.position.z	= e._xseen.attributes.translation[2];
-			group.scale.x		= e._xseen.attributes.scale[0];
-			group.scale.y		= e._xseen.attributes.scale[1];
-			group.scale.z		= e._xseen.attributes.scale[2];
+			group.position.x	= e._xseen.attributes.position.x;
+			group.position.y	= e._xseen.attributes.position.y;
+			group.position.z	= e._xseen.attributes.position.z;
+			group.scale.x		= e._xseen.attributes.scale.x;
+			group.scale.y		= e._xseen.attributes.scale.y;
+			group.scale.z		= e._xseen.attributes.scale.z;
 			group.setRotationFromQuaternion (e._xseen.attributes.rotation);
 			
 			var bx, by, bz, q, tx, ty, tz;
@@ -2514,12 +2532,19 @@ XSeen.Tags.group = {
 			e._xseen.properties['rotatey'] = Math.atan2 (by.z, by.x);
 			e._xseen.properties['rotatez'] = Math.atan2 (bz.y, bz.x);
 				
-			e._xseen.animate['translation'] = group.position;
+			//e._xseen.animate['translation'] = group.position;
 			e._xseen.animate['rotation'] = group.quaternion;
-			e._xseen.animate['scale'] = group.scale;
+			//e._xseen.animate['scale'] = group.scale;
 			e._xseen.animate['rotatex'] = 'rotateX';
 			e._xseen.animate['rotatey'] = 'rotateY';
 			e._xseen.animate['rotatez'] = 'rotateZ';
+			
+			e._xseen.animate['position']	= group.position;
+			e._xseen.animate['scale']		= group.scale;
+			e._xseen.animate['rotate-x']	= XSeen.Tags.Solids._animateRotation (group, 'rotateX');
+			e._xseen.animate['rotate-y']	= XSeen.Tags.Solids._animateRotation (group, 'rotateY');
+			e._xseen.animate['rotate-z']	= XSeen.Tags.Solids._animateRotation (group, 'rotateZ');
+
 			e._xseen.loadGroup = group;
 			e._xseen.tagObject = e._xseen.loadGroup;
 			e._xseen.update = XSeen.Tags.group.animateObject;
@@ -2551,13 +2576,17 @@ XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.group.event,
 						'tick'	: XSeen.Tags.group.tick
 						})
+		.addSceneSpace()
+		.addTag();
+
+/*
 		.defineAttribute ({'name':'translation', dataType:'vec3', 'defaultValue':[0,0,0], 'isAnimatable':true})
 		.defineAttribute ({'name':'scale', dataType:'vec3', 'defaultValue':[1,1,1], 'isAnimatable':true})
 		.defineAttribute ({'name':'rotation', dataType:'rotation', 'defaultValue':'0 0 0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatex', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatey', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
 		.defineAttribute ({'name':'rotatez', dataType:'float', 'defaultValue':'0.0', 'isAnimatable':true})
-		.addTag();
+ */
 // File: tags/label.js
 /*
  * XSeen JavaScript library
@@ -2951,15 +2980,20 @@ XSeen.Tags.model = {
 	'init'	: function (e, p) 
 		{
 			e._xseen.processedUrl = false;
+			e._xseen.tmpGroup = new THREE.Group();
+			e._xseen.tmpGroup.name = 'External Model [' + e.id + ']';
 			e._xseen.loadGroup = new THREE.Group();
 			e._xseen.loadGroup.name = 'External Model [' + e.id + ']';
-			XSeen.Tags._setSpace (e._xseen.loadGroup, e._xseen.attributes);
-			console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+			e._xseen.loadGroup.name = 'Parent of |' + e._xseen.tmpGroup.name  + '|';
+			e._xseen.loadGroup.add (e._xseen.tmpGroup);
+			//XSeen.Tags._setSpace (e._xseen.loadGroup, e._xseen.attributes);
+			XSeen.Tags._setSpace (e._xseen.tmpGroup, e._xseen.attributes);
+			//console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
 			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
 			e._xseen.requestedUrl = true;
 			e._xseen.tagObject = e._xseen.loadGroup;
 			p._xseen.children.push(e._xseen.loadGroup);
-			console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+			//console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},
@@ -2967,7 +3001,11 @@ XSeen.Tags.model = {
 	
 					// Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
 	'loadProgress' : function (a1) {
-		console.log ('Progress ('+a1.type+'): ' + a1.timeStamp);
+		if (a1.total == 0) {
+			console.log ('Progress loading '+a1.type);
+		} else {
+			console.log ('Progress ('+a1.type+'): ' + a1.loaded/a1.total * 100 + '%');
+		}
 	},
 	'loadFailure' : function (a1) {
 		console.log ('Failure ('+a1.type+'): ' + a1.timeStamp);
@@ -2981,9 +3019,13 @@ XSeen.Tags.model = {
 							e._xseen.loadText = response;
 							e._xseen.currentUrl = e._xseen.attributes.src;
 
-							console.log ('Success');
-							console.log("download successful for |"+e.id);
-							e._xseen.loadGroup.add(response.scene);		// This works for glTF
+// Something is not loading into the scene. It may be a synchronization issue.
+							console.log("Successful download for |"+e.id+'|');
+							//e._xseen.loadGroup.add(response.scene);		// This works for glTF
+							e._xseen.tmpGroup.add(response.scene);		// This works for glTF
+							//p._xseen.children.push(e._xseen.loadGroup);
+							console.log ('glTF loading complete and inserted into parent');
+							//p._xseen.children.push(mesh);
 /*
  ** TODO: Need to go deeper into the structure
  * See https://stackoverflow.com/questions/26202064/how-to-select-a-root-object3d-using-raycaster
@@ -3018,7 +3060,7 @@ XSeen.Tags.model = {
 
 	'addReferenceToRoot' : function (ele, root)
 		{
-			console.log ('addReferenceToRoot -- |' + ele.name + '|');
+			//console.log ('addReferenceToRoot -- |' + ele.name + '|');
 			//if (ele.isObject) {
 				ele.userData.root = root;
 			//}
@@ -3084,15 +3126,6 @@ XSeen.Tags.scene = {
 		},
 	'fin'	: function (e, p) 
 		{
-			// Render all Children
-			e._xseen.children.forEach (function (child, ndx, wholeThing)
-				{
-					console.log('Adding child of type ' + child.type + ' (' + child.name + ') to THREE scene');
-					e._xseen.sceneInfo.SCENE.add(child);
-					//console.log('Check for successful add');
-				});
-			//XSeen.Parser.dumpTable ();
-//			XSeen.LogDebug("Rendered all elements -- Starting animation");
 
 /*
  *	Add an event listener to this node for resize events
@@ -3123,6 +3156,18 @@ XSeen.Tags.scene = {
 			XSeen.Runtime.Camera.aspect = thisTag.offsetWidth / thisTag.offsetHeight;
 			XSeen.Runtime.Camera.updateProjectionMatrix();
 			XSeen.Runtime.Renderer.setSize (thisTag.offsetWidth, thisTag.offsetHeight)
+		},
+	'addScene': function () {
+			// Render all Children
+			var e = XSeen.Runtime.RootTag;
+			console.log ('Adding children to SCENE');
+			e._xseen.children.forEach (function (child, ndx, wholeThing)
+				{
+					console.log('Adding child of type ' + child.type + ' (' + child.name + ') with ' + child.children.length + ' children to THREE scene');
+					e._xseen.sceneInfo.SCENE.add(child);
+					//console.log('Check for successful add');
+				});
+//			XSeen.LogDebug("Rendered all elements -- Starting animation");
 		},
 	'event'	: function (ev, attr)
 		{
@@ -3164,6 +3209,7 @@ XSeen.Tags.Solids = {};
 XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
+				console.log ('Loading texture: |'+e._xseen.attributes['map']+'|');
 				e._xseen.texture = new THREE.TextureLoader().load (e._xseen.attributes['map']);
 				e._xseen.texture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.texture.wrapT = THREE.ClampToEdgeWrapping;
@@ -3278,7 +3324,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.animate['metalness']			= mesh.material.metalness;
 			e._xseen.animate['roughness']			= mesh.material.roughness;
 
-			p._xseen.sceneInfo.selectable.push(mesh);
+			if (e._xseen.attributes.selectable) p._xseen.sceneInfo.selectable.push(mesh);
 			mesh.name = 'Solid: ' + e.id;
 			
 			e._xseen.tagObject = mesh;
@@ -3581,6 +3627,7 @@ XSeen.Tags.ring = {
  */
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
+		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
 
 // General material properties

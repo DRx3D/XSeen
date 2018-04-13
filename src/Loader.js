@@ -64,6 +64,8 @@ XSeen.Loader = {
 	'totalResponses'	: 0,
 	'requestCount'		: 0,
 	'lmThat'			: this,
+	'manager'			: new THREE.LoadingManager(),
+	'loadersComplete'	: true,
 	'ContentType'		: {
 							'jpg'	: 'image',
 							'jpeg'	: 'image',
@@ -140,7 +142,7 @@ XSeen.Loader = {
 
 			console.log('Loading cube-map texture...');
 
-			textureCube = new THREE.CubeTextureLoader()
+			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 //									.setPath ('./')
 									.load (urls, Success, _Progress, _Failure);
 		},
@@ -186,6 +188,7 @@ XSeen.Loader = {
 				this.internalLoader (url, success, failure, progress, userdata, type);
 			} else {
 				MimeLoader.loader.load (url, success, progress, failure);
+				XSeen.Loader.loadersComplete = false;
 			}
 		},
 	
@@ -256,6 +259,7 @@ XSeen.Loader = {
 };
 
 XSeen.Loader.onLoad = function() {
+	var mgr = XSeen.Loader.manager;
 	XSeen.Loader.ContentLoaders = {
 							'image'		: {'loader': null, needHint: false, },
 							'text'		: {'loader': null, needHint: false, },
@@ -263,14 +267,19 @@ XSeen.Loader.onLoad = function() {
 							'xml'		: {'loader': null, needHint: false, },
 							'json'		: {'loader': null, needHint: false, },
 							'gltf'		: {'loader': null, needHint: 2, },
-							'collada'	: {'loader': new THREE.ColladaLoader(), needHint: false, },
-							'obj'		: {'loader': new THREE.OBJLoader2(), needHint: false, },
-							'x3d'		: {'loader': new THREE.ColladaLoader(), needHint: false, },
-							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(), needHint: false, }, 
-							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(), needHint: false, }, 
+							'collada'	: {'loader': new THREE.ColladaLoader(mgr), needHint: false, },
+							'obj'		: {'loader': new THREE.OBJLoader2(mgr), needHint: false, },
+							'x3d'		: {'loader': new THREE.ColladaLoader(mgr), needHint: false, },
+							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(mgr), needHint: false, }, 
+							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(mgr), needHint: false, }, 
 						};
 	console.log ('Created ContentLoaders object');
+	mgr.onLoad = function() {XSeen.Loader.loadersComplete = true;}
 };
+XSeen.Loader.loadingComplete = function() {
+	if (XSeen.Loader.urlQueue.length == 0 && XSeen.Loader.loadersComplete) return true;
+	return false;
+}
 if (typeof(XSeen.onLoadCallBack) === 'undefined') {
 	XSeen.onLoadCallBack = [];
 }

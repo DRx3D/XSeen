@@ -38,15 +38,6 @@ XSeen.Tags.scene = {
 		},
 	'fin'	: function (e, p) 
 		{
-			// Render all Children
-			e._xseen.children.forEach (function (child, ndx, wholeThing)
-				{
-					console.log('Adding child of type ' + child.type + ' (' + child.name + ') to THREE scene');
-					e._xseen.sceneInfo.SCENE.add(child);
-					//console.log('Check for successful add');
-				});
-			//XSeen.Parser.dumpTable ();
-//			XSeen.LogDebug("Rendered all elements -- Starting animation");
 
 /*
  *	Add an event listener to this node for resize events
@@ -77,6 +68,18 @@ XSeen.Tags.scene = {
 			XSeen.Runtime.Camera.aspect = thisTag.offsetWidth / thisTag.offsetHeight;
 			XSeen.Runtime.Camera.updateProjectionMatrix();
 			XSeen.Runtime.Renderer.setSize (thisTag.offsetWidth, thisTag.offsetHeight)
+		},
+	'addScene': function () {
+			// Render all Children
+			var e = XSeen.Runtime.RootTag;
+			console.log ('Adding children to SCENE');
+			e._xseen.children.forEach (function (child, ndx, wholeThing)
+				{
+					console.log('Adding child of type ' + child.type + ' (' + child.name + ') with ' + child.children.length + ' children to THREE scene');
+					e._xseen.sceneInfo.SCENE.add(child);
+					//console.log('Check for successful add');
+				});
+//			XSeen.LogDebug("Rendered all elements -- Starting animation");
 		},
 	'event'	: function (ev, attr)
 		{

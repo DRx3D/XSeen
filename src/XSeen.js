@@ -25,6 +25,8 @@
  *	0.6.14: Mouse event creation
  *	0.6.15: Rotation animation
  *	0.6.16: Added Label tag
+ *	0.6.17: Fixed a number of issues - asynchronous model loading, group, scene loading, camera
+ *	0.6.18: Allowed user identified non-selectable geometry
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -41,11 +43,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 16,
+					'_Patch'		: 18,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-11',
+					'_RDate'		: '2017-04-12',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -127,6 +129,13 @@ XSeen.RenderFrame = function()
 	{
 		if (XSeen.Runtime.isProcessingResize) {return;}		// Only do one thing at a time
 
+		if (XSeen.Runtime.frameNumber == 0) {
+			if (XSeen.Loader.loadingComplete()) {
+				XSeen.Tags.scene.addScene();
+			} else {
+				return;
+			}
+		}
 		XSeen.Runtime.deltaTime = XSeen.Runtime.Time.getDelta();
 		XSeen.Runtime.currentTime = XSeen.Runtime.Time.getElapsedTime();
 		XSeen.Runtime.frameNumber ++;

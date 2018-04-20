@@ -34,7 +34,8 @@ XSeen.Tags.background = {
 
 	'init'	: function (e, p) 
 		{
-			e._xseen.sceneInfo.SCENE.background = new THREE.Color(e._xseen.attributes.skycolor);
+			var t = e._xseen.attributes.skycolor;
+			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
 			XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
 		},
 			
@@ -58,6 +59,7 @@ XSeen.Tags.background = {
 			}
 
 			if (urls2load > 0) {
+				console.log ('Loading background image cube');
 				var dirtyFlag;
 				XSeen.Loader.TextureCube ('./', [urls['right'],
 												 urls['left'],

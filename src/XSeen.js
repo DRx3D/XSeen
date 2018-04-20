@@ -27,6 +27,7 @@
  *	0.6.16: Added Label tag
  *	0.6.17: Fixed a number of issues - asynchronous model loading, group, scene loading, camera
  *	0.6.18: Allowed user identified non-selectable geometry
+ *	0.6.19: Fixed handling of skycolor in background
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -43,11 +44,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 18,
+					'_Patch'		: 19,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-12',
+					'_RDate'		: '2018-04-20',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

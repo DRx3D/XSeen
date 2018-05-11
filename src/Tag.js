@@ -206,6 +206,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	Create all XSeen additions un element._xseen
@@ -510,11 +511,13 @@ XSeen.Parser = {
  * Color parsing order
  *	<integer>; Integer [0-16777215]. Key integer within range.
  *	#HHHHHH	24-bit hex value indicating color. Key '#'
- *	rgba(r,g,b,a); where r,g,b are either byte-integers [0,255] or percent [0%-100%]; and a is [0.0-0.1] Key 'rgba' and '%'
- *	rgb(r,g,b); where r,g,b are either byte-integers [0,255] or percent [0%-100%]. Key 'rgb' and '%'
- *	hsla(h,s,l,a); where h is [0-360], s&l are [0-100%]. Key 'hsla'
- *	hsl(h,s,l); where h is [0-360], s&l are [0-100%]. Key 'hsl'
- *	<color-name>; One of the 140 predefined HTML color names. This is enumerable (but not yet)
+ *	rgba(r g b a): where r,g,b are either byte-integers [0,255] or percent [0%-100%]; and a is [0.0-0.1] Key 'rgba(' and '%'
+ *	rgb(r g b): where r,g,b are either byte-integers [0,255] or percent [0%-100%]. Key 'rgb(' and '%'
+ *	f3(r g b): where r,g,b are fraction color values [0,1]. Key 'f3('
+ *	f4(r g b a): where r,g,b are fraction color values [0,1]; and a is [0.0-0.1] Key 'f4(' 
+ *	hsla(h,s,l,a): where h is [0-360], s&l are [0-100%]. Key 'hsla('
+ *	hsl(h,s,l): where h is [0-360], s&l are [0-100%]. Key 'hsl('
+ *	<color-name>: One of the 140 predefined HTML color names. This is enumerable (but not yet)
  *	<default used>
  */
 		'color'	: function(value, def, insensitive, enumeration)
@@ -536,6 +539,22 @@ XSeen.Parser = {
 				if (value.substring(0,3) == 'hsl') {
 					XSeen.LogWarn("HSL[A] color not yet implemented");
 					console.log ("WARN: HSL[A] color not yet implemented");
+				}
+				if (value.substring(0,3) == 'f3(') {
+					XSeen.LogWarn("HSL[A] color not yet implemented");
+					console.log ("WARN: HSL[A] color not yet implemented");
+					if (value.substring(value.length-1,value.length) != ')') {
+						XSeen.LogWarn ("WARN: Illegal syntax for f3 color -- no closing ')'");
+						console.log ("WARN: Illegal syntax for f3 color -- no closing ')'");
+					} else {
+						var colorString = value.substring(3,value.length-1);
+						var colors = colorString.split(' ');
+						return {'r':colors[0], 'g':colors[1], 'b':colors[2]};
+					}
+				}
+				if (value.substring(0,3) == 'f4(') {
+					XSeen.LogWarn("F4 color not yet implemented");
+					console.log ("WARN: F4 color not yet implemented");
 				}
 				
 				if (typeof(XSeen.CONST.Colors[value]) === 'undefined') {return def;}
@@ -560,10 +579,10 @@ XSeen.Parser = {
 
 /*
  * Rotation parsing order
- *	e(rx, ry, rz): Euler rotation about (in local order) X, Y, and Z axis
- *	q(x, y, z, w): Quaternion with 4 components
- *	h(x, y, z, t): Homogeneous rotation of 't' about the vector [x, y, z]
- *	The default is e(). The 'e' and parantheses are optional.
+ *	e(rx ry rz): Euler rotation about (in local order) X, Y, and Z axis
+ *	q(x y z w): Quaternion with 4 components
+ *	h(x y z t): Homogeneous rotation of 't' about the vector [x, y, z]
+ *	The default is e(). The 'e' and parantheses are optional. Case and spacing are important.
  *	The return value is always a quaternion
  *
  *	Only the Euler rotation without 'e(' and ')' is implemented. The default should be of the this type.
@@ -571,12 +590,38 @@ XSeen.Parser = {
 		'rotation'	: function(value, def, insensitive, enumeration)
 			{
 				if (value === null) {value = def;}
-				var eulerAngles = this.vec3 (value, def, true, []);
-				var euler = new THREE.Euler();
-				euler.fromArray (eulerAngles);
+				if (value == '') {value = def;}
+				var eulerAngles, processed = false;
 				var quat = new THREE.Quaternion();
-				quat.setFromEuler (euler);
-				
+
+				if (typeof(value) == 'string') {
+					if (value.substring(0,2) == 'h(') {
+						processed = true;
+						value = value.substring(2,value.length-1);
+						var axisAngle = this.vec4 (value, def, true, []);
+						quat = this.rotation2Quat (axisAngle);
+						
+					} else if (value.substring(0,2) == 'q(') {
+						console.log ('No support yet for quaternion form of rotation');
+						value = def;
+						eulerAngles = this.vec3 (value, def, true, []);
+	
+					} else if (value.substring(0,2) == 'e(') {
+						value = value.substring(2,value.length-1);
+						eulerAngles = this.vec3 (value, def, true, []);
+
+					} else {
+						eulerAngles = this.vec3 (value, def, true, []);
+					}
+					
+				} else {
+					eulerAngles = value;
+				}
+				if (!processed) {
+					var euler = new THREE.Euler();
+					euler.fromArray (eulerAngles);
+					quat.setFromEuler (euler);
+				}
 				return quat;
 			},
 

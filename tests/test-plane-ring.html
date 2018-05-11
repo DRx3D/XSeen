@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+		<x-scene>
+			<x-class3d id='geometry'>
+				<x-style3d property='radius' value='1'></x-style3d>
+				<x-style3d property='tube' value='.4'></x-style3d>
+				<x-style3d property='segments-radial' value='8'></x-style3d>
+				<x-style3d property='segments-tubular' value='64'></x-style3d>
+			</x-class3d>
+			<x-class3d id='material'>
+				<x-style3d property='color' value='purple'></x-style3d>
+				<x-style3d property='emissive' value='#444400'></x-style3d>
+			</x-class3d>
+			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
+			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
+			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+			<x-plane id='plane1' class3d='material' side='both' height='1' width='2' position='-5 5 0'></x-plane>
+			<x-plane id='plane2' class3d='material' side='both' height='1' width='2' position='-5 0 0' rotation='1 0 0'></x-plane>
+			<x-plane id='plane3' class3d='material' side='both' height='2' width='1' position='-5 -5 0' rotation='1 2 3'></x-plane>
+			<x-ring id='ring1' class3d='material' side='both' radius-inner='.3' radius-outer='2' position='5 5 0'></x-ring>
+			<x-ring id='ring2' class3d='material' side='both' segments-theta='12' radius-inner='1.0' radius-outer='1.2' position='5 0 0'></x-ring>
+			<x-ring id='ring3' class3d='material' side='both' segments-theta='12' segments-radial='8' theta-length='200' radius-inner='.5' radius-outer='1.2' position='5 -5 0'></x-ring>
+		</x-scene>
+	</body>
+</html>
+
+

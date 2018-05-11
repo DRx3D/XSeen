@@ -9,11 +9,12 @@
  
 /*
  * xxTODO: Update xseen... XSeen...
- * TODO: Add standard position, rotation, and scale fields with XSeen.Tags.setSpace method
- * TODO: Improve handling of file formats that the loaders cannot do version distinction (gltf)
- * xxTODO: Save current URL so any changes can be compared to increase performance
+ * DONE:  TODO: Add standard position, rotation, and scale fields with XSeen.Tags.setSpace method
+ * DONE:  TODO: Improve handling of file formats that the loaders cannot do version distinction (gltf)
+ * DONE:  TODO: Save current URL so any changes can be compared to increase performance
  * TODO: Add handling of changing model URL - need to stop & delete animations
  * TODO: Investigate how to add 'setValue' and 'getValue' to work with [s|g]etAttribute
+ * TODO: Implement default path/URL for loader.
  */
 
 XSeen.Tags.model = {

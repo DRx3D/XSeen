@@ -29,12 +29,20 @@
  *	0.6.18: Allowed user identified non-selectable geometry
  *	0.6.19: Fixed handling of skycolor in background
  *
+ *	0.7.20: Added asset capability for Material
+ *	0.7.21: Added axis-angle parsing for rotation
+ *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
+ *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
+ *		If that happens than target should not be used
+ *	Check background image cube for proper orientation
  * 
  */
 
@@ -43,12 +51,12 @@ var Renderer = new THREE.WebGLRenderer();
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
-					'_Minor'		: 6,
-					'_Patch'		: 19,
-					'_PreRelease'	: 'alpha.1',
-					'_Release'		: 6,
+					'_Minor'		: 7,
+					'_Patch'		: 22,
+					'_PreRelease'	: 'alpha.2',
+					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-04-20',
+					'_RDate'		: '2018-05-09',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

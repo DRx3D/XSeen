@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.6.18-alpha.1+6_ccc350e
- *  Built Thu Apr 12 17:34:18 2018
+ *  XSeen V0.6.19-alpha.1+6_0b67869
+ *  Built Mon May  7 07:50:17 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1234,6 +1234,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	Create all XSeen additions un element._xseen
@@ -1588,10 +1589,10 @@ XSeen.Parser = {
 
 /*
  * Rotation parsing order
- *	e(rx, ry, rz): Euler rotation about (in local order) X, Y, and Z axis
- *	q(x, y, z, w): Quaternion with 4 components
- *	h(x, y, z, t): Homogeneous rotation of 't' about the vector [x, y, z]
- *	The default is e(). The 'e' and parantheses are optional.
+ *	e(rx ry rz): Euler rotation about (in local order) X, Y, and Z axis
+ *	q(x y z w): Quaternion with 4 components
+ *	h(x y z t): Homogeneous rotation of 't' about the vector [x, y, z]
+ *	The default is e(). The 'e' and parantheses are optional. Case and spacing are important.
  *	The return value is always a quaternion
  *
  *	Only the Euler rotation without 'e(' and ')' is implemented. The default should be of the this type.
@@ -1599,12 +1600,38 @@ XSeen.Parser = {
 		'rotation'	: function(value, def, insensitive, enumeration)
 			{
 				if (value === null) {value = def;}
-				var eulerAngles = this.vec3 (value, def, true, []);
-				var euler = new THREE.Euler();
-				euler.fromArray (eulerAngles);
+				if (value == '') {value = def;}
+				var eulerAngles, processed = false;
 				var quat = new THREE.Quaternion();
-				quat.setFromEuler (euler);
-				
+
+				if (typeof(value) == 'string') {
+					if (value.substring(0,2) == 'h(') {
+						processed = true;
+						value = value.substring(2,value.length-1);
+						var axisAngle = this.vec4 (value, def, true, []);
+						quat = this.rotation2Quat (axisAngle);
+						
+					} else if (value.substring(0,2) == 'q(') {
+						console.log ('No support yet for quaternion form of rotation');
+						value = def;
+						eulerAngles = this.vec3 (value, def, true, []);
+	
+					} else if (value.substring(0,2) == 'e(') {
+						value = value.substring(2,value.length-1);
+						eulerAngles = this.vec3 (value, def, true, []);
+
+					} else {
+						eulerAngles = this.vec3 (value, def, true, []);
+					}
+					
+				} else {
+					eulerAngles = value;
+				}
+				if (!processed) {
+					var euler = new THREE.Euler();
+					euler.fromArray (eulerAngles);
+					quat.setFromEuler (euler);
+				}
 				return quat;
 			},
 
@@ -1639,8 +1666,9 @@ XSeen.Parser = {
  *	0.6.14: Mouse event creation
  *	0.6.15: Rotation animation
  *	0.6.16: Added Label tag
- *	0.6.17: Fixed a number of issues - asynchronous model loading, group
+ *	0.6.17: Fixed a number of issues - asynchronous model loading, group, scene loading, camera
  *	0.6.18: Allowed user identified non-selectable geometry
+ *	0.6.19: Fixed handling of skycolor in background
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -1657,11 +1685,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 6,
-					'_Patch'		: 18,
+					'_Patch'		: 19,
 					'_PreRelease'	: 'alpha.1',
 					'_Release'		: 6,
 					'_Version'		: '',
-					'_RDate'		: '2017-04-12',
+					'_RDate'		: '2018-04-20',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -2212,6 +2240,34 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'easing', dataType:'string', 'defaultValue':'', enumeration:['', 'in', 'out', 'inout'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'easingtype', dataType:'string', 'defaultValue':'linear', enumeration:['linear', 'quadratic', 'sinusoidal', 'exponential', 'elastic', 'bounce'], isCaseInsensitive:true})
 		.addTag();
+// File: tags/asset.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2017, Daly Realism, Los Angeles
+ * Dual licensed under the MIT and GPL
+ */
+
+ // Control Node definitions
+
+XSeen.Tags.asset = {
+	'init'	: function (e, p) 
+		{
+		},
+	'fin'	: function (e, p) 
+		{
+		},
+	'event'	: function (ev, attr) {},
+};
+
+// Add tag and attributes to Parsing table
+XSeen.Parser.defineTag ({
+						'name'	: 'asset',
+						'init'	: XSeen.Tags.asset.init,
+						'fin'	: XSeen.Tags.asset.fin,
+						'event'	: XSeen.Tags.asset.event
+						})
+		.addTag();
 // File: tags/background.js
 /*
  * XSeen JavaScript library
@@ -2249,7 +2305,8 @@ XSeen.Tags.background = {
 
 	'init'	: function (e, p) 
 		{
-			e._xseen.sceneInfo.SCENE.background = new THREE.Color(e._xseen.attributes.skycolor);
+			var t = e._xseen.attributes.skycolor;
+			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
 			XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
 		},
 			
@@ -2273,6 +2330,7 @@ XSeen.Tags.background = {
 			}
 
 			if (urls2load > 0) {
+				console.log ('Loading background image cube');
 				var dirtyFlag;
 				XSeen.Loader.TextureCube ('./', [urls['right'],
 												 urls['left'],
@@ -2969,11 +3027,12 @@ XSeen.Parser.defineTag ({
  
 /*
  * xxTODO: Update xseen... XSeen...
- * TODO: Add standard position, rotation, and scale fields with XSeen.Tags.setSpace method
- * TODO: Improve handling of file formats that the loaders cannot do version distinction (gltf)
- * xxTODO: Save current URL so any changes can be compared to increase performance
+ * DONE:  TODO: Add standard position, rotation, and scale fields with XSeen.Tags.setSpace method
+ * DONE:  TODO: Improve handling of file formats that the loaders cannot do version distinction (gltf)
+ * DONE:  TODO: Save current URL so any changes can be compared to increase performance
  * TODO: Add handling of changing model URL - need to stop & delete animations
  * TODO: Investigate how to add 'setValue' and 'getValue' to work with [s|g]etAttribute
+ * TODO: Implement default path/URL for loader.
  */
 
 XSeen.Tags.model = {
@@ -3206,7 +3265,7 @@ XSeen.Parser.defineTag ({
  // Tag definition code for light
 
 XSeen.Tags.Solids = {};
-XSeen.Tags._solid = function (e, p, geometry) {
+XSeen.Tags._appearance = function (e) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
 				console.log ('Loading texture: |'+e._xseen.attributes['map']+'|');
@@ -3219,7 +3278,15 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
 
 			var parameters, appearance;
-			if (e._xseen.attributes.type == 'phong') {
+			if (e._xseen.attributes.material != '') {
+				var ele = document.getElementById (e._xseen.attributes.material);
+				if (typeof(ele) != 'undefined') {
+					appearance = ele._xseen.tagObject;
+				} else {
+					console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
+					appearance = {};
+				}
+			} else if (e._xseen.attributes.type == 'phong') {
 				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
@@ -3295,6 +3362,11 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							};
 				appearance = new THREE.MeshBasicMaterial(parameters);
 			}
+			return appearance;
+}
+XSeen.Tags._solid = function (e, p, geometry) {
+			var appearance = XSeen.Tags._appearance (e);
+
 			//geometry.needsUpdate = true;
 	
 			// Create mesh, set userData and animateable fields
@@ -3368,7 +3440,7 @@ XSeen.Tags.Solids._animateRotation = function (obj, field) {
 }
 
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'color') {				// Different operation for each attribute
@@ -3377,6 +3449,12 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
 					console.log ('Changing envMap to |' + value + '|');
 					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
+				} else if (attributeName == 'metalness') {
+					//console.log ('Setting metalness to ' + value);
+					e._xseen.tagObject.material.metalness = value;
+				} else if (attributeName == 'roughness') {
+					//console.log ('Setting roughness to ' + value);
+					e._xseen.tagObject.material.roughness = value;
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -3414,15 +3492,33 @@ XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			return envMap;
 };
 
+// This method assumes that the target is an environment map in a material in a mesh. It won't
+// for a material-only node. Perhaps I need a new field that is a reference to the environment map
+// location
 XSeen.Tags.Solids.loadSuccess = function (userdata) {
 	var thisEle = userdata.e;
 	return function (textureCube)
 	{
 		//thisEle._xseen.processedUrl = true;
-		thisEle._xseen.tagObject.material.envMap = textureCube;
-		thisEle._xseen.tagObject.material.needsUpdate = true;
+		if (thisEle._xseen.tagObject.type == 'Material') {
+			thisEle._xseen.tagObject.envMap = textureCube;
+			thisEle._xseen.tagObject.needsUpdate = true;
+		} else {
+			thisEle._xseen.tagObject.material.envMap = textureCube;
+			thisEle._xseen.tagObject.material.needsUpdate = true;
+		}
 		console.log ('Successful load of environment textures.');
 	}
+};
+
+XSeen.Tags.material = {
+	'init'	: function (e,p)
+		{
+			var material = XSeen.Tags._appearance (e);
+			e._xseen.tagObject = material;
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
 };
 
 XSeen.Tags.box = {
@@ -3629,6 +3725,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 
 // General material properties
 		.defineAttribute ({'name':'emissive-intensity', dataType:'float', 'defaultValue':1.0})
@@ -3853,6 +3950,17 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8});
 XSeen.Parser._addStandardAppearance (tag);
+
+//	Tags for assets. These should only be used as children of <asset>
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'material',
+						'init'	: XSeen.Tags.material.init,
+						'fin'	: XSeen.Tags.material.fin,
+						'event'	: XSeen.Tags.material.event,
+						'tick'	: XSeen.Tags.material.tick
+						})
+XSeen.Parser._addStandardAppearance (tag);
+
 // File: tags/style3d.js
 /*
  * XSeen JavaScript library

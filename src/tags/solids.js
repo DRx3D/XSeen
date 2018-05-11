@@ -14,7 +14,7 @@
  // Tag definition code for light
 
 XSeen.Tags.Solids = {};
-XSeen.Tags._solid = function (e, p, geometry) {
+XSeen.Tags._appearance = function (e) {
 			e._xseen.texture = null;
 			if (e._xseen.attributes['map'] !== '') {
 				console.log ('Loading texture: |'+e._xseen.attributes['map']+'|');
@@ -27,7 +27,15 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			if (e._xseen.attributes['side'] == 'both') e._xseen.properties['side'] = THREE.DoubleSide;
 
 			var parameters, appearance;
-			if (e._xseen.attributes.type == 'phong') {
+			if (e._xseen.attributes.material != '') {
+				var ele = document.getElementById (e._xseen.attributes.material);
+				if (typeof(ele) != 'undefined') {
+					appearance = ele._xseen.tagObject;
+				} else {
+					console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
+					appearance = {};
+				}
+			} else if (e._xseen.attributes.type == 'phong') {
 				parameters = {
 							'aoMap'					: e._xseen.attributes['ambient-occlusion-map'],
 							'aoMapIntensity'		: e._xseen.attributes['ambient-occlusion-map-intensity'],
@@ -103,6 +111,11 @@ XSeen.Tags._solid = function (e, p, geometry) {
 							};
 				appearance = new THREE.MeshBasicMaterial(parameters);
 			}
+			return appearance;
+}
+XSeen.Tags._solid = function (e, p, geometry) {
+			var appearance = XSeen.Tags._appearance (e);
+
 			//geometry.needsUpdate = true;
 	
 			// Create mesh, set userData and animateable fields
@@ -167,6 +180,7 @@ XSeen.Tags.Solids._animateRotation = function (obj, field) {
 		};
 	}
 	if (field == 'rotateZ') {
+		console.log ('Defining function for Z rotation');
 		return function (td) {
 			var rotation = td.current - target.obj.userData.previousRotation.z;
 			target.obj.rotateZ(rotation);
@@ -176,7 +190,7 @@ XSeen.Tags.Solids._animateRotation = function (obj, field) {
 }
 
 XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'color') {				// Different operation for each attribute
@@ -185,6 +199,12 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
 					console.log ('Changing envMap to |' + value + '|');
 					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
+				} else if (attributeName == 'metalness') {
+					//console.log ('Setting metalness to ' + value);
+					e._xseen.tagObject.material.metalness = value;
+				} else if (attributeName == 'roughness') {
+					//console.log ('Setting roughness to ' + value);
+					e._xseen.tagObject.material.roughness = value;
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -222,15 +242,33 @@ XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			return envMap;
 };
 
+// This method assumes that the target is an environment map in a material in a mesh. It won't
+// for a material-only node. Perhaps I need a new field that is a reference to the environment map
+// location
 XSeen.Tags.Solids.loadSuccess = function (userdata) {
 	var thisEle = userdata.e;
 	return function (textureCube)
 	{
 		//thisEle._xseen.processedUrl = true;
-		thisEle._xseen.tagObject.material.envMap = textureCube;
-		thisEle._xseen.tagObject.material.needsUpdate = true;
+		if (thisEle._xseen.tagObject.type == 'Material') {
+			thisEle._xseen.tagObject.envMap = textureCube;
+			thisEle._xseen.tagObject.needsUpdate = true;
+		} else {
+			thisEle._xseen.tagObject.material.envMap = textureCube;
+			thisEle._xseen.tagObject.material.needsUpdate = true;
+		}
 		console.log ('Successful load of environment textures.');
 	}
+};
+
+XSeen.Tags.material = {
+	'init'	: function (e,p)
+		{
+			var material = XSeen.Tags._appearance (e);
+			e._xseen.tagObject = material;
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
 };
 
 XSeen.Tags.box = {
@@ -437,6 +475,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 
 // General material properties
 		.defineAttribute ({'name':'emissive-intensity', dataType:'float', 'defaultValue':1.0})
@@ -661,3 +700,14 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8});
 XSeen.Parser._addStandardAppearance (tag);
+
+//	Tags for assets. These should only be used as children of <asset>
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'material',
+						'init'	: XSeen.Tags.material.init,
+						'fin'	: XSeen.Tags.material.fin,
+						'event'	: XSeen.Tags.material.event,
+						'tick'	: XSeen.Tags.material.tick
+						})
+XSeen.Parser._addStandardAppearance (tag);
+

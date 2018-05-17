@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.21-alpha.2+6_0b67869
- *  Built Wed May  9 09:10:57 2018
+ *  XSeen V0.7.22-alpha.2+7_0a413a5
+ *  Built Thu May 17 07:13:53 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1690,6 +1690,7 @@ XSeen.Parser = {
  *
  *	0.7.20: Added asset capability for Material
  *	0.7.21: Added axis-angle parsing for rotation
+ *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -1697,6 +1698,10 @@ XSeen.Parser = {
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
+ *		If that happens than target should not be used
+ *	Check background image cube for proper orientation
  * 
  */
 
@@ -1706,11 +1711,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 21,
+					'_Patch'		: 22,
 					'_PreRelease'	: 'alpha.2',
-					'_Release'		: 6,
+					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-05-07',
+					'_RDate'		: '2018-05-09',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -2412,11 +2417,6 @@ XSeen.Parser.defineTag ({
  *
  * (c)2017, Daly Realism, Los Angeles
  *
- * portions extracted from or inspired by
- * X3DOM JavaScript Library
- * http://www.x3dom.org
- *
- * (C)2009 Fraunhofer IGD, Darmstadt, Germany
  * Dual licensed under the MIT and GPL
  */
 
@@ -2435,6 +2435,107 @@ XSeen.Tags.camera = {
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
 							e._xseen.attributes.position.z);
+							
+/*
+ * Handle camera target. Target is an HTML id attribute value,
+ * must exist, and be defined (and parsed) prior to the camera tag parsing.
+ * This section handles the existence and gets the tagObject associated with the referenced tag.
+ */
+			if (e._xseen.attributes.target != '') {
+				var tagElement = document.getElementById (e._xseen.attributes.target);
+				if (typeof(tagElement) == 'object' && typeof(tagElement._xseen) != 'undefined' && typeof(tagElement._xseen.tagObject) != 'undefined') {
+					e._xseen.target = tagElement._xseen.tagObject;
+				} else {
+					e._xseen.target = null;
+				}
+			}
+ 
+/*
+ *	Handle the camera type and tracking capabilities
+ *	The allowed types and capabilities are dependent on the display device
+ *	(isVrCapable and hasDeviceOrientation). 
+ *
+ *	'orthographic'	==> all devices support and all manual tracking is allowed (no VR, no Device)
+ *	'perspective'	==> all devices support and all manual tracking is allowed. Device tracking is allowed if hasDeviceOrientation
+ *	'stereo'		==> all devices support and all manual tracking is allowed. Device tracking is allowed if hasDeviceOrientation
+ *						Object tracking is allowed if hasDeviceOrientation and target != null
+ *	'vr'			==> only allowed if isVrCapable
+ *
+ *	Rollbacks: If the requested type and/or tracking is not allowed the the following rollback is used:
+ *
+ *	'vr'		==> stereo/device OR stereo/target if hasDeviceOrientation
+ *				==> perspective/orbit otherwise
+ *	'device'	==> orbit if !hasDeviceOrientation
+ */
+ 
+			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
+			
+			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
+				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				
+			} else if (e._xseen.type == 'stereo') {	// Stereo perspective cameras
+				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
+				e._xseen.sceneInfo.rendererHasControls = false;
+				e._xseen.sceneInfo.isStereographic = true;
+				// Need to add a button to the display to go full screen
+ 
+			} else if (e._xseen.type == 'vr') {	// Stereo perspective cameras
+				if (e._xseen.sceneInfo.isVrCapable) {
+					e._xseen.sceneInfo.Renderer.vr.enabled = true;
+					e._xseen.sceneInfo.rendererHasControls = true;
+					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
+				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
+					e._xseen.type = 'stereo';
+					e._xseen.track = 'device';
+					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
+					e._xseen.sceneInfo.rendererHasControls = false;
+					e._xseen.sceneInfo.isStereographic = true;
+					// Need to add a button to the display to go full screen
+				} else {													// Flat screen
+					e._xseen.type = 'perspective';
+					e._xseen.track = 'orbit';
+				}
+			}
+			
+//	Now handle object tracking. Only allowed if stereo, hasDeviceOrientation, and target != null
+
+			if (e._xseen.target != null) {
+				if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
+					e._xseen.track = 'object';
+				} else {
+					e._xseen.target = null;
+				}
+			}
+
+/*
+ *	Handle camera controls for (navigational) tracking. 
+ *	This applies to stereo (device & object) and perspective with track != none.
+ *	TODO: orthographic camera
+ */
+			if (!e._xseen.sceneInfo.rendererHasControls) {
+				if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
+					if (e._xseen.track == 'object') {
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
+					} else {
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
+					}
+				} else if (e._xseen.track == 'orbit') {
+					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
+				} else if (e._xseen.track == 'trackball') {
+					//console.log ('Trackball');
+				} else if (e._xseen.track == 'none') {
+					//console.log ('No tracking');
+					e._xseen.sceneInfo.rendererHasControls = true;
+				} else {
+					console.log ('Something else');
+				}
+			}
+
+/*
+ * OLD code -- waiting for working confirmation of above
+ *
+			// Handle camera type (perspective, orthographic, vr, etc.)
 			if (e._xseen.type == 'perspective') {			// Already exists
 
 			} else if (e._xseen.type == 'stereo') {			// TODO: need to implement
@@ -2473,7 +2574,13 @@ XSeen.Tags.camera = {
 				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
 					// TODO: check for proper enabling of DeviceControls
 					//console.log ('Adding DeviceOrientationControls');
-					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
+					if (typeof(e._xseen.target) != 'undefined' && e._xseen.target != null) {
+						console.log ('Targeting controls to ' + e._xseen.target.name);
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
+					} else {
+						console.log ('Targeting controls to camera');
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
+					}
 				} else if (e._xseen.track == 'orbit' || (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation)) {
 					//console.log ('Adding OrbitControls');
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
@@ -2488,6 +2595,8 @@ XSeen.Tags.camera = {
 			} else {
 				console.log ('Renderer has controls...');
 			}
+*/
+
 
 /* For handling events
 			e._xseen.handlers = {};
@@ -2515,6 +2624,7 @@ XSeen.Parser.defineTag ({
 		.addSceneSpace()
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'perspective', enumeration:['perspective','stereo','orthographic','vr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'track', dataType:'string', 'defaultValue':'none', enumeration:['none', 'orbit', 'fly', 'examine', 'trackball', 'device'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':''})
 		.addTag();
 // File: tags/fog.js
 /*
@@ -3452,6 +3562,7 @@ XSeen.Tags.Solids._animateRotation = function (obj, field) {
 		};
 	}
 	if (field == 'rotateZ') {
+		console.log ('Defining function for Z rotation');
 		return function (td) {
 			var rotation = td.current - target.obj.userData.previousRotation.z;
 			target.obj.rotateZ(rotation);

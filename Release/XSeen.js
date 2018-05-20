@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.22-alpha.2+7_27ec09a
- *  Built Fri May 18 17:22:37 2018
+ *  XSeen V0.7.22-alpha.2+7_f3ca524
+ *  Built Sat May 19 22:59:12 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -862,13 +862,29 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	//console.log ("'onLoad' method");
+	//console.log ("onLoad method");
+
 
 	loadExternal = function(url, domElement) {
+                                       // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
+                                       //
+                var xseenCode = '';
+        	loadExternalSuccess = function (userdata) {
+                	var e = userdata.e;
+                        return function (response) {
+                                 console.log('Loading of external XSeen complete');
+                                 xseenCode = '<x-group>' + resppnse + '</x-group>';
+                                 e.insertAdjacentHTML('afterbegin', xseenCode);
+                        }
+                };
+
 		if (url != 'test') {
-			console.log ('External loads not yet supported');
-		}
-		xseenCode = '';
+        	  console.log ('External loads not yet supported');
+                  var loader = new THREE.ObjectLoader();
+                  loader.load (url, loadExternalSuccess({'e':domElement}));
+
+                } else {
+	        	xseenCode = '' +
    "<x-class3d id='geometry'>\n" +
    "        <x-style3d property='radius' value='1'></x-style3d>\n" +
    "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
@@ -889,13 +905,12 @@ XSeen.onLoad = function() {
    "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='1' position='-5 -5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='1' position='0 -5 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
    "</x-group>";
 		xseenCode = '<x-group>' + xseenCode + '</x-group>';
 		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-	}
+            }
+        }	
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}

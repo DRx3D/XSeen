@@ -25,26 +25,29 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	//console.log ("'onLoad' method");
+	//console.log ("onLoad method");
+
 
 	loadExternal = function(url, domElement) {
+                                       // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
+                                       //
+                var xseenCode = '';
+        	loadExternalSuccess = function (userdata) {
+                	var e = userdata.e;
+                        return function (response) {
+                                 console.log('Loading of external XSeen complete');
+                                 xseenCode = '<x-group>' + resppnse + '</x-group>';
+                                 e.insertAdjacentHTML('afterbegin', xseenCode);
+                        }
+                };
+
 		if (url != 'test') {
-			console.log ('External loads not yet supported');
-                        var loader = new THREE.ObjectLoader();
-                        loader.load (url, loadExternalSuccess({'e':domElement}));
-                },
+        	  console.log ('External loads not yet supported');
+                  var loader = new THREE.ObjectLoader();
+                  loader.load (url, loadExternalSuccess({'e':domElement}));
 
-                                        // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
-        'loadExternalSuccess = function (userdata) {
-                                                var e = userdata.e;
-                                                return function (response) {
-		// need to extract all of the children of the first 'scene' tag and insert them into the first DOM scene tag
-                                                        e._xseen.loadGroup.add(response);               // What docs say for ObjectLoader
-
-                                                }
-                                        }
-		}
-		xseenCode = '';
+                } else {
+	        	xseenCode = '' +
    "<x-class3d id='geometry'>\n" +
    "        <x-style3d property='radius' value='1'></x-style3d>\n" +
    "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
@@ -65,13 +68,12 @@ XSeen.onLoad = function() {
    "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='1' position='-5 -5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='1' position='0 -5 0'></x-tknot>\n" +
    "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
    "</x-group>";
 		xseenCode = '<x-group>' + xseenCode + '</x-group>';
 		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-	}
+            }
+        }	
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}

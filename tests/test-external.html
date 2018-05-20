@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Loading External Scene</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+		<x-scene src='test'>
+			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
+			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
+			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+		</x-scene>
+	</body>
+</html>
+
+

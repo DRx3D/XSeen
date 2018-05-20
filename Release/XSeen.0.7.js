@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.22-alpha.2+7_0a413a5
- *  Built Thu May 17 07:13:53 2018
+ *  XSeen V0.7.22-alpha.2+7_27ec09a
+ *  Built Fri May 18 17:22:37 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -863,6 +863,39 @@ XSeen.Convert = {
  */
 XSeen.onLoad = function() {
 	//console.log ("'onLoad' method");
+
+	loadExternal = function(url, domElement) {
+		if (url != 'test') {
+			console.log ('External loads not yet supported');
+		}
+		xseenCode = '';
+   "<x-class3d id='geometry'>\n" +
+   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
+   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
+   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
+   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
+   "</x-class3d>\n" +
+   "<x-class3d id='material'>\n" +
+   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
+   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
+   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
+   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
+   "</x-class3d>\n" +
+   "<x-group rotation='0 3.14 0'>\n" +
+   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='1' position='-5 -5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='1' position='0 -5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
+   "</x-group>";
+		xseenCode = '<x-group>' + xseenCode + '</x-group>';
+		domElement.insertAdjacentHTML('afterbegin', xseenCode);
+	}
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
@@ -911,6 +944,10 @@ XSeen.onLoad = function() {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
 	});
+
+	if (XSeen.Runtime.Attributes.src != '') {
+		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
+	}
 
 	
 	// Setup/define various characteristics for the runtime or display

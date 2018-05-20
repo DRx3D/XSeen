@@ -26,6 +26,52 @@ XSeen.Convert = {
  */
 XSeen.onLoad = function() {
 	//console.log ("'onLoad' method");
+
+	loadExternal = function(url, domElement) {
+		if (url != 'test') {
+			console.log ('External loads not yet supported');
+                        var loader = new THREE.ObjectLoader();
+                        loader.load (url, loadExternalSuccess({'e':domElement}));
+                },
+
+                                        // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
+        'loadExternalSuccess = function (userdata) {
+                                                var e = userdata.e;
+                                                return function (response) {
+		// need to extract all of the children of the first 'scene' tag and insert them into the first DOM scene tag
+                                                        e._xseen.loadGroup.add(response);               // What docs say for ObjectLoader
+
+                                                }
+                                        }
+		}
+		xseenCode = '';
+   "<x-class3d id='geometry'>\n" +
+   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
+   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
+   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
+   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
+   "</x-class3d>\n" +
+   "<x-class3d id='material'>\n" +
+   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
+   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
+   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
+   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
+   "</x-class3d>\n" +
+   "<x-group rotation='0 3.14 0'>\n" +
+   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='0' roughness='1' position='-5 -5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='.5' roughness='1' position='0 -5 0'></x-tknot>\n" +
+   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
+   "</x-group>";
+		xseenCode = '<x-group>' + xseenCode + '</x-group>';
+		domElement.insertAdjacentHTML('afterbegin', xseenCode);
+	}
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
@@ -74,6 +120,10 @@ XSeen.onLoad = function() {
 			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
 		}
 	});
+
+	if (XSeen.Runtime.Attributes.src != '') {
+		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
+	}
 
 	
 	// Setup/define various characteristics for the runtime or display

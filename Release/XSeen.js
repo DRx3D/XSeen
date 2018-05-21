@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.22-alpha.2+7_f3ca524
- *  Built Sat May 19 22:59:12 2018
+ *  XSeen V0.7.22-alpha.2+7_daef1b5
+ *  Built Sun May 20 19:42:43 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -873,14 +873,20 @@ XSeen.onLoad = function() {
                 	var e = userdata.e;
                         return function (response) {
                                  console.log('Loading of external XSeen complete');
-                                 xseenCode = '<x-group>' + resppnse + '</x-group>';
-                                 e.insertAdjacentHTML('afterbegin', xseenCode);
+				var parser = new DOMParser();
+				var xmlDoc = parser.parseFromString(response,"text/xml");
+				var rootNode = xmlDoc.getElementsByTagName('x-scene');
+				var nodes = rootNode[0].children;
+				while (nodes.length > 0) {
+					console.log('Adding external node: ' + nodes[0].nodeName);
+					e.appendChild(nodes[0]);
+				}	
                         }
                 };
 
 		if (url != 'test') {
         	  console.log ('External loads not yet supported');
-                  var loader = new THREE.ObjectLoader();
+                  var loader = new THREE.FileLoader();
                   loader.load (url, loadExternalSuccess({'e':domElement}));
 
                 } else {
@@ -1143,6 +1149,29 @@ XSeen.Parser = {
 								handler (mutation.target, mutation.attributeName, value);
 							}
 						}),
+/*
+ * Observer for tag/child changes/additions
+ */
+	'ChildObserver'	: new MutationObserver(function(list) {
+				for (var mutation of list) {
+					console.log ('Child mutation element');
+                              		mutation.addedNodes[0]._xseen = {
+                                                           'children'              : [],   // Children of this tag
+                                                           'Metadata'              : [],   // Metadata for this tag
+                                                           'tmp'                   : [],   // tmp working space
+                                                           'attributes'    : [],   // attributes for this tag
+                                                           'animate'               : [],   // animatable attributes for this tag
+                                                           'animation'             : [],   // array of animations on this tag
+                                                           'properties'    : [],   // array of properties (active attribute values) on this tag
+                                                           'class3d'               : [],   // 3D classes for this tag
+                                                           'parseComplete' : false,        // tag has been completely parsed
+                                                           'sceneInfo'             : mutation.target._xseen.sceneInfo,     // Runtime...
+                                                                        };
+					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
+							}
+						}),
+
+
 	'TypeInfo'		: {
 						'string'	: {'isNumeric':false},
 						'boolean'	: {'isNumeric':false},
@@ -1289,6 +1318,7 @@ XSeen.Parser = {
 			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
+			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
 			 *	Create all XSeen additions un element._xseen
 			 *	Parse provided attributes
 			 *	Redefine DOM methods for accessing attributes
@@ -1298,6 +1328,9 @@ XSeen.Parser = {
 				XSeen.LogDebug("Unknown node: " + tagName + '. Skipping all children.');
 				console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
 				return;
+			} else if (element._xseen.parseComplete) {	// tag already parsed. Display messge and ignore tag
+				XSeen.LogDebug("Tag already parsed: " + tagName + '. Skipping all children.');
+                                console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
 			} else {
 				tagEntry = XSeen.Parser.Table[tagName];
 				if (typeof(element._xseen) == 'undefined') {
@@ -1310,8 +1343,10 @@ XSeen.Parser = {
 									'animation'		: [],	// array of animations on this tag
 									'properties'	: [],	// array of properties (active attribute values) on this tag
 									'class3d'		: [],	// 3D classes for this tag
+									'parseComplete'	: false,	// tag has benn completely parsed
 									};
 				}
+			XSeen.Parser.ChildObserver.observe (element, {'childList':true});
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
 				//console.log('Calling node: ' + tagName + '. Method: init');
@@ -1330,6 +1365,7 @@ XSeen.Parser = {
 									'animation'		: [],	// array of animations on this tag
 									'properties'	: [],	// array of properties (active attribute values) on this tag
 									'class3d'		: [],	// 3D classes for this tag
+									'parseComplete'	: false,	// tag has been completely parsed
 									'sceneInfo'		: element._xseen.sceneInfo,	// Runtime...
 									};
 				this.Parse (element.children[element._xseen.parsingCount], element);
@@ -1347,6 +1383,7 @@ XSeen.Parser = {
 				if (typeof(tagEntry.eventHandlers.mutation) !== 'undefined') {
 					XSeen.Parser.AttributeObserver.observe (element, tagEntry.eventHandlers.mutation.options);
 				}
+				element._xseen.parseComplete = true;
 			}
 		},
 

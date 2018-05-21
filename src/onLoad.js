@@ -36,14 +36,20 @@ XSeen.onLoad = function() {
                 	var e = userdata.e;
                         return function (response) {
                                  console.log('Loading of external XSeen complete');
-                                 xseenCode = '<x-group>' + resppnse + '</x-group>';
-                                 e.insertAdjacentHTML('afterbegin', xseenCode);
+				var parser = new DOMParser();
+				var xmlDoc = parser.parseFromString(response,"text/xml");
+				var rootNode = xmlDoc.getElementsByTagName('x-scene');
+				var nodes = rootNode[0].children;
+				while (nodes.length > 0) {
+					console.log('Adding external node: ' + nodes[0].nodeName);
+					e.appendChild(nodes[0]);
+				}	
                         }
                 };
 
 		if (url != 'test') {
         	  console.log ('External loads not yet supported');
-                  var loader = new THREE.ObjectLoader();
+                  var loader = new THREE.FileLoader();
                   loader.load (url, loadExternalSuccess({'e':domElement}));
 
                 } else {

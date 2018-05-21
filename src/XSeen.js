@@ -32,6 +32,7 @@
  *	0.7.20: Added asset capability for Material
  *	0.7.21: Added axis-angle parsing for rotation
  *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
+ *	0.7.23: Added support for external XSeen files in XML format.
  *
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
@@ -52,11 +53,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 22,
+					'_Patch'		: 23,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-05-09',
+					'_RDate'		: '2018-05-20',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

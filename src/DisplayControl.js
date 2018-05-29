@@ -1,0 +1,305 @@
+/**
+ * @author mrdoob / http://mrdoob.com
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Based on @tojiro's vr-samples-utils.js
+ *
+ *	Downloaded 2017-11-02 @13:31
+ */
+
+XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
+XSeen.DisplayControl = {
+	
+/*
+ * Primary entry for handling buttons. This is only called when the device supports the requested
+ *	functionality. If an HTML element is supplied, that is modified rather than a new element being created.
+ *	The text associated with this element is always appropriate for the requested functionality. This can be
+ *	modified prior to adding the element to the HTML document.
+ */
+	'buttonCreate'			: function (buttonType, button) {
+	}
+	
+	'buttonNotSupported'	: function (buttonType, button) {
+		var response = document.createElement( 'a' );
+		response.href = 'https://webvr.info';
+		response.innerHTML = 'WEBVR NOT SUPPORTED';
+		response.style.left = 'calc(50% - 90px)';
+		response.style.width = '180px';
+		response.style.textDecoration = 'none';
+
+		stylizeElement( response );
+	}
+	
+	'buttonVR'				: function (button) {
+	}
+	
+	'buttonFullScreen'		: function (button) {
+	}
+	
+	'_deviceSupportsType'	: function (buttonType) {
+		if (buttonType == 'fullscreen') {
+			return true;
+		} else if (buttonType == 'vr') {
+			if ( 'getVRDisplays' in navigator ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+	
+/*
+ * Creates and returns HTML element. If the device supports the requested change, then the necessary
+ *		Event handlers are created to execute the action on user-initiated requests
+ *		If the requested action is not supported, an appropriate HTML element is returned without event handlers.
+ *
+ *	Parameters:
+ *		type		The type of requested action. All values are case insensitive. The only supported values are:
+ *				'fullscreen'	Set the display full screen
+ *				'vr'			Set the display to VR mode
+ *		renderer	The rendering object
+ *		button		An optional user-created HTML element. If present, then this is modified to supply the appropriate 
+ *					innerHTML value. If not present or not an HTML element with innerHTML field, then one will be created.
+ */
+	'createButton'			: function (type, renderer, button) {
+		var buttonType = type.toLowerCase();
+		if (this->_deviceSupportsType(buttonType)) {	// Device supports requested feature (VR or FullScreen)
+			var response = null;
+		
+		} else {								// Device does not support requested feature (VR or FullScreen)
+			var response = this->buttonNotSupported (buttonType, button);
+		}
+		return response;
+
+		
+		
+		if ( 'getVRDisplays' in navigator ) {
+
+			var button = document.createElement( 'button' );
+			button.style.display = 'none';
+
+			stylizeElement( button );
+
+			window.addEventListener( 'vrdisplayconnect', function ( event ) {
+
+				showEnterVR( event.display );
+
+			}, false );
+
+			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
+
+				showVRNotFound();
+
+			}, false );
+
+			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
+
+				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
+
+			}, false );
+
+			navigator.getVRDisplays()
+				.then( function ( displays ) {
+
+					if ( displays.length > 0 ) {
+
+						showEnterVR( displays[ 0 ] );
+
+					} else {
+
+						showVRNotFound();
+
+					}
+
+				} );
+
+			return button;
+
+		} else {
+
+			var message = document.createElement( 'a' );
+			message.href = 'https://webvr.info';
+			message.innerHTML = 'WEBVR NOT SUPPORTED';
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement( message );
+
+			return message;
+
+		}
+	}
+}
+	
+//var WEBVR = {
+
+	createButton: function ( renderer ) {
+
+		function showEnterVR( display ) {
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'ENTER VR';
+
+			button.onmouseenter = function () { button.style.opacity = '1.0'; };
+			button.onmouseleave = function () { button.style.opacity = '0.5'; };
+			(jQuery)('#HUD-text').prepend ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
+			console.log ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
+			renderer.vr._RequestStart = false;
+
+			button.onclick = function () {
+
+/*
+ *	display == VRDisplay object. .displayName: "Google, Inc. Daydream View"
+ *	renderer.domElement ==
+ *				canvas object (HTML element). .nodeName = 'CANVAS'
+ */
+//				display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
+				if (display.isPresenting) {
+					(jQuery)('#HUD-text').prepend ('Curently VRpresenting, now exiting<br>');
+					console.log ('Curently VRpresenting, now exiting<br>');
+					display.exitPresent();
+					renderer.vr._RequestStart = false;
+				} else {
+					renderer.vr._RequestStart = true;
+					(jQuery)('#HUD-text').prepend ('Starting VRpresenting<br>');
+					(jQuery)('#HUD-text').prepend (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
+					console.log ('Starting VRpresenting<br>');
+					console.log (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
+					var st = display.requestPresent( [ { source: renderer.domElement } ] );
+					console.log ('VR request response = ' + st);
+					(jQuery)('#HUD-text').prepend ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
+					console.log ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
+				}
+
+			};
+
+			renderer.vr.setDevice( display );
+
+		}
+
+		function showVRNotFound() {
+
+			button.style.display = '';
+
+			button.style.cursor = 'auto';
+			button.style.left = 'calc(50% - 75px)';
+			button.style.width = '150px';
+
+			button.textContent = 'VR NOT FOUND';
+
+			button.onmouseenter = null;
+			button.onmouseleave = null;
+
+			button.onclick = null;
+
+			renderer.vr.setDevice( null );
+
+		}
+
+		function stylizeElement( element ) {
+
+			element.style.position = 'absolute';
+			element.style.bottom = '20px';
+			element.style.padding = '12px 6px';
+			element.style.border = '1px solid #fff';
+			element.style.borderRadius = '4px';
+			element.style.background = 'transparent';
+			element.style.color = '#fff';
+			element.style.font = 'normal 13px sans-serif';
+			element.style.textAlign = 'center';
+			element.style.opacity = '0.5';
+			element.style.outline = 'none';
+			element.style.zIndex = '999';
+
+		}
+
+		if ( 'getVRDisplays' in navigator ) {
+
+			var button = document.createElement( 'button' );
+			button.style.display = 'none';
+
+			stylizeElement( button );
+
+			window.addEventListener( 'vrdisplayconnect', function ( event ) {
+
+				showEnterVR( event.display );
+
+			}, false );
+
+			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
+
+				showVRNotFound();
+
+			}, false );
+
+			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
+
+				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
+
+			}, false );
+
+			navigator.getVRDisplays()
+				.then( function ( displays ) {
+
+					if ( displays.length > 0 ) {
+
+						showEnterVR( displays[ 0 ] );
+
+					} else {
+
+						showVRNotFound();
+
+					}
+
+				} );
+
+			return button;
+
+		} else {
+
+			var message = document.createElement( 'a' );
+			message.href = 'https://webvr.info';
+			message.innerHTML = 'WEBVR NOT SUPPORTED';
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement( message );
+
+			return message;
+
+		}
+
+	},
+
+	// DEPRECATED
+
+	checkAvailability: function () {
+		console.warn( 'WEBVR.checkAvailability has been deprecated.' );
+		return new Promise( function () {} );
+	},
+
+	getMessageContainer: function () {
+		console.warn( 'WEBVR.getMessageContainer has been deprecated.' );
+		return document.createElement( 'div' );
+	},
+
+	getButton: function () {
+		console.warn( 'WEBVR.getButton has been deprecated.' );
+		return document.createElement( 'div' );
+	},
+
+	getVRDisplay: function () {
+		console.warn( 'WEBVR.getVRDisplay has been deprecated.' );
+	}
+
+};

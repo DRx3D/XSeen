@@ -47,7 +47,8 @@
  * 
  */
 
-var Renderer = new THREE.WebGLRenderer();
+//var Renderer = new THREE.WebGLRenderer();
+var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {

@@ -86,7 +86,7 @@ XSeen.Tags.model = {
 							if (e._xseen.attributes.playonload != '' && e._xseen.mixer !== null) {			// separate method?
 								if (e._xseen.attributes.playonload == '*') {			// Play all animations
 									response.animations.forEach( function ( clip ) {
-										//console.log('  starting animation for '+clip.name);
+										console.log('  starting animation for '+clip.name);
 										if (e._xseen.attributes.duration > 0) {clip.duration = e._xseen.attributes.duration;}
 										e._xseen.mixer.clipAction( clip ).play();
 									} );

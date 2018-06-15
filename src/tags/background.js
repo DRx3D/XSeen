@@ -35,8 +35,17 @@ XSeen.Tags.background = {
 	'init'	: function (e, p) 
 		{
 			var t = e._xseen.attributes.skycolor;
+			e._xseen.sceneInfo.SCENE.background = null;
 			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
-			XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
+			if (e._xseen.attributes.fixed != '') {
+				console.log ('Loading background fixed texture');
+				e._xseen.loadTexture = new THREE.TextureLoader().load (e._xseen.attributes.fixed);
+				e._xseen.loadTexture.wrapS = THREE.ClampToEdgeWrapping;
+				e._xseen.loadTexture.wrapT = THREE.ClampToEdgeWrapping;
+				e._xseen.sceneInfo.SCENE.background = e._xseen.loadTexture;
+			} else {
+				XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
+			}
 		},
 			
 	'_loadBackground'	: function (attributes, e)
@@ -66,13 +75,13 @@ XSeen.Tags.background = {
 												 urls['top'],
 												 urls['bottom'],
 												 urls['front'],
-												 urls['back']], '', XSeen.Tags.background.loadSuccess({'e':e}));
+												 urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
 			}
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},
 	'tick'	: function (systemTime, deltaTime) {},
-	'loadSuccess' : function (userdata)
+	'cubeLoadSuccess' : function (userdata)
 		{
 			var thisEle = userdata.e;
 			return function (textureCube)
@@ -80,7 +89,7 @@ XSeen.Tags.background = {
 				thisEle._xseen.processedUrl = true;
 				thisEle._xseen.loadTexture = textureCube;
 				thisEle._xseen.sceneInfo.SCENE.background = textureCube;
-				console.log ('Successful load of background textures.');
+				console.log ('Successful load of background texture cube.');
 			}
 		},
 	'loadProgress' : function (a)
@@ -112,5 +121,6 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'srctop', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcbottom', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'backgroundiscube', dataType:'boolean', 'defaultValue':true})
+		.defineAttribute ({'name':'fixed', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();

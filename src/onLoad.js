@@ -48,7 +48,7 @@ XSeen.onLoad = function() {
                 };
 
 		if (url != 'test') {
-        	  console.log ('External loads not yet supported');
+        	  console.log ('External loads not yet supported for ' + url);
                   var loader = new THREE.FileLoader();
                   loader.load (url, loadExternalSuccess({'e':domElement}));
 
@@ -77,6 +77,7 @@ XSeen.onLoad = function() {
    "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
    "</x-group>";
 		xseenCode = '<x-group>' + xseenCode + '</x-group>';
+		console.log ('Adding inline-generated nodes');
 		domElement.insertAdjacentHTML('afterbegin', xseenCode);
             }
         }	
@@ -129,7 +130,8 @@ XSeen.onLoad = function() {
 		}
 	});
 
-	if (XSeen.Runtime.Attributes.src != '') {
+	if (!(typeof(XSeen.Runtime.Attributes.src) == 'undefined' || XSeen.Runtime.Attributes.src == '')) {
+		console.log ('*** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
 		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
 	}
 
@@ -143,6 +145,39 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
+	
+/*
+ *	Experimental code for device camera
+ *
+ *	From: https://www.html5rocks.com/en/tutorials/getusermedia/intro/
+ */
+	function hasGetUserMedia() {
+		return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+	}
+	if (!hasGetUserMedia()) {
+		alert('getUserMedia() is not supported by your browser');
+	} else {
+
+	var video = document.createElement( 'video' );
+	video.style.zIndex = -1;
+	XSeen.Runtime.RootTag.appendChild (video);
+	const constraints = {video: true};
+
+	function handleSuccess(stream) {
+		video.srcObject = stream;
+//		XSeen.Runtime.RootTag.appendChild (video);
+	}
+	function handleError(error) {
+		//console.error('Reeeejected!', error);
+		console.log ('Device camera not available -- ignoring');
+	}
+	navigator.mediaDevices.getUserMedia(constraints).
+		then(handleSuccess).catch(handleError);
+
+	}
+// End of experimental code
+
+
 	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
 		//console.log ('Defining _xseen');
@@ -215,7 +250,7 @@ XSeen.onLoad = function() {
 
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	//console.log ('Starting Parse...');
+	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 // TODO: Start rendering loop

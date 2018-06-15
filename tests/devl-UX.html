@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Development of Control Buttons</title>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<!-- script src='../../Release/WebVR.js'></script -->
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../../Release/XSeen.js'></script>
+		<script src='../src/DisplayControl.js'></script>
+<style>
+.XSeen-UX-button {
+		background-color:#212214; 
+		height:24px; 
+		color:#aaa; 
+		background-image:url(XSeen-64x24.png); 
+		background-repeat:no-repeat; 
+		padding-left:70px; 
+		border-radius:4px; 
+		width:6em; 
+		cursor:pointer; 
+		font-family:Arial,Helvetica,"sans serif"; 
+		font-size:18px;
+		text-align:center; 
+		}
+.XSeen-UX-button:hover {color:#fff; }
+</style>
+	</head>
+	<body>
+		<div id='control-region' style='border:1px solid green; padding:4em; margin:4em;'>
+			<div id='button-vr' style='border:1px solid red; padding:10px;'>
+			</div>
+			<div id='button-fullscreen' style='border:1px solid red; padding:10px;'>
+			</div>
+			<div id='button-test' style='border:1px solid red; padding:10px;'>
+				<div id='testButton' class='XSeen-UX-button'>UX Text</div>
+			</div>
+		</div>
+
+<script>
+	var xb = XSeen.DisplayControl.createButton ('vr', document.getElementById('control-region'));
+	document.getElementById('button-vr').appendChild(xb);
+	xb = null;
+	
+	xb = XSeen.DisplayControl.createButton ('fullscreen', document.getElementById('control-region'));
+	document.getElementById('button-fullscreen').appendChild(xb);
+</script>
+	</body>
+</html>
+
+

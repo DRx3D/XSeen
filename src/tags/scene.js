@@ -73,11 +73,15 @@ XSeen.Tags.scene = {
 			// Render all Children
 			var e = XSeen.Runtime.RootTag;
 			console.log ('Adding children to SCENE');
+			e._xseen.idReference = e._xseen.idReference || Array();
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
-					console.log('Adding child of type ' + child.type + ' (' + child.name + ') with ' + child.children.length + ' children to THREE scene');
-					e._xseen.sceneInfo.SCENE.add(child);
-					//console.log('Check for successful add');
+					if (e._xseen.idReference[child.id] === undefined) {
+						console.log('Adding child of type ' + child.type + ' (' + child.name + '/' + child.id + ') with ' + child.children.length + ' children to THREE scene');
+						e._xseen.sceneInfo.SCENE.add(child);
+						e._xseen.idReference[child.id] = child;
+						//console.log('Check for successful add');
+					}
 				});
 //			XSeen.LogDebug("Rendered all elements -- Starting animation");
 		},

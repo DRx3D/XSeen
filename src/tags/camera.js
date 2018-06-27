@@ -16,23 +16,21 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
-			//if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) e._xseen.track = 'orbit';
 			e._xseen.sceneInfo.Camera.position.set (
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
 							e._xseen.attributes.position.z);
-							
+			e._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
 /*
  * Handle camera target. Target is an HTML id attribute value,
  * must exist, and be defined (and parsed) prior to the camera tag parsing.
  * This section handles the existence and gets the tagObject associated with the referenced tag.
  */
+			e._xseen.target = null;
 			if (e._xseen.attributes.target != '') {
 				var tagElement = document.getElementById (e._xseen.attributes.target);
 				if (typeof(tagElement) == 'object' && typeof(tagElement._xseen) != 'undefined' && typeof(tagElement._xseen.tagObject) != 'undefined') {
 					e._xseen.target = tagElement._xseen.tagObject;
-				} else {
-					e._xseen.target = null;
 				}
 			}
  
@@ -57,10 +55,20 @@ XSeen.Tags.camera = {
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
-				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				if (e._xseen.track == 'device') {
+					if (e._xseen.sceneInfo.hasDeviceOrientation) {
+						e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
+						e._xseen.sceneInfo.useDeviceOrientation = true;
+					} else {
+						e._xseen.track = 'orbit';
+						e._xseen.sceneInfo.useDeviceOrientation = false;
+					}
+				}
 				
 			} else if (e._xseen.type == 'stereo') {	// Stereo perspective cameras
-				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				var track = (e._xseen.target === null) ? 'environment' : 'object'
+				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {track = 'orbit';}
+				e._xseen.track = track;
 				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 				e._xseen.sceneInfo.rendererHasControls = false;
 				e._xseen.sceneInfo.isStereographic = true;
@@ -83,16 +91,21 @@ XSeen.Tags.camera = {
 					e._xseen.track = 'orbit';
 				}
 			}
-			
+
+/*
+ *	This code not needed because of login when handling _xseen.type above
+ *
 //	Now handle object tracking. Only allowed if stereo, hasDeviceOrientation, and target != null
 
-			if (e._xseen.target != null) {
-				if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
+			if (e._xseen.target !== null) {
+				//if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
+				if (e._xseen.sceneInfo.hasDeviceOrientation) {
 					e._xseen.track = 'object';
 				} else {
 					e._xseen.target = null;
 				}
 			}
+ */
 
 /*
  *	Handle camera controls for (navigational) tracking. 
@@ -100,12 +113,37 @@ XSeen.Tags.camera = {
  *	TODO: orthographic camera
  */
 			if (!e._xseen.sceneInfo.rendererHasControls) {
-				if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
+				if (e._xseen.sceneInfo.useDeviceOrientation) {
+					if (e._xseen.track == 'object') {	// tracking scene object
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
+					} else {							// tracking environment
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
+					}
+
+				} else {								// No device orientation control. Use something else
+					if (e._xseen.track == 'orbit') {
+						e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
+					} else if (e._xseen.track == 'trackball') {
+						//console.log ('Trackball');
+					} else if (e._xseen.track == 'none') {
+						//console.log ('No tracking');
+						e._xseen.sceneInfo.rendererHasControls = true;
+					} else {
+						console.log ('Something else');
+					}
+				}
+			}
+
+
+/*
+			if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
 					if (e._xseen.track == 'object') {
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
 					} else {
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 					}
+				} else if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'object') {
+					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
 				} else if (e._xseen.track == 'orbit') {
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 				} else if (e._xseen.track == 'trackball') {
@@ -117,6 +155,8 @@ XSeen.Tags.camera = {
 					console.log ('Something else');
 				}
 			}
+ */
+
 
 /*
  * OLD code -- waiting for working confirmation of above

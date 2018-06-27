@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset='utf-8' />
+		<title>XSeen: Loading Background with VR Navigation Mode</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:2px yellow dashed; }
+		</style>
+		<script src='../Release/XSeenExternals.js'></script>
+		<script src='../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../Release/xseen.css' />
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+<!--		<x-scene style='width:1680px; height:980px; ' transparent='false'>	-->
+		<x-scene style='width:100%; height:100%; ' transparent='false'>
+			<x-class3d id='Recenter'>
+				<x-style3d property='position' value='0 -20 0'></x-style3d>
+			</x-class3d>
+			<x-class3d id='RingMarkers'>
+				<x-style3d property='side' value='both'></x-style3d>
+				<x-style3d property='open-ended' value='true'></x-style3d>
+				<x-style3d property='radius-top' value='40'></x-style3d>
+				<x-style3d property='radius-bottom' value='40'></x-style3d>
+				<x-style3d property='height' value='1'></x-style3d>
+				<x-style3d property='segments-radial' value='32'></x-style3d>
+			</x-class3d>
+			<x-class3d id='OriginMarker'>
+				<x-style3d property='side' value='both'></x-style3d>
+				<x-style3d property='open-ended' value='false'></x-style3d>
+				<x-style3d property='radius' value='1'></x-style3d>
+				<x-style3d property='height' value='10'></x-style3d>
+				<x-style3d property='segments-radial' value='32'></x-style3d>
+			</x-class3d>
+
+			<x-cone class3d='OriginMarker' position='0 0 5' rotation='1.57 0 0' color='red'></x-cone>
+			<x-cone class3d='OriginMarker' position='0 5 0' rotation='0 1.57 0' color='green'></x-cone>
+			<x-cone class3d='OriginMarker' position='-5 0 0' rotation='0 0 1.57' color='blue'></x-cone>
+
+			<x-background id='Background' usecamera='true' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+			<x-light id='Top_White' type='directional' color='.7 .7 .9' direction='0 -1 0'></x-light>
+			<x-light id='Front' type='directional' color='.8 .8 0' direction='+.866 -.5 0'></x-light>
+			<x-light id='LeftRear' type='directional' color='.8 .8 0' direction='-.707 -.5 -.5'></x-light>
+			<x-light id='Top_Red' type='directional' color='.6 0 0' direction='0 -1 0'></x-light>
+			<x-light id='Bottom_Gray' type='directional' color='.4 .4 .4' direction='0 1 0'></x-light>
+			
+			<x-cylinder class3d='Recenter RingMarkers' rotation='1.57 0 0' color='red' ></x-cylinder>
+			<x-cylinder class3d='Recenter RingMarkers' rotation='0 1.57 0' color='green' ></x-cylinder>
+			<x-cylinder class3d='Recenter RingMarkers' rotation='0 0 1.57' color='blue' ></x-cylinder>
+
+			<x-model id='model' class3d='Recenter' src='Resources/models/Opel-GT-Retopo/scene.gltf'  playonload='*'></x-model>
+			<x-camera id='SceneCamera' type='perspective' track='device' target='model' position='20 0 30'></x-camera>
+		</x-scene>
+	</body>
+</html>
+
+

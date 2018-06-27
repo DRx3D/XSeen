@@ -1,0 +1,1177 @@
+<x-scene style="position:relative; top:5px, left:0;" width="800" height="600">
+<x-asset>
+	<x-material id="__XSeen_l0" ambientintensity="1" color="f3(0.565 0.565 0.565)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material>
+	<x-material id="__XSeen_l1" ambientintensity="1" color="f3(0.188235 0.313725 0.972549)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material>
+	<x-material id="__XSeen_l2" ambientintensity="1" color="f3(0.14902 0.490196 0.670588)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material>
+	<x-material id="__XSeen_l3" ambientintensity="1" color="f3(0 0.560784 1)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material>
+	<x-material id="__XSeen_l4" ambientintensity="1" color="f3(1 0.0509804 0.0509804)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material>
+	<x-material id="__XSeen_l5" ambientintensity="1" color="f3(0.576 0.439 0.859)" shininess="0.484375" specular="f3(0.255 0.255 0.255)"></x-material></x-asset>
+<!--
+<x-light type="directional" color="white" intensity=".3" direction="-.69 -.2 -.69"></x-light>
+<x-light type="directional" color="#422237" direction="0 0 -1"></x-light>
+<x-background skycolor="tan"></x-background>
+-->
+<x-group id="__XSeen-Group" position='-7.0109 -7.09305 -6.1213'>
+<x-group>
+<x-group>
+</x-group>
+<x-group rotation="h(0 0 1 0)" position="0 0 0">
+<x-group position="7.053 4.91 3.5858">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.3255 4.0024 4.6722">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.3464 4.5957 5.5222">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.7148 5.8586 4.9674">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.0399 5.9834 3.6911">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="6.0633 4.3576 7.8651">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="4.7126 4.8381 7.6301">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="4.6651 6.2025 8.1201">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="6.0264 6.6219 8.4594">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="6.896 5.4897 8.2623">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="5.1334 8.2913 4.1666">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="4.419 8.4752 5.3672">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="5.3091 8.9138 6.3834">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="6.6241 8.9161 5.8511">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="6.5008 8.7156 4.4071">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="11.6248 4.1134 5.0602">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="11.6034 3.1818 6.1224">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="12.1936 0.7559 6.4876">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="11.1483 1.74 5.9197">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="9.7864 1.478 6.5633">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="11.9934 3.6164 7.3875">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="12.4195 4.9094 7.5998">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="12.4739 5.8074 6.5415">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="12.0802 5.4311 5.264">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="11.9702 7.8791 4.5922">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="12.1088 6.4278 4.1216">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="13.3766 6.3168 3.2886">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="13.3383 2.7242 3.373">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="11.8924 3.001 2.9687">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="11.4489 2.4441 1.7745">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="10.1498 2.3843 1.2965">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="9.9198 1.6668 -0.0145">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.7672 2.5957 1.5148">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="7.1306 1.5321 2.1749">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="6.9776 0.1283 4.2958">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.8696 0.6815 3.201">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.6225 -0.4669 2.5112">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="5.8122 1.2443 1.8466">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="5.1303 1.9806 0.8868">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="5.778 3.0038 0.2349">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="7.0984 3.3287 0.5279">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="7.0954 5.8086 0.0927">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.7602 4.4706 -0.2323">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.7158 4.2345 -1.7444">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="2.7506 3.6025 9.8067">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="1.6886 4.495 9.5848">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="1.2149 6.9702 9.2637">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="1.6272 5.8544 10.2447">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="0.6452 5.8318 11.4322">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="0.6538 4.1074 8.7324">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="0.6503 2.8886 8.1142">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="1.7122 2.0306 8.3077">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="2.7729 2.3689 9.1411">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="4.5166 0.9972 7.9154">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="3.9324 1.3759 9.2721">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="3.5208 0.1207 10.0335">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="2.5811 2.8132 12.4852">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="3.7297 3.6618 11.9864">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="4.6574 4.0729 12.9375">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="5.7639 4.888 12.7682">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="6.5541 5.2957 13.987">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.2899 6.2169 11.4665">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="7.0686 7.6006 11.5389">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="5.9751 9.2058 13.14">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="5.752 8.199 12.0185">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="4.9511 8.8438 10.8927">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.1229 8.4362 11.1808">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="9.3531 7.934 10.8233">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="9.5783 6.5775 10.8878">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="8.563 5.6799 11.2291">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="10.0148 3.9636 12.3556">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.8627 4.2057 11.3606">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="9.1708 3.5237 10.0257">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="2.9257 10.4352 3.1242">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="1.8067 10.0526 3.9065">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="0.6605 11.8906 5.1638">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="1.5387 10.683 5.2636">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="1.0049 9.7255 6.3061">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="0.9721 9.0729 3.4125">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="1.188 8.4924 2.1868">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="2.2519 8.8975 1.403">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="3.1451 9.888 1.8482">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="3.7639 10.8259 -0.4239">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="4.2889 10.3426 0.9556">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="5.2818 9.2405 0.6824">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="2.7166 13.1611 2.4648">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="3.7692 12.6622 3.438">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="4.5934 13.6136 4.0186">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="5.5681 13.4106 4.9707">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="6.2205 14.653 5.5647">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="6.8007 12.1247 6.5774">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="6.216 12.2865 7.8619">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="4.6205 13.8647 9.0393">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="4.7632 12.7066 8.038">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="3.8707 11.5518 8.4675">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="7.0204 12.053 8.9705">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="8.3588 11.7218 8.8442">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="8.9262 11.6271 7.582">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="8.1665 11.833 6.4359">
+<x-sphere material="__XSeen_l0" radius="0.483">
+</x-sphere>
+</x-group>
+<x-group position="9.4698 13.0255 4.6616">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="8.8193 11.7349 5.0633">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="9.8589 10.614 4.9919">
+<x-sphere material="__XSeen_l0" radius="0.564">
+</x-sphere>
+</x-group>
+<x-group position="2.8249 2.9287 4.4801">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="1.5872 4.8955 4.9367">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="3.9063 3.8084 4.0446">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="2.6277 5.6962 4.6626">
+<x-sphere material="__XSeen_l0" radius="0.528">
+</x-sphere>
+</x-group>
+<x-group position="9.1167 2.9575 1.9422">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="11.0951 3.7208 3.7763">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="3.8368 3.985 10.6753">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="6.1513 5.3293 11.5505">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="3.9064 11.3481 3.6821">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="5.9348 12.1922 5.415">
+<x-sphere material="__XSeen_l1" radius="0.492">
+</x-sphere>
+</x-group>
+<x-group position="9.1124 4.1885 3.5651">
+<x-sphere material="__XSeen_l2" radius="0.639">
+</x-sphere>
+</x-group>
+<x-group position="5.3235 5.0075 9.7198">
+<x-sphere material="__XSeen_l2" radius="0.639">
+</x-sphere>
+</x-group>
+<x-group position="5.278 10.3524 4.8305">
+<x-sphere material="__XSeen_l2" radius="0.639">
+</x-sphere>
+</x-group>
+<x-group position="6.0582 6.2374 5.7192">
+<x-sphere material="__XSeen_l3" radius="0.759">
+</x-sphere>
+</x-group>
+<x-group position="3.94 5.1066 4.6009">
+<x-sphere material="__XSeen_l4" radius="0.426">
+</x-sphere>
+</x-group>
+<x-group position="1.681 3.6738 3.938">
+<x-sphere material="__XSeen_l4" radius="0.426">
+</x-sphere>
+</x-group>
+<x-group rotation="h(0.969953 0 -0.243292 2.2518)" position="7.18925 4.4562 4.129">
+<x-cylinder material="__XSeen_l0" height="0.42084" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.106096 0 -0.994356 0.746259)" position="7.54645 5.4467 3.63845">
+<x-cylinder material="__XSeen_l0" height="0.441156" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.639851 0 -0.768499 1.15076)" position="7.83595 4.29905 5.0972">
+<x-cylinder material="__XSeen_l0" height="0.434126" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.833067 0 -0.553172 0.485277)" position="8.5306 5.22715 5.2448">
+<x-cylinder material="__XSeen_l0" height="0.406962" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.884014 0 0.46746 1.48457)" position="8.37735 5.921 4.32925">
+<x-cylinder material="__XSeen_l0" height="0.428364" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.171409 0 0.9852 1.2337)" position="5.38795 4.59785 7.7476">
+<x-cylinder material="__XSeen_l0" height="0.431978" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.430531 0 -0.902576 0.683779)" position="6.47965 4.92365 8.0637">
+<x-cylinder material="__XSeen_l0" height="0.439637" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.995334 -0 0.0964876 0.346277)" position="4.68885 5.5203 7.8751">
+<x-cylinder material="__XSeen_l0" height="0.429722" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.241847 0 -0.970314 1.28031)" position="5.34575 6.4122 8.28975">
+<x-cylinder material="__XSeen_l0" height="0.443518" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.221049 0 -0.975263 2.47449)" position="6.4612 6.0558 8.36085">
+<x-cylinder material="__XSeen_l0" height="0.420379" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.85937 -0 0.511355 1.43992)" position="4.7762 8.38325 4.7669">
+<x-cylinder material="__XSeen_l0" height="0.468519" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.173222 0 -0.984883 1.2742)" position="5.79822 8.49759 4.28353">
+<x-cylinder material="__XSeen_l0" height="0.471086" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.752237 0 -0.658893 1.25686)" position="4.86405 8.6945 5.8753">
+<x-cylinder material="__XSeen_l0" height="0.479716" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.375216 0 -0.926938 1.56917)" position="5.9666 8.91495 6.11725">
+<x-cylinder material="__XSeen_l0" height="0.478048" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.996374 0 0.0850781 1.70827)" position="6.56414 8.8186 5.14888">
+<x-cylinder material="__XSeen_l0" height="0.482368" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.999797 -0 0.0201434 2.29068)" position="11.6141 3.6476 5.5913">
+<x-cylinder material="__XSeen_l0" height="0.574707" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.40848 0 -0.912767 0.361952)" position="11.8525 4.77225 5.1621">
+<x-cylinder material="__XSeen_l0" height="0.570686" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.924415 0 0.381388 1.84628)" position="11.4167 3.95915 4.55576">
+<x-cylinder material="__XSeen_l0" height="0.295836" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.924416 0 -0.381386 1.29531)" position="11.3076 3.87827 4.29127">
+<x-cylinder material="__XSeen_l1" height="0.298819" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.406865 0 0.913488 2.8089)" position="11.3895 2.50402 6.02711">
+<x-cylinder material="__XSeen_l0" height="0.595907" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.955622 0 -0.294595 1.2536)" position="11.7912 3.39112 6.73173">
+<x-cylinder material="__XSeen_l0" height="0.503906" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.477385 0 0.878694 0.879659)" position="11.6709 1.24795 6.20365">
+<x-cylinder material="__XSeen_l0" height="0.523119" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.427267 -0 0.904126 1.74301)" position="10.4674 1.609 6.2415">
+<x-cylinder material="__XSeen_l0" height="0.508158" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.445953 0 -0.895056 0.352779)" position="12.2064 4.2629 7.49365">
+<x-cylinder material="__XSeen_l0" height="0.43725" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.998681 0 -0.0513359 0.867806)" position="12.4467 5.3584 7.07065">
+<x-cylinder material="__XSeen_l0" height="0.448411" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.955648 0 0.294512 1.84519)" position="12.2698 5.61232 5.87922">
+<x-cylinder material="__XSeen_l0" height="0.499289" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.999687 0 -0.0250262 0.853561)" position="12.0936 5.89947 4.72717">
+<x-cylinder material="__XSeen_l0" height="0.586805" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.959262 0 -0.282517 2.81562)" position="12.0395 7.15345 4.3569">
+<x-cylinder material="__XSeen_l0" height="0.511199" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.54912 0 -0.835743 1.64384)" position="12.7427 6.3723 3.7051">
+<x-cylinder material="__XSeen_l0" height="0.500252" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.269289 0 0.963059 1.38848)" position="12.5721 2.87087 3.15877">
+<x-cylinder material="__XSeen_l0" height="0.597124" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.93744 0 0.348147 1.98292)" position="11.6788 2.73279 2.39357">
+<x-cylinder material="__XSeen_l0" height="0.500849" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.71163 -0 0.702554 1.00556)" position="11.5706 3.29154 3.29468">
+<x-cylinder material="__XSeen_l0" height="0.246585" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.711629 0 -0.702556 2.13603)" position="11.4237 3.42417 3.44349">
+<x-cylinder material="__XSeen_l1" height="0.248651" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.345314 0 0.938487 1.61397)" position="10.7754 2.4131 1.52668">
+<x-cylinder material="__XSeen_l0" height="0.496085" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.984957 0 0.1728 2.0652)" position="10.0417 2.0472 0.680551">
+<x-cylinder material="__XSeen_l0" height="0.582553" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.530007 -0 0.847994 1.13103)" position="9.7331 2.6155 1.55694">
+<x-cylinder material="__XSeen_l0" height="0.247831" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.530005 0 -0.847995 2.01056)" position="9.54214 2.72145 1.6763">
+<x-cylinder material="__XSeen_l1" height="0.24992" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.719803 -0 0.694178 2.43005)" position="7.4489 2.0639 1.84485">
+<x-cylinder material="__XSeen_l0" height="0.566058" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.827819 0 0.560995 1.01953)" position="7.4328 2.9622 1.02135">
+<x-cylinder material="__XSeen_l0" height="0.561178" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.301929 0 -0.95333 1.32057)" position="8.29503 2.73721 1.68197">
+<x-cylinder material="__XSeen_l0" height="0.304638" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.301929 0 0.953331 1.82103)" position="8.57786 2.81304 1.77154">
+<x-cylinder material="__XSeen_l1" height="0.307785" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.811457 0 -0.584413 2.16294)" position="7.47798 1.13226 2.65724">
+<x-cylinder material="__XSeen_l0" height="0.594442" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.241635 0 0.970367 1.77954)" position="6.49568 1.3935 2.0168">
+<x-cylinder material="__XSeen_l0" height="0.499353" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.775256 0 -0.631648 1.19744)" position="7.4236 0.4049 3.7484">
+<x-cylinder material="__XSeen_l0" height="0.495891" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.675534 0 -0.737329 2.4148)" position="8.24605 0.1073 2.8561">
+<x-cylinder material="__XSeen_l0" height="0.515943" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.815206 0 0.579172 1.01193)" position="5.47125 1.61245 1.3667">
+<x-cylinder material="__XSeen_l0" height="0.448043" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.709388 0 -0.704818 0.731778)" position="5.45415 2.4922 0.56085">
+<x-cylinder material="__XSeen_l0" height="0.434688" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.216633 0 -0.976253 1.33504)" position="6.46248 3.17222 0.386787">
+<x-cylinder material="__XSeen_l0" height="0.501539" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.754234 0 -0.656606 0.723152)" position="7.40948 3.86545 0.170568">
+<x-cylinder material="__XSeen_l0" height="0.593554" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.439195 0 -0.898392 2.63641)" position="7.4278 5.1396 -0.0698">
+<x-cylinder material="__XSeen_l0" height="0.50822" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.999569 0 0.0293506 1.72562)" position="7.738 4.35255 -0.98835">
+<x-cylinder material="__XSeen_l0" height="0.510289" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.204529 0 0.97886 0.882408)" position="2.2196 4.04875 9.69575">
+<x-cylinder material="__XSeen_l0" height="0.566557" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.999439 0 -0.033485 2.64657)" position="2.76175 2.9857 9.4739">
+<x-cylinder material="__XSeen_l0" height="0.563582" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.624537 0 -0.780996 1.30241)" position="3.17746 3.75282 10.148">
+<x-cylinder material="__XSeen_l0" height="0.295404" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.624538 0 0.780995 1.83918)" position="3.40103 3.83155 10.3268">
+<x-cylinder material="__XSeen_l1" height="0.29838" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.995699 -0 0.092644 0.453623)" position="1.65975 5.1337 9.89485">
+<x-cylinder material="__XSeen_l0" height="0.582811" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.635802 0 0.771852 1.85223)" position="1.19016 4.3083 9.17422">
+<x-cylinder material="__XSeen_l0" height="0.506121" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.921888 0 -0.387456 2.3799)" position="1.42105 6.4123 9.7542">
+<x-cylinder material="__XSeen_l0" height="0.521094" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.770636 -0 0.637276 1.58546)" position="1.1362 5.8431 10.8384">
+<x-cylinder material="__XSeen_l0" height="0.520324" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.999984 0 0.00566154 2.67218)" position="0.65205 3.498 8.4233">
+<x-cylinder material="__XSeen_l0" height="0.426018" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.179269 0 -0.9838 2.24242)" position="1.18125 2.4596 8.21095">
+<x-cylinder material="__XSeen_l0" height="0.43825" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.617818 0 -0.786321 1.32507)" position="2.26206 2.20597 8.73973">
+<x-cylinder material="__XSeen_l0" height="0.501259" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.112267 0 -0.993678 2.27586)" position="3.31813 1.90196 9.2027">
+<x-cylinder material="__XSeen_l0" height="0.602664" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.918468 -0 0.395496 1.31983)" position="4.2245 1.18655 8.59375">
+<x-cylinder material="__XSeen_l0" height="0.504129" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.879691 -0 0.475547 2.53791)" position="3.7266 0.7483 9.6528">
+<x-cylinder material="__XSeen_l0" height="0.503911" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.39833 0 -0.917242 0.975214)" position="3.19004 3.26309 12.2208">
+<x-cylinder material="__XSeen_l0" height="0.583141" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.715858 0 -0.698246 1.27072)" position="4.17649 3.85979 12.4445">
+<x-cylinder material="__XSeen_l0" height="0.501309" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.99668 0 -0.081416 1.32988)" position="3.7728 3.79186 11.4588">
+<x-cylinder material="__XSeen_l0" height="0.25189" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.99668 -0 0.0814161 1.81172)" position="3.7928 3.85222 11.214">
+<x-cylinder material="__XSeen_l1" height="0.254055" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.151244 0 -0.988496 0.941411)" position="5.23109 4.4955 12.8497">
+<x-cylinder material="__XSeen_l0" height="0.495245" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.839079 0 -0.54401 1.29716)" position="6.13511 5.07952 13.3407">
+<x-cylinder material="__XSeen_l0" height="0.579138" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.952937 0 -0.303169 1.23827)" position="5.91991 5.06572 12.2778">
+<x-cylinder material="__XSeen_l0" height="0.250554" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.952937 -0 0.303167 1.90332)" position="5.99202 5.14786 12.0512">
+<x-cylinder material="__XSeen_l1" height="0.252694" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.310941 -0 0.950429 0.166714)" position="7.17925 6.90875 11.5027">
+<x-cylinder material="__XSeen_l0" height="0.564849" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.183314 0 -0.983054 1.96387)" position="7.92645 5.9484 11.3478">
+<x-cylinder material="__XSeen_l0" height="0.563661" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.0735744 -0 0.99729 2.23163)" position="6.84287 5.86842 11.4995">
+<x-cylinder material="__XSeen_l0" height="0.29724" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.0735775 0 -0.99729 0.909962)" position="6.60766 5.68505 11.5168">
+<x-cylinder material="__XSeen_l1" height="0.300248" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.342269 -0 0.939602 1.16719)" position="6.44972 7.88188 11.7643">
+<x-cylinder material="__XSeen_l0" height="0.594117" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.321611 0 -0.946872 0.927004)" position="7.57638 8.00305 11.3664">
+<x-cylinder material="__XSeen_l0" height="0.50267" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.980782 0 0.195107 2.29272)" position="5.86355 8.7024 12.5792">
+<x-cylinder material="__XSeen_l0" height="0.502766" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.814842 0 0.579683 1.13414)" position="5.35155 8.5214 11.4556">
+<x-cylinder material="__XSeen_l0" height="0.503899" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.279058 0 -0.960274 1.9444)" position="8.738 8.1851 11.002">
+<x-cylinder material="__XSeen_l0" height="0.435405" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.275339 0 -0.961347 2.97059)" position="9.4657 7.25575 10.8555">
+<x-cylinder material="__XSeen_l0" height="0.435975" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.318636 -0 0.947877 2.26828)" position="9.05207 6.11227 11.0647">
+<x-cylinder material="__XSeen_l0" height="0.508045" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.401798 0 -0.915728 2.92313)" position="8.7038 4.98733 11.2909">
+<x-cylinder material="__XSeen_l0" height="0.580552" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.653622 0 0.756822 1.41308)" position="9.43875 4.08465 11.8581">
+<x-cylinder material="__XSeen_l0" height="0.520643" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.974384 0 -0.224892 2.03269)" position="9.01675 3.8647 10.6931">
+<x-cylinder material="__XSeen_l0" height="0.509586" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.572971 -0 0.819576 1.84401)" position="2.3662 10.2439 3.51535">
+<x-cylinder material="__XSeen_l0" height="0.579629" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.985538 0 -0.169457 1.97066)" position="3.0354 10.1616 2.4862">
+<x-cylinder material="__XSeen_l0" height="0.567305" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.494467 0 -0.869196 0.890528)" position="3.31023 10.7931 3.34295">
+<x-cylinder material="__XSeen_l0" height="0.299823" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.494467 0 0.869196 2.25106)" position="3.51385 10.9827 3.45879">
+<x-cylinder material="__XSeen_l1" height="0.30288" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.981053 -0 0.193738 1.1432)" position="1.68074 10.3489 4.54433">
+<x-cylinder material="__XSeen_l0" height="0.59064" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.509361 0 0.860553 2.36125)" position="1.40488 9.58093 3.66866">
+<x-cylinder material="__XSeen_l0" height="0.489097" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.112915 0 -0.993605 2.50977)" position="1.0996 11.2868 5.2137">
+<x-cylinder material="__XSeen_l0" height="0.475717" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.8901 -0 0.455766 2.25613)" position="1.2718 10.2043 5.78485">
+<x-cylinder material="__XSeen_l0" height="0.492021" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.984839 0 -0.173473 2.00723)" position="1.08005 8.78265 2.79965">
+<x-cylinder material="__XSeen_l0" height="0.432689" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.593137 0 -0.805101 1.27334)" position="1.71995 8.69495 1.7949">
+<x-cylinder material="__XSeen_l0" height="0.441543" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.446091 0 -0.894988 0.789172)" position="2.71475 9.41077 1.6337">
+<x-cylinder material="__XSeen_l0" height="0.516639" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.615219 0 -0.788357 1.26715)" position="3.68268 10.1017 1.42868">
+<x-cylinder material="__XSeen_l0" height="0.590878" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.934606 0 -0.355686 1.88723)" position="4.0264 10.5842 0.26585">
+<x-cylinder material="__XSeen_l0" height="0.532358" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.265294 0 -0.964168 2.39009)" position="4.78535 9.79155 0.819">
+<x-cylinder material="__XSeen_l0" height="0.487572" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.678871 0 -0.734258 1.9057)" position="3.27453 12.8967 2.98065">
+<x-cylinder material="__XSeen_l0" height="0.588348" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.575896 0 -0.817523 0.81436)" position="4.16609 13.1203 3.71759">
+<x-cylinder material="__XSeen_l0" height="0.49675" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.871738 0 -0.489972 2.93165)" position="3.82458 12.1317 3.53654">
+<x-cylinder material="__XSeen_l0" height="0.246447" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.871738 0 0.489972 0.209945)" position="3.84985 11.8897 3.5815">
+<x-cylinder material="__XSeen_l1" height="0.24851" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.698765 0 -0.715351 1.71869)" position="5.09885 13.5083 4.51233">
+<x-cylinder material="__XSeen_l0" height="0.488132" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.673237 0 -0.739426 0.617514)" position="5.87477 13.9946 5.24992">
+<x-cylinder material="__XSeen_l0" height="0.594276" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.77124 0 -0.636544 2.69992)" position="5.71595 12.9193 5.14984">
+<x-cylinder material="__XSeen_l0" height="0.248491" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.771245 0 0.636538 0.441667)" position="5.78385 12.6938 5.23211">
+<x-cylinder material="__XSeen_l1" height="0.250591" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.910143 -0 0.414294 1.45665)" position="6.50835 12.2056 7.21965">
+<x-cylinder material="__XSeen_l0" height="0.582255" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.103051 0 -0.994676 1.78012)" position="7.4836 11.9788 6.50665">
+<x-cylinder material="__XSeen_l0" height="0.565447" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.801949 0 0.597392 1.52426)" position="6.46116 12.1512 6.12159">
+<x-cylinder material="__XSeen_l0" height="0.299669" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.80195 0 -0.597391 1.61733)" position="6.28142 12.1652 5.88031">
+<x-cylinder material="__XSeen_l1" height="0.302724" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.120334 -0 0.992733 1.29125)" position="5.53313 12.484 7.94467">
+<x-cylinder material="__XSeen_l0" height="0.592998" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.809379 0 -0.587286 1.73965)" position="6.60339 12.174 8.39579">
+<x-cylinder material="__XSeen_l0" height="0.499997" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.989997 0 -0.141089 2.4237)" position="4.69185 13.2856 8.53865">
+<x-cylinder material="__XSeen_l0" height="0.516806" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.433632 -0 0.90109 2.43265)" position="4.31695 12.1292 8.25275">
+<x-cylinder material="__XSeen_l0" height="0.500601" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.0939492 0 -0.995577 1.81235)" position="7.6896 11.8874 8.90735">
+<x-cylinder material="__XSeen_l0" height="0.443939" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.912082 0 -0.410009 1.63912)" position="8.6425 11.6744 8.2131">
+<x-cylinder material="__XSeen_l0" height="0.446501" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.833512 0 0.552501 1.42216)" position="8.53238 11.7338 6.98787">
+<x-cylinder material="__XSeen_l0" height="0.500899" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.903069 0 -0.429496 1.63525)" position="8.47335 11.7869 5.79071">
+<x-cylinder material="__XSeen_l0" height="0.593549" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.525418 -0 0.850844 2.60679)" position="9.14455 12.3802 4.86245">
+<x-cylinder material="__XSeen_l0" height="0.479278" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.0685179 0 -0.99765 2.39263)" position="9.3391 11.1744 5.0276">
+<x-cylinder material="__XSeen_l0" height="0.509675" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.373564 0 -0.927604 0.924364)" position="3.3656 3.36855 4.26235">
+<x-cylinder material="__XSeen_l0" height="0.519861" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.428248 0 0.903661 1.03879)" position="2.32522 3.25417 4.2433">
+<x-cylinder material="__XSeen_l0" height="0.342653" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.42825 0 -0.90366 2.1028)" position="2.07345 3.41817 4.12398">
+<x-cylinder material="__XSeen_l4" height="0.303946" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.25474 0 -0.967009 0.931051)" position="2.10745 5.29585 4.79965">
+<x-cylinder material="__XSeen_l0" height="0.400624" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.995618 0 -0.0935107 2.45414)" position="1.62711 4.37568 4.51176">
+<x-cylinder material="__XSeen_l0" height="0.404575" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.995618 -0 0.0935107 0.687454)" position="1.64961 4.08258 4.27216">
+<x-cylinder material="__XSeen_l4" height="0.353906" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.99817 0 -0.0604687 0.405509)" position="3.92123 4.38373 4.29114">
+<x-cylinder material="__XSeen_l0" height="0.31161" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.99817 0 0.0604678 2.73608)" position="3.92828 4.65504 4.4074">
+<x-cylinder material="__XSeen_l4" height="0.278901" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.0469663 0 -0.998896 1.99264)" position="3.20515 5.43676 4.63545">
+<x-cylinder material="__XSeen_l0" height="0.326672" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.046964 -0 0.998897 1.14895)" position="3.48663 5.3103 4.62222">
+<x-cylinder material="__XSeen_l4" height="0.291053" radius="0.24" radius-top="0.24" radius-bottom="0.24" open-ended="true">
+</x-cylinder>
+</x-group>
+</x-group>
+<x-group rotation="h(0 0 1 0)" position="0 0 0">
+<x-group rotation="h(0.999997 0 -0.00237686 2.29019)" position="6.06093 5.23002 6.86919">
+<x-cylinder material="__XSeen_l5" height="1.59329" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.0857766 0 -0.996314 2.1914)" position="7.28531 5.35699 5.61355">
+<x-cylinder material="__XSeen_l5" height="1.56357" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.947543 0 -0.319627 0.50955)" position="6.29547 7.5659 5.01581">
+<x-cylinder material="__XSeen_l5" height="1.57931" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.999933 -0 0.0116041 1.4314)" position="6.04112 6.44388 7.19071">
+<x-cylinder material="__XSeen_l5" height="1.5077" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.864941 -0 0.501874 1.58337)" position="5.31026 6.21866 7.00822">
+<x-cylinder material="__XSeen_l5" height="1.51649" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.906311 0 -0.422611 2.08425)" position="6.5933 5.5234 4.57165">
+<x-cylinder material="__XSeen_l5" height="1.44289" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.636918 0 -0.770932 2.50743)" position="6.73863 5.0374 5.15705">
+<x-cylinder material="__XSeen_l5" height="1.51491" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.226995 0 -0.973896 0.213612)" position="6.36629 7.69574 5.79101">
+<x-cylinder material="__XSeen_l5" height="1.52017" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.663433 -0 0.748235 0.357953)" position="5.65173 7.68964 6.0796">
+<x-cylinder material="__XSeen_l5" height="1.63669" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.817627 -0 0.575749 2.11028)" position="5.33481 5.48514 6.74649">
+<x-cylinder material="__XSeen_l5" height="1.46448" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.949787 0 -0.312898 1.84311)" position="6.50796 5.836 7.08444">
+<x-cylinder material="__XSeen_l5" height="1.52046" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.715241 0 -0.698878 1.66013)" position="7.12034 6.10126 4.63219">
+<x-cylinder material="__XSeen_l5" height="1.58738" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.859139 0 0.511742 0.72158)" position="5.55464 7.35576 4.8738">
+<x-cylinder material="__XSeen_l5" height="1.51492" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.2723 0 -0.962212 1.70715)" position="7.48413 6.03408 5.31567">
+<x-cylinder material="__XSeen_l5" height="1.52727" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.209953 0 0.977712 0.642991)" position="5.16722 7.45375 5.52787">
+<x-cylinder material="__XSeen_l5" height="1.57535" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.466876 0 0.884323 2.01187)" position="4.85674 5.596 5.08489">
+<x-cylinder material="__XSeen_l5" height="1.54048" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.931214 -0 0.364473 1.37942)" position="8.71517 4.39967 4.58001">
+<x-cylinder material="__XSeen_l5" height="1.00651" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.0100509 -0 0.999949 1.23383)" position="8.04517 4.5624 3.57583">
+<x-cylinder material="__XSeen_l5" height="1.04799" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.526673 -0 0.850068 1.6591)" position="8.18527 4.09194 4.13952">
+<x-cylinder material="__XSeen_l5" height="0.976045" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.11668 -0 0.99317 0.541621)" position="8.55579 5.12003 3.63049">
+<x-cylinder material="__XSeen_l5" height="0.960464" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.962076 -0 0.272781 0.717554)" position="8.90647 5.05352 4.29141">
+<x-cylinder material="__XSeen_l5" height="1.08246" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.999996 0 -0.00265021 2.21973)" position="9.11472 3.52545 2.69096">
+<x-cylinder material="__XSeen_l5" height="0.980545" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.105922 0 -0.994374 1.80119)" position="10.1799 3.93668 3.67881">
+<x-cylinder material="__XSeen_l5" height="0.991625" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.327196 0 -0.944957 2.47262)" position="5.91271 9.5028 4.61073">
+<x-cylinder material="__XSeen_l5" height="0.952291" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.604169 0 -0.796856 2.27544)" position="5.98694 9.59595 5.36801">
+<x-cylinder material="__XSeen_l5" height="1.12178" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.9998 0 -0.0200233 2.3179)" position="5.29442 9.59293 5.65031">
+<x-cylinder material="__XSeen_l5" height="1.02153" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.977093 0 0.212814 2.82315)" position="5.20176 9.2657 4.48046">
+<x-cylinder material="__XSeen_l5" height="1.07466" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.529875 -0 0.848076 2.64679)" position="4.82469 9.36177 5.11373">
+<x-cylinder material="__XSeen_l5" height="1.03748" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.641964 0 0.766734 1.0629)" position="4.53948 10.8885 4.21216">
+<x-cylinder material="__XSeen_l5" height="0.990912" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.664795 0 -0.747026 0.445802)" position="5.63175 11.3433 5.14531">
+<x-cylinder material="__XSeen_l5" height="0.982681" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.928835 0 -0.370493 1.88545)" position="5.70741 4.67024 8.75732">
+<x-cylinder material="__XSeen_l5" height="0.965659" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.873369 0 -0.48706 0.729447)" position="5.68786 5.84435 9.06645">
+<x-cylinder material="__XSeen_l5" height="1.03116" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.924739 0 0.380601 0.966276)" position="4.98185 5.62761 8.88969">
+<x-cylinder material="__XSeen_l5" height="0.968269" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.959827 0 0.280594 1.64845)" position="5.00692 4.91971 8.63689">
+<x-cylinder material="__XSeen_l5" height="1.0495" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(-0.67978 0 -0.733416 1.34958)" position="6.13821 5.25733 8.96467">
+<x-cylinder material="__XSeen_l5" height="1.06339" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.540663 -0 0.841239 2.09531)" position="4.52285 4.45684 10.2344">
+<x-cylinder material="__XSeen_l5" height="0.985345" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+<x-group rotation="h(0.911178 0 -0.412013 1.41198)" position="5.76941 5.18084 10.7059">
+<x-cylinder material="__XSeen_l5" height="0.978356" radius="0.2" radius-top="0.2" radius-bottom="0.2" open-ended="true">
+</x-cylinder>
+</x-group>
+</x-group>
+</x-group></x-group>
+<!-- x-camera id="SceneCamera" target="__XSeen-Group" type="vr" track="device" position="1 0 10"></x-camera -->
+<!-- x-camera id="SceneCamera" position='-9.17 2.62 12.47' track='device'></x-camera -->
+</x-scene>

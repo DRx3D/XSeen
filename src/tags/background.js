@@ -35,9 +35,13 @@ XSeen.Tags.background = {
 	'init'	: function (e, p) 
 		{
 			var t = e._xseen.attributes.skycolor;
-			e._xseen.sceneInfo.SCENE.background = null;
 			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
-			if (e._xseen.attributes.fixed != '') {
+			console.log ("value for 'usecamera' is |"+e._xseen.attributes.usecamera+"|");
+			if (e._xseen.attributes.usecamera && XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
+				console.log ('Background: using device camera');
+				e._xseen.sceneInfo.SCENE.background = null;
+				XSeen.Tags.background._setupCamera();
+			} else if (e._xseen.attributes.fixed != '') {
 				console.log ('Loading background fixed texture');
 				e._xseen.loadTexture = new THREE.TextureLoader().load (e._xseen.attributes.fixed);
 				e._xseen.loadTexture.wrapS = THREE.ClampToEdgeWrapping;
@@ -47,7 +51,51 @@ XSeen.Tags.background = {
 				XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
 			}
 		},
-			
+		
+	'_setupCamera'		: function ()
+		{
+			//if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
+			var video = document.createElement( 'video' );
+		//if (XSeen.Runtime.Attributes.usecamera) {
+			video.setAttribute("autoplay", "1"); 
+			video.height			= XSeen.Runtime.SceneDom.height;
+			video.width				= XSeen.Runtime.SceneDom.width;
+			video.style.height		= video.height + 'px';
+			video.style.width		= video.width + 'px';
+			video.style.position	= 'absolute';
+			video.style.top			= '0';
+			video.style.left		= '0';
+			video.style.zIndex		= -1;
+			const constraints = {video: {facingMode: "environment"}};
+
+			function handleSuccess(stream) {
+				XSeen.Runtime.RootTag.appendChild (video);
+				video.srcObject = stream;
+			}
+			function handleError(error) {
+				//console.error('Reeeejected!', error);
+				console.log ('Device camera not available -- ignoring');
+			}
+
+			navigator.mediaDevices.enumerateDevices()
+				.then(gotDevices).catch(handleError);
+//				.then(gotDevices).then(getStream).catch(handleError);
+
+			function gotDevices(deviceInfos) {
+				var msgs = '';
+				for (var i = 0; i !== deviceInfos.length; ++i) {
+					var deviceInfo = deviceInfos[i];
+					console.log('Found a media device of type: ' + deviceInfo.kind);
+					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
+				}
+				//alert (msgs);
+			}
+
+			navigator.mediaDevices.getUserMedia(constraints).
+				then(handleSuccess).catch(handleError);
+			//}
+		},
+
 	'_loadBackground'	: function (attributes, e)
 		{
 			// Parse src as a default to srcXXX.
@@ -122,5 +170,6 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'srcbottom', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'backgroundiscube', dataType:'boolean', 'defaultValue':true})
 		.defineAttribute ({'name':'fixed', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();

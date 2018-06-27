@@ -24,16 +24,16 @@ See details at http://xseen.org/license
 		<script src='../Release/XSeen.js'></script>
 	</head>
 	<body>
-		<x-scene transparent='true' style='width:1920px; height:1080px;'>
-			<x-background id='Background' usecamera='true'></x-background>
+		<x-scene>
+			<x-background id='Background' skycolor='lightblue'></x-background>
 			<x-light id='Top_White' type='directional' color='.7 .7 .9' direction='0 -1 0'></x-light>
 			<x-light id='Front' type='directional' color='.8 .8 0' direction='+.866 -.5 0'></x-light>
 			<x-light id='LeftRear' type='directional' color='.8 .8 0' direction='-.707 -.5 -.5'></x-light>
 			<x-light id='Top_Red' type='directional' color='.6 0 0' direction='0 -1 0'></x-light>
 			<x-light id='Bottom_Gray' type='directional' color='.4 .4 .4' direction='0 1 0'></x-light>
-			<x-camera id='SceneCamera' type='perspective' track='orbit' target='model' position='15 8 15'></x-camera>
 
-			<x-model id='model' src='Resources/models/Opel-GT-Retopo/scene.gltf'  playonload='*' ></x-model>
+			<x-model id='model' src='Resources/models/DamagedHelmet/DamagedHelmet.gltf'  playonload='*' ></x-model>
+			<x-camera id='SceneCamera' type='perspective' track='device' target='model' position='1.6 .8 1.5'></x-camera>
 		</x-scene>
 	</body>
 </html>

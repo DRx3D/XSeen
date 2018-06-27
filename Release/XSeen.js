@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.23-alpha.2+7_e5e1280
- *  Built Fri Jun 15 13:57:06 2018
+ *  XSeen V0.7.24-alpha.2+7_9b10cab
+ *  Built Tue Jun 26 12:52:32 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1391,27 +1391,41 @@ XSeen.onLoad = function() {
 	loadExternal = function(url, domElement) {
                                        // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
                                        //
-                var xseenCode = '';
+			var xseenCode = '';
         	loadExternalSuccess = function (userdata) {
                 	var e = userdata.e;
-                        return function (response) {
-                                 console.log('Loading of external XSeen complete');
-				var parser = new DOMParser();
-				var xmlDoc = parser.parseFromString(response,"text/xml");
-				var rootNode = xmlDoc.getElementsByTagName('x-scene');
-				var nodes = rootNode[0].children;
-				while (nodes.length > 0) {
-					console.log('Adding external node: ' + nodes[0].nodeName);
-					e.appendChild(nodes[0]);
-				}	
-                        }
-                };
+					return function (response) {
+							console.log('Loading of external XSeen complete');
+							var parser = new DOMParser();
+							var xmlDoc = parser.parseFromString(response,"text/xml");
+							var rootNode = xmlDoc.getElementsByTagName('x-scene');
+							var nodes = rootNode[0].children;
+							while (nodes.length > 0) {
+								console.log('Adding external node: ' + nodes[0].nodeName);
+								e.appendChild(nodes[0]);
+							}
+					}
+			};
 
-		if (url != 'test') {
-        	  console.log ('External loads not yet supported for ' + url);
-                  var loader = new THREE.FileLoader();
-                  loader.load (url, loadExternalSuccess({'e':domElement}));
+			//if (url != 'test') {
+			//console.log ('External loads not yet supported for ' + url);
+			var loader = new THREE.FileLoader();
+			loader.load (url, 
+						loadExternalSuccess({'e':domElement}),
+						// onProgress callback
+						function ( xhr ) {
+							console.log('External source loader: ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
+						},
+						// onError callback
+						function ( err ) {
+							console.log ('Response Code: ' + err.target.status);
+							console.log ('Response URL: ' + err.target.responseURL);
+							console.log ('Response Text\n' + err.target.responseText);
+							console.error( 'External source loader: An error happened' );
+						}
+			);
 
+/*
                 } else {
 	        	xseenCode = '' +
    "<x-class3d id='geometry'>\n" +
@@ -1440,7 +1454,8 @@ XSeen.onLoad = function() {
 		console.log ('Adding inline-generated nodes');
 		domElement.insertAdjacentHTML('afterbegin', xseenCode);
             }
-        }	
+ */
+	};
 	
 	var sceneOccurrences, ii;
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
@@ -1463,21 +1478,36 @@ XSeen.onLoad = function() {
 									'name'		: 'src',
 									'default'	: '',
 									'type'		: 'string',
+									'case'		: 'sensitive' ,
+										},
+								'usecamera'	: {						// deprecated
+									'name'		: 'usecamera',
+									'default'	: 'false',
+									'type'		: 'boolean',
 										},
 								'showstat'	: {
 									'name'		: 'showstat',
 									'default'	: 'false',
 									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
 										},
 								'showprogress'	: {
 									'name'		: 'showprogress',
 									'default'	: 'false',
 									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
+								'transparent'	: {
+									'name'		: 'transparent',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
 										},
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
 									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
 										},
 								};
 								
@@ -1486,7 +1516,11 @@ XSeen.onLoad = function() {
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
 		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
-			XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
+			if (attributeCharacteristics[prop].case != 'sensitive') {
+				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
+			} else {
+				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value, attributeCharacteristics[prop].type);
+			}
 		}
 	});
 
@@ -1496,44 +1530,101 @@ XSeen.onLoad = function() {
 	}
 
 	
-	// Setup/define various characteristics for the runtime or display
+
+/** Setup/define various characteristics for the runtime or display
+ *
+ * Define Renderer and StereoRenderer
+ *	This was formerly in XSeen, but moved here to support a transparent
+ *	background request either by style or explicit attribute
+ */
+	var Renderer;
+	if (XSeen.Runtime.Attributes.transparent) {
+		XSeen.Runtime.isTransparent = true;
+	} else {
+		XSeen.Runtime.isTransparent = false;
+	}
+	if (XSeen.Runtime.isTransparent) {
+		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
+	} else {
+		Renderer = new THREE.WebGLRenderer();
+	}
+	XSeen.Runtime.Renderer			= Renderer,
+	XSeen.Runtime.RendererStandard	= Renderer,
+	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
+	Renderer = null;
+	
 	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
 	XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);	// TODO: test
+	//XSeen.Runtime.Renderer.setPixelRatio( window.devicePixelRatio );	// See https://stackoverflow.com/questions/31407778/display-scene-at-lower-resolution-in-three-js
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
-	XSeen.Runtime.Renderer.setPixelRatio( window.devicePixelRatio );
 
 	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
 	
+	XSeen.Runtime.mediaAvailable = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);	// flag for device media availability
+
+
 /*
  *	Experimental code for device camera
  *
  *	From: https://www.html5rocks.com/en/tutorials/getusermedia/intro/
+ *		https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+ *
+ *	Revision plans:
+ *	1.	Remove 'usecamera' x-scene attribute and use element transparency instead.
+ *		a. This is a one-time setting and can't be changed
+ *		b. Camera not allowed unless this is set
+ *	2.	Renderer, StereoRenderer definitions need to go in onLoad
+ *	3.	Runtime definition remains, but many items are populated in onLoad
+ *	4.	x-background specified use of camera
+ *	5.	This code would need to go there
+ *	6.	If camera is operational, skycolor or any other background is disabled
+ *	7.	Create separate object for dealing with camera
  */
-	function hasGetUserMedia() {
-		return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-	}
-	if (!hasGetUserMedia()) {
-		alert('getUserMedia() is not supported by your browser');
+	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
+/*
+		var video = document.createElement( 'video' );
+		//if (XSeen.Runtime.Attributes.usecamera) {
+			video.setAttribute("autoplay", "1"); 
+			video.height			= XSeen.Runtime.SceneDom.height;
+			video.width				= XSeen.Runtime.SceneDom.width;
+			video.style.height		= video.height + 'px';
+			video.style.width		= video.width + 'px';
+			video.style.position	= 'absolute';
+			video.style.top			= '0';
+			video.style.left		= '0';
+			video.style.zIndex		= -1;
+			const constraints = {video: {facingMode: "environment"}};
+
+			function handleSuccess(stream) {
+				XSeen.Runtime.RootTag.appendChild (video);
+				video.srcObject = stream;
+			}
+			function handleError(error) {
+				//console.error('Reeeejected!', error);
+				console.log ('Device camera not available -- ignoring');
+			}
+
+			navigator.mediaDevices.enumerateDevices()
+				.then(gotDevices);
+//				.then(gotDevices).then(getStream).catch(handleError);
+
+			function gotDevices(deviceInfos) {
+				var msgs = '';
+				for (var i = 0; i !== deviceInfos.length; ++i) {
+					var deviceInfo = deviceInfos[i];
+					console.log('Found a media device of type: ' + deviceInfo.kind);
+					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
+				}
+				//alert (msgs);
+			}
+
+			navigator.mediaDevices.getUserMedia(constraints).
+				then(handleSuccess).catch(handleError);
+*/
 	} else {
-
-	var video = document.createElement( 'video' );
-	video.style.zIndex = -1;
-	XSeen.Runtime.RootTag.appendChild (video);
-	const constraints = {video: true};
-
-	function handleSuccess(stream) {
-		video.srcObject = stream;
-//		XSeen.Runtime.RootTag.appendChild (video);
-	}
-	function handleError(error) {
-		//console.error('Reeeejected!', error);
-		console.log ('Device camera not available -- ignoring');
-	}
-	navigator.mediaDevices.getUserMedia(constraints).
-		then(handleSuccess).catch(handleError);
-
+		console.log ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
 	}
 // End of experimental code
 
@@ -1726,6 +1817,9 @@ XSeen.Parser = {
                                                            'sceneInfo'             : mutation.target._xseen.sceneInfo,     // Runtime...
                                                                         };
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
+					if (mutation.target.localName == 'x-scene') {
+						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+					}
 							}
 						}),
 
@@ -2151,11 +2245,6 @@ XSeen.Parser = {
 				if (svalue == 'f' || svalue == 'false' || svalue == '0') return false;
 				var ivalue = Boolean (value);
 				return ivalue;
-/*
-				if (value) {return true;}
-				if (!value) {return false;}
-				return def;
- */
 			},
 		'vecToFloat3'	: function (value, def)
 			{
@@ -2339,32 +2428,33 @@ XSeen.Parser = {
  *	0.7.21: Added axis-angle parsing for rotation
  *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
  *	0.7.23: Added support for external XSeen files in XML format.
+ *	0.7.24: Added support for device camera use.
  *
+ *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
+ *		If that happens than target should not be used
+ *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
- *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
- *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
- *		If that happens than target should not be used
- *	Check background image cube for proper orientation
  * 
  */
 
 //var Renderer = new THREE.WebGLRenderer();
-var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
+//var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 23,
+					'_Patch'		: 24,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-05-20',
+					'_RDate'		: '2018-06-16',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -2398,15 +2488,15 @@ XSeen.parseTable = [];
 
 // Data object for Runtime
 // Stereo viewing effect from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
-var StereoRenderer = new THREE.StereoEffect(Renderer);
+//var StereoRenderer = new THREE.StereoEffect(Renderer);
 XSeen.Runtime = {
 			'currentTime'			: 0,			// Current time at start of frame rendering
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: Renderer,
-			'RendererStandard'		: Renderer,
-			'RendererStereo'		: StereoRenderer,
+			'Renderer'				: {},
+			'RendererStandard'		: {},
+			'RendererStereo'		: {},
 			'Camera'				: {},
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
@@ -2437,17 +2527,20 @@ XSeen.Runtime = {
 			'isVrCapable'			: false,		// WebVR ready to run && access to VR device 
 			'hasDeviceOrientation'	: false,		// device has Orientation sensor
 			'hasVrImmersive'		: false,		// hasDeviceOrientation && stereographic capable (=== TRUE)
+			'useDeviceOrientation'	: false,		// display is using device's Orientation sensor
 			'isStereographic'		: false,		// currently running stereographic display (not VR)
 			'rendererHasControls'	: false,		// Renderer has built-in motion controls
 			'isProcessingResize'	: false,		// semaphore for resizing processing
+			'mediaAvailable'		: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),	// flag for device media availability
+			'isTransparent'			: false,		// flag for XSeen transparent background
 			};										// Need place-holder for xR scene (if any -- tbd)
 			
 XSeen.RenderFrame = function()
 	{
 		if (XSeen.Runtime.isProcessingResize) {return;}		// Only do one thing at a time
 
-		if (XSeen.Runtime.frameNumber == 0) {
-			if (XSeen.Loader.loadingComplete()) {
+		if (XSeen.Runtime.frameNumber == 0) {		// TODO: Replace with 'dirty' flag. May not need loadingComplete
+			if (XSeen.Loader.loadingComplete()) {	//	Code needs to set Runtime.nodeChange whenever nodes are added/removed
 				XSeen.Tags.scene.addScene();
 			} else {
 				return;
@@ -2981,9 +3074,13 @@ XSeen.Tags.background = {
 	'init'	: function (e, p) 
 		{
 			var t = e._xseen.attributes.skycolor;
-			e._xseen.sceneInfo.SCENE.background = null;
 			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
-			if (e._xseen.attributes.fixed != '') {
+			console.log ("value for 'usecamera' is |"+e._xseen.attributes.usecamera+"|");
+			if (e._xseen.attributes.usecamera && XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
+				console.log ('Background: using device camera');
+				e._xseen.sceneInfo.SCENE.background = null;
+				XSeen.Tags.background._setupCamera();
+			} else if (e._xseen.attributes.fixed != '') {
 				console.log ('Loading background fixed texture');
 				e._xseen.loadTexture = new THREE.TextureLoader().load (e._xseen.attributes.fixed);
 				e._xseen.loadTexture.wrapS = THREE.ClampToEdgeWrapping;
@@ -2993,7 +3090,51 @@ XSeen.Tags.background = {
 				XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
 			}
 		},
-			
+		
+	'_setupCamera'		: function ()
+		{
+			//if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
+			var video = document.createElement( 'video' );
+		//if (XSeen.Runtime.Attributes.usecamera) {
+			video.setAttribute("autoplay", "1"); 
+			video.height			= XSeen.Runtime.SceneDom.height;
+			video.width				= XSeen.Runtime.SceneDom.width;
+			video.style.height		= video.height + 'px';
+			video.style.width		= video.width + 'px';
+			video.style.position	= 'absolute';
+			video.style.top			= '0';
+			video.style.left		= '0';
+			video.style.zIndex		= -1;
+			const constraints = {video: {facingMode: "environment"}};
+
+			function handleSuccess(stream) {
+				XSeen.Runtime.RootTag.appendChild (video);
+				video.srcObject = stream;
+			}
+			function handleError(error) {
+				//console.error('Reeeejected!', error);
+				console.log ('Device camera not available -- ignoring');
+			}
+
+			navigator.mediaDevices.enumerateDevices()
+				.then(gotDevices).catch(handleError);
+//				.then(gotDevices).then(getStream).catch(handleError);
+
+			function gotDevices(deviceInfos) {
+				var msgs = '';
+				for (var i = 0; i !== deviceInfos.length; ++i) {
+					var deviceInfo = deviceInfos[i];
+					console.log('Found a media device of type: ' + deviceInfo.kind);
+					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
+				}
+				//alert (msgs);
+			}
+
+			navigator.mediaDevices.getUserMedia(constraints).
+				then(handleSuccess).catch(handleError);
+			//}
+		},
+
 	'_loadBackground'	: function (attributes, e)
 		{
 			// Parse src as a default to srcXXX.
@@ -3068,6 +3209,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'srcbottom', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'backgroundiscube', dataType:'boolean', 'defaultValue':true})
 		.defineAttribute ({'name':'fixed', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();
 // File: tags/camera.js
@@ -3089,23 +3231,21 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
-			//if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) e._xseen.track = 'orbit';
 			e._xseen.sceneInfo.Camera.position.set (
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
 							e._xseen.attributes.position.z);
-							
+			e._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
 /*
  * Handle camera target. Target is an HTML id attribute value,
  * must exist, and be defined (and parsed) prior to the camera tag parsing.
  * This section handles the existence and gets the tagObject associated with the referenced tag.
  */
+			e._xseen.target = null;
 			if (e._xseen.attributes.target != '') {
 				var tagElement = document.getElementById (e._xseen.attributes.target);
 				if (typeof(tagElement) == 'object' && typeof(tagElement._xseen) != 'undefined' && typeof(tagElement._xseen.tagObject) != 'undefined') {
 					e._xseen.target = tagElement._xseen.tagObject;
-				} else {
-					e._xseen.target = null;
 				}
 			}
  
@@ -3130,10 +3270,20 @@ XSeen.Tags.camera = {
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
-				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				if (e._xseen.track == 'device') {
+					if (e._xseen.sceneInfo.hasDeviceOrientation) {
+						e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
+						e._xseen.sceneInfo.useDeviceOrientation = true;
+					} else {
+						e._xseen.track = 'orbit';
+						e._xseen.sceneInfo.useDeviceOrientation = false;
+					}
+				}
 				
 			} else if (e._xseen.type == 'stereo') {	// Stereo perspective cameras
-				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {e._xseen.track = 'orbit';}
+				var track = (e._xseen.target === null) ? 'environment' : 'object'
+				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {track = 'orbit';}
+				e._xseen.track = track;
 				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 				e._xseen.sceneInfo.rendererHasControls = false;
 				e._xseen.sceneInfo.isStereographic = true;
@@ -3156,16 +3306,21 @@ XSeen.Tags.camera = {
 					e._xseen.track = 'orbit';
 				}
 			}
-			
+
+/*
+ *	This code not needed because of login when handling _xseen.type above
+ *
 //	Now handle object tracking. Only allowed if stereo, hasDeviceOrientation, and target != null
 
-			if (e._xseen.target != null) {
-				if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
+			if (e._xseen.target !== null) {
+				//if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
+				if (e._xseen.sceneInfo.hasDeviceOrientation) {
 					e._xseen.track = 'object';
 				} else {
 					e._xseen.target = null;
 				}
 			}
+ */
 
 /*
  *	Handle camera controls for (navigational) tracking. 
@@ -3173,12 +3328,37 @@ XSeen.Tags.camera = {
  *	TODO: orthographic camera
  */
 			if (!e._xseen.sceneInfo.rendererHasControls) {
-				if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
+				if (e._xseen.sceneInfo.useDeviceOrientation) {
+					if (e._xseen.track == 'object') {	// tracking scene object
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
+					} else {							// tracking environment
+						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
+					}
+
+				} else {								// No device orientation control. Use something else
+					if (e._xseen.track == 'orbit') {
+						e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
+					} else if (e._xseen.track == 'trackball') {
+						//console.log ('Trackball');
+					} else if (e._xseen.track == 'none') {
+						//console.log ('No tracking');
+						e._xseen.sceneInfo.rendererHasControls = true;
+					} else {
+						console.log ('Something else');
+					}
+				}
+			}
+
+
+/*
+			if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
 					if (e._xseen.track == 'object') {
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
 					} else {
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
 					}
+				} else if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'object') {
+					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
 				} else if (e._xseen.track == 'orbit') {
 					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 				} else if (e._xseen.track == 'trackball') {
@@ -3190,6 +3370,8 @@ XSeen.Tags.camera = {
 					console.log ('Something else');
 				}
 			}
+ */
+
 
 /*
  * OLD code -- waiting for working confirmation of above
@@ -4010,11 +4192,15 @@ XSeen.Tags.scene = {
 			// Render all Children
 			var e = XSeen.Runtime.RootTag;
 			console.log ('Adding children to SCENE');
+			e._xseen.idReference = e._xseen.idReference || Array();
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
-					console.log('Adding child of type ' + child.type + ' (' + child.name + ') with ' + child.children.length + ' children to THREE scene');
-					e._xseen.sceneInfo.SCENE.add(child);
-					//console.log('Check for successful add');
+					if (e._xseen.idReference[child.id] === undefined) {
+						console.log('Adding child of type ' + child.type + ' (' + child.name + '/' + child.id + ') with ' + child.children.length + ' children to THREE scene');
+						e._xseen.sceneInfo.SCENE.add(child);
+						e._xseen.idReference[child.id] = child;
+						//console.log('Check for successful add');
+					}
 				});
 //			XSeen.LogDebug("Rendered all elements -- Starting animation");
 		},

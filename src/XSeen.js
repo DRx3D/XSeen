@@ -33,32 +33,33 @@
  *	0.7.21: Added axis-angle parsing for rotation
  *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
  *	0.7.23: Added support for external XSeen files in XML format.
+ *	0.7.24: Added support for device camera use.
  *
+ *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
+ *		If that happens than target should not be used
+ *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
- *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
- *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
- *		If that happens than target should not be used
- *	Check background image cube for proper orientation
  * 
  */
 
 //var Renderer = new THREE.WebGLRenderer();
-var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
+//var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 23,
+					'_Patch'		: 24,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-05-20',
+					'_RDate'		: '2018-06-16',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -92,15 +93,15 @@ XSeen.parseTable = [];
 
 // Data object for Runtime
 // Stereo viewing effect from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
-var StereoRenderer = new THREE.StereoEffect(Renderer);
+//var StereoRenderer = new THREE.StereoEffect(Renderer);
 XSeen.Runtime = {
 			'currentTime'			: 0,			// Current time at start of frame rendering
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: Renderer,
-			'RendererStandard'		: Renderer,
-			'RendererStereo'		: StereoRenderer,
+			'Renderer'				: {},
+			'RendererStandard'		: {},
+			'RendererStereo'		: {},
 			'Camera'				: {},
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
 			'Mixers'				: [],			// Internal animation mixer array
@@ -131,17 +132,20 @@ XSeen.Runtime = {
 			'isVrCapable'			: false,		// WebVR ready to run && access to VR device 
 			'hasDeviceOrientation'	: false,		// device has Orientation sensor
 			'hasVrImmersive'		: false,		// hasDeviceOrientation && stereographic capable (=== TRUE)
+			'useDeviceOrientation'	: false,		// display is using device's Orientation sensor
 			'isStereographic'		: false,		// currently running stereographic display (not VR)
 			'rendererHasControls'	: false,		// Renderer has built-in motion controls
 			'isProcessingResize'	: false,		// semaphore for resizing processing
+			'mediaAvailable'		: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),	// flag for device media availability
+			'isTransparent'			: false,		// flag for XSeen transparent background
 			};										// Need place-holder for xR scene (if any -- tbd)
 			
 XSeen.RenderFrame = function()
 	{
 		if (XSeen.Runtime.isProcessingResize) {return;}		// Only do one thing at a time
 
-		if (XSeen.Runtime.frameNumber == 0) {
-			if (XSeen.Loader.loadingComplete()) {
+		if (XSeen.Runtime.frameNumber == 0) {		// TODO: Replace with 'dirty' flag. May not need loadingComplete
+			if (XSeen.Loader.loadingComplete()) {	//	Code needs to set Runtime.nodeChange whenever nodes are added/removed
 				XSeen.Tags.scene.addScene();
 			} else {
 				return;

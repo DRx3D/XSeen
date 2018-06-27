@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+ * Conversion of X3D simple mode to XSeen
+ * Source: URe3trefoil-bas-color.x3d
+ *
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Converted 3DPrint Exchange Model</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../Release/XSeenExternals.js'></script>
+		<script src='../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../Release/xseen.css' />
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+<x-scene style="position:relative; top:5px, left:0;" width="800" height="600" src='URe3trefoil-bas-color.xseen'>
+<!--
+			<x-class3d id='OriginMarker'>
+				<x-style3d property='side' value='both'></x-style3d>
+				<x-style3d property='open-ended' value='false'></x-style3d>
+				<x-style3d property='radius' value='.2'></x-style3d>
+				<x-style3d property='height' value='2'></x-style3d>
+				<x-style3d property='segments-radial' value='32'></x-style3d>
+			</x-class3d>
+			<x-cone class3d='OriginMarker' position='0 0 1' rotation='1.57 0 0' color='red'></x-cone>
+			<x-cone class3d='OriginMarker' position='0 1 0' rotation='0 1.57 0' color='green'></x-cone>
+			<x-cone class3d='OriginMarker' position='-1 0 0' rotation='0 0 1.57' color='blue'></x-cone>
+-->
+
+	<x-light type="directional" color="white" intensity=".3" direction="-.69 -.2 -.69"></x-light>
+	<x-light type="directional" color="#422237" direction="0 0 -1"></x-light>
+	<x-light type="directional" color="#422236" direction="-.707 .707 0"></x-light>
+	<x-light type="directional" color="#422236" direction=".707 0 .707"></x-light>
+	<x-background skycolor="#361b20"></x-background>
+	<!-- x-camera id="SceneCamera" target="__XSeen-Group" type="vr" track="device" position="1 0 10"></x-camera -->
+	<!-- x-camera track='orbit' position='-9.17 2.62 12.47'></x-camera -->
+	<x-camera id="SceneCamera" position='-9.17 2.62 12.47' track='device'></x-camera>
+</x-scene>
+</body>
+</html>

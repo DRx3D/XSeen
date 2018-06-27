@@ -82,6 +82,9 @@ XSeen.Parser = {
                                                            'sceneInfo'             : mutation.target._xseen.sceneInfo,     // Runtime...
                                                                         };
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
+					if (mutation.target.localName == 'x-scene') {
+						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+					}
 							}
 						}),
 
@@ -507,11 +510,6 @@ XSeen.Parser = {
 				if (svalue == 'f' || svalue == 'false' || svalue == '0') return false;
 				var ivalue = Boolean (value);
 				return ivalue;
-/*
-				if (value) {return true;}
-				if (!value) {return false;}
-				return def;
- */
 			},
 		'vecToFloat3'	: function (value, def)
 			{

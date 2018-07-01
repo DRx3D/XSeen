@@ -317,8 +317,17 @@ XSeen.onLoad = function() {
 	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
 	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
 	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
+	
+/*
+ *	Create default camera by adding a first-child node to x-scene
+ *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ */
+	defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var tmp = document.createElement('div');
+	tmp.innerHTML = defaultCamera;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 
- 
+	
 // Introduce things
 	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
 	XSeen.LogInfo(XSeen.Version.splashText);

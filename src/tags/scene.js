@@ -54,6 +54,9 @@ XSeen.Tags.scene = {
 //			XSeen.LogInfo("Ready to kick off rendering loop");
 //			XSeen.renderFrame();
 			//RunTest (e._xseen.sceneInfo);
+// Configure current camera
+			e._xseen.sceneInfo.ViewManager.setNext();
+			
 			if (e._xseen.attributes.cubetest) {
 				XSeen.LogInfo("Kicking off THREE testing code and rendering");
 				DoRestOfCubes (e._xseen.sceneInfo);

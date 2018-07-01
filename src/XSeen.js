@@ -33,10 +33,11 @@
  *	0.7.21: Added axis-angle parsing for rotation
  *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
  *	0.7.23: Added support for external XSeen files in XML format.
- *	0.7.24: Added support for device camera use.
+ *	0.7.24: Added support for device camera background use.
+ *	0.7.25: Support device motion controlling object position
+ *	0.7.26: Initial support for multiple cameras
  *
- *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
- *		If that happens than target should not be used
+ *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation
  *	Additional PBR
@@ -55,12 +56,12 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 24,
+					'_Patch'		: 26,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-06-16',
-					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
+					'_RDate'		: '2018-06-30',
+					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
 					};
@@ -100,10 +101,12 @@ XSeen.Runtime = {
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
 			'Renderer'				: {},
-			'RendererStandard'		: {},
-			'RendererStereo'		: {},
-			'Camera'				: {},
+			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
+			'RendererStereo'		: {},			// these and 'camera' chooses which one
+			'Camera'				: {},			// Current camera in use
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
+			'DefinedCameras'		: [],			// Array of defined cameras
+			'ViewManager'			: XSeen.CameraManager,
 			'Mixers'				: [],			// Internal animation mixer array
 			'perFrame'				: [],			// List of methods with data to execute per frame
 			'Animate'				: function() {	// XSeen animation loop control

@@ -1173,5 +1173,5 @@
 </x-group>
 </x-group></x-group>
 <!-- x-camera id="SceneCamera" target="__XSeen-Group" type="vr" track="device" position="1 0 10"></x-camera -->
-<!-- x-camera id="SceneCamera" position='-9.17 2.62 12.47' track='device'></x-camera -->
+<x-camera priority='3' id="Model-URe3trefoil-bas-color-Camera" position='-9.17 2.62 12.47' track='device'></x-camera>
 </x-scene>

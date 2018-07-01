@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.24-alpha.2+7_9b10cab
- *  Built Tue Jun 26 12:52:32 2018
+ *  XSeen V0.7.26-alpha.2+7_8fdb047
+ *  Built Sat Jun 30 21:13:22 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -58,6 +58,70 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 ===  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
  */
+// File: ./CameraManager.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2018, Daly Realism, Los Angeles
+ *
+ * Dual licensed under the MIT and GPL
+ */
+
+ 
+/*
+ * XSeen Camera Manager.
+ * This object is the manager for all XSeen cameras.
+ *
+ * provides method for the addition and selection of a camera for scene viewing
+ *
+ *
+ *
+ */
+
+var XSeen = XSeen || {};
+XSeen.CameraManager = {
+		'PRIORITY_MINIMUM'	: 0,
+		'PRIORITY_DEFAULT'	: 1,
+		'DefinedCameras'	: [],		// Contains references to camera nodes ...[priority][order]
+		'CurrentNode'		: null,
+		
+/*
+ *
+ */
+		'add'				: function (camera)
+					{
+						console.log ('Adding camera#' + camera.id + ' to the list');
+						if (typeof(this.DefinedCameras[camera._xseen.priority]) == 'undefined') {this.DefinedCameras[camera._xseen.priority] = [];}
+						this.DefinedCameras[camera._xseen.priority].push (camera);
+						camera._xseen.ndxCamera = this.DefinedCameras[camera._xseen.priority].length - 1;
+					},
+					
+		'next'				: function ()
+					{
+						for (var p=this.DefinedCameras.length-1; p>=this.PRIORITY_MINIMUM; p--) {
+							if (typeof(this.DefinedCameras[p]) != 'undefined') {
+								for (var ii=0; ii<this.DefinedCameras[p].length; ii++) {
+									if (this.DefinedCameras[p][ii]._xseen.available) {return this.DefinedCameras[p][ii];}
+								}
+							}
+						}
+						return this.DefinedCameras[this.PRIORITY_MINIMUM][0];	// System default
+					},
+					
+		'setNext'			: function ()
+					{
+						var camera = this.next();
+						if (this.CurrentNode !== null) {this.CurrentNode._xseen.active = false;}
+						camera._xseen.active = true;
+						camera._xseen.sceneInfo.Camera.position.set (
+									camera._xseen.attributes.position.x,
+									camera._xseen.attributes.position.y,
+									camera._xseen.attributes.position.z);
+						camera._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
+						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
+						this.CurrentNode = camera;
+					}
+};
 // File: ./Constants.js
 /*
  * XSeen JavaScript library
@@ -1677,8 +1741,17 @@ XSeen.onLoad = function() {
 	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
 	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
 	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
+	
+/*
+ *	Create default camera by adding a first-child node to x-scene
+ *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ */
+	defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var tmp = document.createElement('div');
+	tmp.innerHTML = defaultCamera;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 
- 
+	
 // Introduce things
 	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
 	XSeen.LogInfo(XSeen.Version.splashText);
@@ -1819,6 +1892,7 @@ XSeen.Parser = {
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
 					if (mutation.target.localName == 'x-scene') {
 						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+						XSeen.Runtime.ViewManager.setNext();	// Update the camera
 					}
 							}
 						}),
@@ -2428,10 +2502,11 @@ XSeen.Parser = {
  *	0.7.21: Added axis-angle parsing for rotation
  *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
  *	0.7.23: Added support for external XSeen files in XML format.
- *	0.7.24: Added support for device camera use.
+ *	0.7.24: Added support for device camera background use.
+ *	0.7.25: Support device motion controlling object position
+ *	0.7.26: Initial support for multiple cameras
  *
- *	Stereo+device should roll back to perspective+orbit if display doesn't have device orientation.
- *		If that happens than target should not be used
+ *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation
  *	Additional PBR
@@ -2450,12 +2525,12 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 24,
+					'_Patch'		: 26,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-06-16',
-					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='http://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
+					'_RDate'		: '2018-06-30',
+					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
 					};
@@ -2495,10 +2570,12 @@ XSeen.Runtime = {
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
 			'Renderer'				: {},
-			'RendererStandard'		: {},
-			'RendererStereo'		: {},
-			'Camera'				: {},
+			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
+			'RendererStereo'		: {},			// these and 'camera' chooses which one
+			'Camera'				: {},			// Current camera in use
 			'CameraControl'			: {},			// Camera control to be used in Renderer for various types
+			'DefinedCameras'		: [],			// Array of defined cameras
+			'ViewManager'			: XSeen.CameraManager,
 			'Mixers'				: [],			// Internal animation mixer array
 			'perFrame'				: [],			// List of methods with data to execute per frame
 			'Animate'				: function() {	// XSeen animation loop control
@@ -3231,11 +3308,17 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
+/*
+ *	These are now set in the Camera Manager
 			e._xseen.sceneInfo.Camera.position.set (
 							e._xseen.attributes.position.x,
 							e._xseen.attributes.position.y,
 							e._xseen.attributes.position.z);
 			e._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
+ */
+			e._xseen.priority = e._xseen.attributes.priority;
+			if (e._xseen.priority < 0) {e._xseen.priority = 1;}
+			e._xseen.available = e._xseen.attributes.available;
 /*
  * Handle camera target. Target is an HTML id attribute value,
  * must exist, and be defined (and parsed) prior to the camera tag parsing.
@@ -3308,20 +3391,46 @@ XSeen.Tags.camera = {
 			}
 
 /*
- *	This code not needed because of login when handling _xseen.type above
+ *	TODO: support multiple cameras
+ *	If multiple cameras are to be allowed, then the above processing needs to occur for each
+ *	camera. What follows is for the camera in use because it sets the specific controls. Note
+ *	that above the 'stereographic' and 'vr' modes set the renderer. Other modes may set a scene
+ *	variable. This needs to be "re-factored" into setup and use. All 'setup' processing and
+ *	definitions are stored in the node. The 'use' phase determines which camera will be active
+ *	and extracts the details from the node. This sounds like a data array that references each camera
+ *	so the 'use' phase can get to the right information. There will also need to be a mechanism for
+ *	determining which camera is active or active next. Perhaps a 'priority' field with cameras at
+ *	the same priority being handled in declared order. An 'active' event would allow the designated camera
+ *	to become the next active camera. The process would also inactivate the current camera. The other
+ *	choice would be a stack of some sort.
  *
-//	Now handle object tracking. Only allowed if stereo, hasDeviceOrientation, and target != null
-
-			if (e._xseen.target !== null) {
-				//if (e._xseen.type == 'stereo' && e._xseen.sceneInfo.hasDeviceOrientation) {
-				if (e._xseen.sceneInfo.hasDeviceOrientation) {
-					e._xseen.track = 'object';
-				} else {
-					e._xseen.target = null;
-				}
-			}
+ *	Data structures:
+ *	 In XSeen.Runtime:
+ *		add cameras = sparse array of arrays. The hash is accessed in reverse numerical order and is the priority
+ *			of the camera. Each inner array contains references to all cameras at that priority. Each 
+ *			outer array element is an array with at least one element.
+ *		add currentCamera as a reference to the active camera (not possible to have no active cameras)
+ *	 XSeen automatically creates a priority 0 camera (normal priorities > 0; highest priority camera is next-active)
+ *	 Store above parameters (track, isStereographic, etc.) in node
+ *	 Add event to activate camera. This has no effect as an attribute.
+ *	 When a camera activates, data in the node (element._xseen...) is retrieved and used to determine the 
+ *		renderer and other system camera parameters. Note that if a target is specified, then it needs to be
+ *		checked when the camera is activated. Activating a camera causes the current active camera to deactivate.
+ *	 No special processing is required for deactivating a camera.
+ *
+ *	A viewpoint list can be constructed with the x-class3d tag setting the same camera parameters and each 
+ *	x-camera node having different position/rotation attributes.
+ *
+ *	None of this should change the animation of a camera, though I don't know if the existing mechanisms
+ *	correctly handle orientation change.
+ *
+ *	Motivation for multiple cameras:
+ *	When loading an external XSeen source it may be necessary to include a camera in the external file to
+ *	handle 'target'. It is necessary to include a camera (at least XSeen default) so that the first frame can
+ *	be rendered. 
+ *
  */
-
+ 
 /*
  *	Handle camera controls for (navigational) tracking. 
  *	This applies to stereo (device & object) and perspective with track != none.
@@ -3349,100 +3458,12 @@ XSeen.Tags.camera = {
 				}
 			}
 
-
-/*
-			if (e._xseen.sceneInfo.isStereographic && e._xseen.sceneInfo.hasDeviceOrientation) {
-					if (e._xseen.track == 'object') {
-						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
-					} else {
-						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
-					}
-				} else if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'object') {
-					e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
-				} else if (e._xseen.track == 'orbit') {
-					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
-				} else if (e._xseen.track == 'trackball') {
-					//console.log ('Trackball');
-				} else if (e._xseen.track == 'none') {
-					//console.log ('No tracking');
-					e._xseen.sceneInfo.rendererHasControls = true;
-				} else {
-					console.log ('Something else');
-				}
-			}
- */
-
-
-/*
- * OLD code -- waiting for working confirmation of above
- *
-			// Handle camera type (perspective, orthographic, vr, etc.)
-			if (e._xseen.type == 'perspective') {			// Already exists
-
-			} else if (e._xseen.type == 'stereo') {			// TODO: need to implement
-				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
-				e._xseen.sceneInfo.rendererHasControls = false;
-				e._xseen.sceneInfo.isStereographic = true;
-
-			} else if (e._xseen.type == 'orthographic') {	// TODO: need to implement -- change camera type
-
-			} else if (e._xseen.type == 'vr') {
-				if (e._xseen.sceneInfo.isVrCapable) {
-					e._xseen.sceneInfo.Renderer.vr.enabled = true;
-					e._xseen.sceneInfo.rendererHasControls = true;
-					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
-				} else {									// TODO: create split screen and navigation mode
-					XSeen.LogWarn ('VR display requested, but not capable. Rolling over to stereographic');
-					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
-					e._xseen.sceneInfo.isStereographic = true;
-					e._xseen.sceneInfo.rendererHasControls = false;
-					//e._xseen.sceneInfo.Renderer.controls = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
-					//e._xseen.sceneInfo.Renderer.controls = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.Renderer.domElement );
-					//controls.addEventListener( 'change', render ); // remove when using animation loop
-					// enable animation loop when using damping or autorotation
-					//controls.enableDamping = true;
-					//controls.dampingFactor = 0.25;
-					//controls.enableZoom = false;
-					//e._xseen.sceneInfo.Renderer.controls.enableZoom = true;
-				}
-			}
-			//console.log("Setting up controls...");
-			//console.log (" - Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|");
-			//console.log (" - Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
-			//console.log (" - Track: |"+e._xseen.track+"|");
-			XSeen.LogInfo("Renderer has controls: |"+e._xseen.sceneInfo.rendererHasControls+"|; Device has orientation: |"+e._xseen.sceneInfo.hasDeviceOrientation+"|");
-			if (!e._xseen.sceneInfo.rendererHasControls) {
-				if (e._xseen.sceneInfo.hasDeviceOrientation && e._xseen.track == 'device') {
-					// TODO: check for proper enabling of DeviceControls
-					//console.log ('Adding DeviceOrientationControls');
-					if (typeof(e._xseen.target) != 'undefined' && e._xseen.target != null) {
-						console.log ('Targeting controls to ' + e._xseen.target.name);
-						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
-					} else {
-						console.log ('Targeting controls to camera');
-						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.sceneInfo.Camera);
-					}
-				} else if (e._xseen.track == 'orbit' || (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation)) {
-					//console.log ('Adding OrbitControls');
-					e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
-				} else if (e._xseen.track == 'trackball') {
-					//console.log ('Trackball');
-				} else if (e._xseen.track == 'none') {
-					//console.log ('No tracking');
-					e._xseen.sceneInfo.rendererHasControls = true;
-				} else {
-					console.log ('Something else');
-				}
-			} else {
-				console.log ('Renderer has controls...');
-			}
-*/
-
-
-/* For handling events
-			e._xseen.handlers = {};
-			e._xseen.handlers.setactive = this.setactive;
- */
+			e._xseen.sceneInfo.ViewManager.add (e);
+			//if (typeof(e._xseen.sceneInfo.DefinedCameras[e._xseen.priority]) == 'undefined') {e._xseen.sceneInfo.DefinedCameras[e._xseen.priority] = [];}
+			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push (e);
+			//e._xseen.ndxCamera = e._xseen.sceneInfo.DefinedCameras.length - 1;
+			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
+			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr)
@@ -3465,6 +3486,8 @@ XSeen.Parser.defineTag ({
 		.addSceneSpace()
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'perspective', enumeration:['perspective','stereo','orthographic','vr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'track', dataType:'string', 'defaultValue':'none', enumeration:['none', 'orbit', 'fly', 'examine', 'trackball', 'device'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'priority', dataType:'integer', 'defaultValue':1})
+		.defineAttribute ({'name':'available', dataType:'boolean', 'defaultValue':true})
 		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':''})
 		.addTag();
 // File: tags/fog.js
@@ -4173,6 +4196,9 @@ XSeen.Tags.scene = {
 //			XSeen.LogInfo("Ready to kick off rendering loop");
 //			XSeen.renderFrame();
 			//RunTest (e._xseen.sceneInfo);
+// Configure current camera
+			e._xseen.sceneInfo.ViewManager.setNext();
+			
 			if (e._xseen.attributes.cubetest) {
 				XSeen.LogInfo("Kicking off THREE testing code and rendering");
 				DoRestOfCubes (e._xseen.sceneInfo);

@@ -84,6 +84,7 @@ XSeen.Parser = {
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
 					if (mutation.target.localName == 'x-scene') {
 						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+						XSeen.Runtime.ViewManager.setNext();	// Update the camera
 					}
 							}
 						}),

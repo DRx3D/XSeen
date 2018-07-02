@@ -221,3 +221,4 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();
+//	TODO: Convert backgroundiscube to backgroundtype with the values cube(D) | sphere | fixed. Remove 'fixed' and change logic throughout.

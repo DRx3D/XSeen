@@ -212,6 +212,8 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
 			}
 };
+
+// TODO: This is very specific and only for debug/development purposes. Needs to be fixed.
 XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			var envMap, basePath = 'Resources/textures/';
 			if (envMapUrl == 'desert') {

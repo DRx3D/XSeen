@@ -38,12 +38,14 @@
  *	0.7.26: Initial support for multiple cameras
  *	0.7.27: Spherical (photosphere) backgrounds
  *
+ *	Change background attributes (see embedded TODO)
+ *	Add spherical background change event (see embedded TODO)
  *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Fix display size wrt browser window size
  *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
- *	Add spherical background change event (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)

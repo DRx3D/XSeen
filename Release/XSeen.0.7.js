@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.27-alpha.2+7_38b58dd
- *  Built Sun Jul  1 20:04:02 2018
+ *  XSeen V0.7.27-alpha.2+7_8fed8c4
+ *  Built Mon Jul  2 07:14:40 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -2507,12 +2507,14 @@ XSeen.Parser = {
  *	0.7.26: Initial support for multiple cameras
  *	0.7.27: Spherical (photosphere) backgrounds
  *
+ *	Change background attributes (see embedded TODO)
+ *	Add spherical background change event (see embedded TODO)
  *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ *	Fix display size wrt browser window size
  *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
- *	Add spherical background change event (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
@@ -3339,6 +3341,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();
+//	TODO: Convert backgroundiscube to backgroundtype with the values cube(D) | sphere | fixed. Remove 'fixed' and change logic throughout.
 // File: tags/camera.js
 /*
  * XSeen JavaScript library
@@ -4515,6 +4518,8 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
 			}
 };
+
+// TODO: This is very specific and only for debug/development purposes. Needs to be fixed.
 XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			var envMap, basePath = 'Resources/textures/';
 			if (envMapUrl == 'desert') {

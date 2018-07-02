@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.26-alpha.2+7_8fdb047
- *  Built Sat Jun 30 21:13:22 2018
+ *  XSeen V0.7.27-alpha.2+7_38b58dd
+ *  Built Sun Jul  1 20:04:02 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -2505,12 +2505,14 @@ XSeen.Parser = {
  *	0.7.24: Added support for device camera background use.
  *	0.7.25: Support device motion controlling object position
  *	0.7.26: Initial support for multiple cameras
+ *	0.7.27: Spherical (photosphere) backgrounds
  *
  *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
+ *	Add spherical background change event (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
@@ -2525,11 +2527,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 26,
+					'_Patch'		: 27,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-06-30',
+					'_RDate'		: '2018-07-01',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -3132,6 +3134,7 @@ XSeen.Parser.defineTag ({
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
 			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'skycolor') {				// Different operation for each attribute
@@ -3144,12 +3147,15 @@ XSeen.Tags.background = {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
 			} else {
-				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
 			}
 		},
 
 	'init'	: function (e, p) 
 		{
+			var r = e._xseen.attributes.radius;
+			e._xseen.sphereRadius = (r <= 0) ? 500 : r;
+			e._xseen.sphereDefined = false;
 			var t = e._xseen.attributes.skycolor;
 			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
 			console.log ("value for 'usecamera' is |"+e._xseen.attributes.usecamera+"|");
@@ -3212,34 +3218,77 @@ XSeen.Tags.background = {
 			//}
 		},
 
+/*
+ *	Background textures can either be a cube-map image (1 image for each face of a cube) or
+ *	a single equirectangular (photosphere) image of width = 2 x height. For any image, each dimension
+ *	must be a power of 2. 
+ *
+ *	The attribute 'backgroundiscube' determines whether the texture is cube- or sphere- mapped.
+ *	backgroundiscube == false ==> sphere-mapped texture. These attributes are also allowed:
+ *		radius		sets the radius of the sphere that is constructed for the texture. This can only be set once.
+ *		src			The sphere-mapped texture.
+ *	backgroundiscube == true ==> cube-mapped texture. These attributes are also allowed:
+ *		src			The cube-mapped texture that can take any of the following forms (all proceeded by domain and path):
+ *			<file>.<extension> loads the specified image. This is not yet functioning [TODO]
+ *			...path/ loads the 6 textures in the specified directory. The files MUST be called [n|p][x|y|z].jpg
+ *			<full-file> with single '*'. This substitutes (in -turn) ['right', 'left', 'top', 'bottom', 'front', 'back']
+ *						for the wild card character to load the 6 cube textures.
+ */
 	'_loadBackground'	: function (attributes, e)
 		{
-			// Parse src as a default to srcXXX.
-			var urls = [];
-			var sides = ['right', 'left', 'top', 'bottom', 'front', 'back'];
-			var src = attributes.src.split('*');
-			var tail = src[src.length-1];
-			var srcFile = src[0];
-			var urls2load = 0;
-			for (var ii=0;  ii<sides.length; ii++) {
-				urls[sides[ii]] = srcFile + sides[ii] + tail;
-				urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
+			// Parse src according the description above. 
+			if (attributes.backgroundiscube) {
+				var urls=[], files=[], tail='', srcFile='';
+				var src = attributes.src.split('*');
+				var sides = ['right', 'left', 'top', 'bottom', 'front', 'back'];
+				var files = [];
+				if (src.length == 2) {
+					tail = src[src.length-1];
+					srcFile = src[0];
+					files = sides;
+				} else {					// Also requires 'src' ends in '/'
+					tail = '.jpg';
+					srcFile = src;
+					files = ['px', 'nx', 'py', 'ny', 'px', 'nz'];
+				}
+				for (var ii=0;  ii<sides.length; ii++) {
+					urls[sides[ii]] = srcFile + files[ii] + tail;
+					urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
+/*
+ * Old code that reflected a very X3D-centric means of specifying textures
 				if (urls[sides[ii]] == '' || urls[sides[ii]] == sides[ii]) {
 					urls[sides[ii]] = null;
 				} else {
 					urls2load ++;
 				}
-			}
+*/
+				}
 
-			if (urls2load > 0) {
 				console.log ('Loading background image cube');
 				var dirtyFlag;
 				XSeen.Loader.TextureCube ('./', [urls['right'],
-												 urls['left'],
-												 urls['top'],
-												 urls['bottom'],
-												 urls['front'],
-												 urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+												urls['left'],
+												urls['top'],
+												urls['bottom'],
+												urls['front'],
+												urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+
+			} else {		// Sphere-mapped texture. Need to do all of things specified in the above description
+				if (!e._xseen.sphereDefined) {
+					var geometry = new THREE.SphereBufferGeometry( e._xseen.sphereRadius, 60, 40 );
+					// invert the geometry on the x-axis so that all of the faces point inward
+					geometry.scale(-1, 1, 1);
+
+					var material = new THREE.MeshBasicMaterial( {
+						map: new THREE.TextureLoader().load(attributes.src)
+					} );
+
+					var mesh = new THREE.Mesh( geometry, material );
+					e._xseen.sphereDefined = true;
+					e._xseen.sphere = mesh;
+					mesh = null;
+				}
+				e.parentNode._xseen.children.push(e._xseen.sphere);
 			}
 		},
 	'fin'	: function (e, p) {},
@@ -3285,6 +3334,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'srctop', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcbottom', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'backgroundiscube', dataType:'boolean', 'defaultValue':true})
+		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
 		.defineAttribute ({'name':'fixed', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Load Spherical Background</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../Release/XSeenExternals.js'></script>
+		<script src='../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+		<x-scene>
+			<x-background skycolor='blue' backgroundiscube='false' radius='1000' src='Resources/textures/Sphere/Desert-Stop-NV.jpg'></x-background>
+			<x-light id='Top_White' type='directional' color='.7 .7 .9' direction='0 -1 0'></x-light>
+			<x-light id='Front' type='directional' color='.8 .8 0' direction='+.866 -.5 0'></x-light>
+			<x-light id='LeftRear' type='directional' color='.8 .8 0' direction='-.707 -.5 -.5'></x-light>
+			<x-light id='Top_Red' type='directional' color='.6 0 0' direction='0 -1 0'></x-light>
+			<x-light id='Bottom_Gray' type='directional' color='.4 .4 .4' direction='0 1 0'></x-light>
+
+			<x-group position='-5 -3 5' scale='.4 .4 .4' rotate='0 0 0'>
+				<x-model id='model' src='Resources/models/Opel-GT-Retopo/scene.gltf'  playonload='*'></x-model>
+			</x-group>
+			<!-- x-camera id='SceneCamera' type='perspective' track='device' target='model' position='20 0 30'></x-camera -->
+			<x-camera id='SceneCamera' type='perspective' track='device' position='12 0 18'></x-camera>
+
+		</x-scene>
+	</body>
+</html>
+
+

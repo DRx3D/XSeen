@@ -36,12 +36,14 @@
  *	0.7.24: Added support for device camera background use.
  *	0.7.25: Support device motion controlling object position
  *	0.7.26: Initial support for multiple cameras
+ *	0.7.27: Spherical (photosphere) backgrounds
  *
  *	Support indexed triangle sets. This is probably done through Face3. 
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
+ *	Add spherical background change event (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
@@ -56,11 +58,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 26,
+					'_Patch'		: 27,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-06-30',
+					'_RDate'		: '2018-07-01',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

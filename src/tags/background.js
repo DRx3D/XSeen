@@ -13,77 +13,204 @@
 
  // Control Node definitions
 
+/*
+ * Single TODO to encompass all work
+ *xx	1. Create function for determining source type (none, single image (image extension), image directory)
+ *	2. Add attribute for image extension/type for use with (1)/directory
+ *	3. Create function for determining background type based on supplied value. (1), and camera environment.
+ *	4. Functions from (1) and (3) are used in the _changeAttribute method
+ *	5. Update _changeAttribute to fully handle changes to all attributes (except geometry)
+ *	6. Add color attribute to supersede skycolor
+ *	7. Deprecate skycolor (not supported on change of attribute)
+ */ 
+
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
 			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
-				if (attributeName == 'skycolor') {				// Different operation for each attribute
-					e._xseen.sceneInfo.SCENE.background = new THREE.Color(value);
-
-				} else if (attributeName.substr(0,3) == 'src') {
-					XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
-					
-				} else {
-					XSeen.LogWarn('No support for updating ' + attributeName);
-				}
+				var type = XSeen.Tags.background._saveAttributes (e);
+				XSeen.Tags.background._processChange (e);
 			} else {
 				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
 			}
 		},
 
+/*
+ *	Perform node initialization. This is done on the first encounter with each 'background' node.
+ *	Some things are done "just in case". This includes setting up for a video background from device
+ *	camera and creating photosphere geometry.
+ *
+ *	The video setup is only done if the device supports a camera. Note that no access to the camera 
+ *	is requested until it is specified in the node (either on initial setting or attribute change
+ *
+ *	The photosphere geometry is set up, but made transparent. This ensures that it is in the 
+ *	render tree
+ *
+ *	The method _processChange is called every time there is a change, either to the initial state
+ *	or on attribute change.
+ */
 	'init'	: function (e, p) 
 		{
-			var r = e._xseen.attributes.radius;
-			e._xseen.sphereRadius = (r <= 0) ? 500 : r;
+			// This function doesn't really work because the 'enumerateDevices' method runs
+			// asynchronously. Need to figure out some other way to check for existence.
+			function cameraExists () {
+				const constraints = {video: {facingMode: "environment"}};
+				function handleError(error) {
+					//console.error('Reeeejected!', error);
+					console.log ('Device camera not available -- ignoring');
+					exists = false;
+				}
+
+				var exists = false;
+				navigator.mediaDevices.enumerateDevices(constraints)
+					.then(gotDevices).catch(handleError);
+
+				function gotDevices(deviceInfos) {
+					for (var i = 0; i !== deviceInfos.length; ++i) {
+						var deviceInfo = deviceInfos[i];
+						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind);
+						exists = true;
+					}
+				}
+				return true;
+				return exists;
+			}
+
+			var t = e._xseen.attributes.radius;
+			e._xseen.sphereRadius = (t <= 0) ? 500 : t;
 			e._xseen.sphereDefined = false;
-			var t = e._xseen.attributes.skycolor;
-			e._xseen.sceneInfo.SCENE.background = new THREE.Color (t.r, t.g, t.b);
-			console.log ("value for 'usecamera' is |"+e._xseen.attributes.usecamera+"|");
-			if (e._xseen.attributes.usecamera && XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
-				console.log ('Background: using device camera');
+			e._xseen.videoState = 'undefined';
+			
+			// Need to declare photosphere here so that it can be put into the scene graph
+			var geometry = new THREE.SphereBufferGeometry( e._xseen.sphereRadius, 60, 40 );
+			// invert the geometry on the x-axis so that all of the faces point inward
+			geometry.scale(-1, 1, 1);
+			var material = new THREE.MeshBasicMaterial( {
+											opacity: 0.0,
+											transparent: true,
+										} );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.name = 'photosphere surface R=' + t;
+			e._xseen.sphereDefined = true;
+			e._xseen.sphere = mesh;
+			mesh = null;
+			e.parentNode._xseen.children.push(e._xseen.sphere);
+			
+			// Define video support
+			if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent && cameraExists()) {
+				var video = document.createElement( 'video' );
+				video.setAttribute("autoplay", "1"); 
+				video.height			= XSeen.Runtime.SceneDom.height;
+				video.width				= XSeen.Runtime.SceneDom.width;
+				video.style.height		= video.height + 'px';
+				video.style.width		= video.width + 'px';
+				video.style.position	= 'absolute';
+				video.style.top			= '0';
+				video.style.left		= '0';
+				video.style.zIndex		= -1;
+				e._xseen.video			= video;
+				XSeen.Runtime.RootTag.appendChild (video);
+				video = null;
+				e._xseen.videoState		= 'defined';
+			}
+			
+			var type = XSeen.Tags.background._saveAttributes (e);
+			XSeen.Tags.background._processChange (e);
+		},
+		
+// Move modifyable attribute values to main node store
+	'_saveAttributes'	: function (e)
+		{
+			var t = e._xseen.attributes.color;
+			e._xseen.color = new THREE.Color (t.r, t.g, t.b);
+			e._xseen.imageSource = e._xseen.attributes.src;
+			e._xseen.srcExtension = e._xseen.attributes.srcextension;
+
+			var type = e._xseen.attributes.background;
+			e._xseen.src = e._xseen.attributes.src;
+			e._xseen.srcType = XSeen.Tags.background._checkSrc (e._xseen.src);
+			if (type == 'camera') {
+				if (e._xseen.videoState == 'undefined') {			// Rollback mechanism
+					console.log ('Device camera requested, but not available or defined.');
+					type = 'sky';
+				} else if (e._xseen.videoState == 'running') {
+					console.log ('Device camera requested, but it is already running.');
+				} else if (e._xseen.videoState == 'defined') {
+					console.log ('Device camera requested, need to engage it.');
+				} else {
+					console.log ('Device camera requested, but it is XSeen cannot handled it -- No change to background.');
+				}
+			}
+
+			e._xseen.backgroundType = type;
+			return type;
+		},
+
+	'_checkSrc'			: function (url) 
+		{
+			return (XSeen.isImage(url)) ? 'image' : 'path';
+		},
+		
+	'_processChange'	: function (e)
+		{
+			if (e._xseen.videoState == 'running') {
+				// TODO: turn off/pause camera
+			}
+			if (e._xseen.backgroundType == 'sky') {
+				e._xseen.sphere.material.transparent = true;
+				e._xseen.sphere.material.opacity = 0.0;
+				e._xseen.sceneInfo.SCENE.background = e._xseen.color;
+			
+			} else if (e._xseen.backgroundType == 'camera') {
+				e._xseen.sphere.material.transparent = true;
+				e._xseen.sphere.material.opacity = 0.0;
 				e._xseen.sceneInfo.SCENE.background = null;
-				XSeen.Tags.background._setupCamera();
-			} else if (e._xseen.attributes.fixed != '') {
-				console.log ('Loading background fixed texture');
-				e._xseen.loadTexture = new THREE.TextureLoader().load (e._xseen.attributes.fixed);
+				XSeen.Tags.background._setupCamera(e);
+
+			} else if (e._xseen.backgroundType == 'fixed') {
+				e._xseen.sphere.material.transparent = true;
+				e._xseen.sphere.material.opacity = 0.0;
+				e._xseen.loadTexture = new THREE.TextureLoader().load (e._xseen.attributes.src);
 				e._xseen.loadTexture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.loadTexture.wrapT = THREE.ClampToEdgeWrapping;
 				e._xseen.sceneInfo.SCENE.background = e._xseen.loadTexture;
+
 			} else {
-				XSeen.Tags.background._loadBackground (e._xseen.attributes, e);
+				XSeen.Tags.background._loadBackground (e);
 			}
 		},
 		
-	'_setupCamera'		: function ()
+/* TODO: Method needs better/proper handling on change
+ *	Only create one 'video' tag
+ *	Only try to access the camera on the first request
+ *	When this is not the background, then pause video feed
+ *	Perhaps impose limitation that a XSeen cannot change to a video background
+ *	May require capability to turn on/off background node
+ */
+	'_setupCamera'		: function (e)
 		{
-			//if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
-			var video = document.createElement( 'video' );
-		//if (XSeen.Runtime.Attributes.usecamera) {
-			video.setAttribute("autoplay", "1"); 
-			video.height			= XSeen.Runtime.SceneDom.height;
-			video.width				= XSeen.Runtime.SceneDom.width;
-			video.style.height		= video.height + 'px';
-			video.style.width		= video.width + 'px';
-			video.style.position	= 'absolute';
-			video.style.top			= '0';
-			video.style.left		= '0';
-			video.style.zIndex		= -1;
 			const constraints = {video: {facingMode: "environment"}};
-
+			if (e._xseen.videoState != 'defined') {
+				console.log ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
+				return;
+			}
 			function handleSuccess(stream) {
-				XSeen.Runtime.RootTag.appendChild (video);
-				video.srcObject = stream;
+				e._xseen.video.srcObject = stream;
+				e._xseen.videoState = 'running';
+				console.log ('Camera/video engaged and connected to display.');
 			}
 			function handleError(error) {
 				//console.error('Reeeejected!', error);
 				console.log ('Device camera not available -- ignoring');
+				e._xseen.videoState = 'error';
 			}
 
+/*
+ *	Debugging only. Figure out what media devices are available
 			navigator.mediaDevices.enumerateDevices()
 				.then(gotDevices).catch(handleError);
-//				.then(gotDevices).then(getStream).catch(handleError);
 
 			function gotDevices(deviceInfos) {
 				var msgs = '';
@@ -94,6 +221,7 @@ XSeen.Tags.background = {
 				}
 				//alert (msgs);
 			}
+*/
 
 			navigator.mediaDevices.getUserMedia(constraints).
 				then(handleSuccess).catch(handleError);
@@ -116,6 +244,9 @@ XSeen.Tags.background = {
  *			<full-file> with single '*'. This substitutes (in -turn) ['right', 'left', 'top', 'bottom', 'front', 'back']
  *						for the wild card character to load the 6 cube textures.
  */
+ /*
+  *		Old code slated for removal...
+  *
 	'_loadBackground'	: function (attributes, e)
 		{
 			// Parse src according the description above. 
@@ -143,7 +274,7 @@ XSeen.Tags.background = {
 				} else {
 					urls2load ++;
 				}
-*/
+* End of even older code...
 				}
 
 				console.log ('Loading background image cube');
@@ -154,23 +285,46 @@ XSeen.Tags.background = {
 												urls['bottom'],
 												urls['front'],
 												urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+*/
+	'_loadBackground'	: function (e)
+		{
+			// Parse src according the description above. 
+			if (e._xseen.backgroundType == 'cube' && e._xseen.srcType == 'path') {
+				var urls=[], files=[];
+				var files = ['px.', 'nx.', 'py.', 'ny.', 'pz.', 'nz.'];
+				for (var ii=0;  ii<files.length; ii++) {
+					urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
+				}
+
+				console.log ('Loading background image cube');
+				var dirtyFlag;
+				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+				e._xseen.sphere.material.transparent = true;
+				e._xseen.sphere.material.opacity = 0.0;
 
 			} else {		// Sphere-mapped texture. Need to do all of things specified in the above description
-				if (!e._xseen.sphereDefined) {
-					var geometry = new THREE.SphereBufferGeometry( e._xseen.sphereRadius, 60, 40 );
-					// invert the geometry on the x-axis so that all of the faces point inward
-					geometry.scale(-1, 1, 1);
+				if (e._xseen.backgroundType == 'sphere' && e._xseen.srcType == 'image') {
+					if (!e._xseen.sphereDefined) {
+						var geometry = new THREE.SphereBufferGeometry( e._xseen.sphereRadius, 60, 40 );
+						// invert the geometry on the x-axis so that all of the faces point inward
+						geometry.scale(-1, 1, 1);
+						var material = new THREE.MeshBasicMaterial( {
+											map: new THREE.TextureLoader().load(e._xseen.src)
+										} );
 
-					var material = new THREE.MeshBasicMaterial( {
-						map: new THREE.TextureLoader().load(attributes.src)
-					} );
-
-					var mesh = new THREE.Mesh( geometry, material );
-					e._xseen.sphereDefined = true;
-					e._xseen.sphere = mesh;
-					mesh = null;
+						var mesh = new THREE.Mesh( geometry, material );
+						e._xseen.sphereDefined = true;
+						e._xseen.sphere = mesh;
+						mesh = null;
+						e.parentNode._xseen.children.push(e._xseen.sphere);	// Doesn't work because nothing pushes this up further...
+					} else {
+						e._xseen.sphere.material.map = new THREE.TextureLoader().load(e._xseen.src);
+						e._xseen.sphere.material.transparent = false;
+						e._xseen.sphere.material.opacity = 1.0;
+						e._xseen.sphere.material.needsUpdate = true;
+						console.log (e._xseen.sphere.material);
+					}
 				}
-				e.parentNode._xseen.children.push(e._xseen.sphere);
 			}
 		},
 	'fin'	: function (e, p) {},
@@ -207,8 +361,11 @@ XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.background.event,
 						'tick'	: XSeen.Tags.background.tick
 						})
-		.defineAttribute ({'name':'skycolor', dataType:'color', 'defaultValue':'black'})
+		.defineAttribute ({'name':'color', dataType:'color', 'defaultValue':'black'})
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
+		.defineAttribute ({'name':'background', dataType:'string', 'defaultValue':'sky', enumeration:['sky', 'cube', 'sphere', 'fixed', 'camera'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'srcExtension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpgsky', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'srcfront', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcback', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcleft', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
@@ -216,9 +373,8 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'srctop', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcbottom', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'backgroundiscube', dataType:'boolean', 'defaultValue':true})
-		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
 		.defineAttribute ({'name':'fixed', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'usecamera', dataType:'boolean', 'defaultValue':'false', 'isAnimatable':false})
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.background._changeAttribute}]})
 		.addTag();
-//	TODO: Convert backgroundiscube to backgroundtype with the values cube(D) | sphere | fixed. Remove 'fixed' and change logic throughout.
+//	TODO: Convert backgroundiscube to backgroundtype with the values sky(D) | cube | sphere | fixed | camera. Remove 'fixed' and change logic throughout.

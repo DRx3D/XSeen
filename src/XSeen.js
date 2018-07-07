@@ -37,13 +37,14 @@
  *	0.7.25: Support device motion controlling object position
  *	0.7.26: Initial support for multiple cameras
  *	0.7.27: Spherical (photosphere) backgrounds
- *
- *	Change background attributes (see embedded TODO)
- *	Add spherical background change event (see embedded TODO)
- *	Support indexed triangle sets. This is probably done through Face3. 
+ *	0.7.28: Change event handling for background attributes
+ *	0.7.29: Support indexed triangle sets. This is probably done through Face3. 
+ *	
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Fix display size wrt browser window size
- *	Check background image cube for proper orientation
+ *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
+ *	--	Above is desired for 0.7 release
+ *	Add geometry to asset tag
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio

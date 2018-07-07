@@ -22,39 +22,63 @@ See details at http://xseen.org/license
 		<script src='../ExternalLibraries/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
 		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/background.js'></script>
 
 		<style>
 .sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
 .xseen-screen-drag {cursor:move; border-top-width:10px; }
 .sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
 .sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
-#HUD {top:4px; left:380px; white-space:nowrap; overflow:scroll}
+#HUD {top:4px; left:30px; white-space:nowrap; overflow:scroll}
 		</style>
 	</head>
 	<body>
+		<x-scene width='600' height='600' transparent='true'>
+			<div class='sceneLabels' style='z-index:10; position:absolute; left:40px; top:20px;'>
+				<div id='HUD'>
+					<div style='font-weight:bold; text-align:right;'>HUD</div>
+					<div id='HUD-text'>
 		<h1>Background Change Example</h1>
 		<h2>Changes using mutation of 'background'</h2>
 		<form id='bc' method='get' onsubmit='return false;' style='z-index:1000;'>
+			Type: <select id='BackgroundType'>
+						<option value='sky'>Flat Color</option>
+						<option value='fixed'>Fixed Image</option>
+						<option value='sphere'>Photosphere</option>
+						<option value='cube'>Cube Texture</option>
+						<option value='camera'>Camera</option>
+					</select>
 			Change background to
-			<select id='BackdropId' name='BackdropChoices'>
-				<option value=' '>Choose New Background</option>
-				<option value='forest_1'>Forest</option>
-				<option value='desert_1'>Desert</option>
+			<select id='Background'>
 			</select>
 			<input id='Change' type='submit' value='Do It!'>
 		</form>
-		<x-scene style='position:relative; top:175px, left:0;' width='600' height='600'>
-			<div class='sceneLabels' style='display:none;'>
-				<div id='HUD'>
-					<div style='font-weight:bold;'>HUD</div>
-					<div id='HUD-text'>
 					</div>
 				</div>
 			</div>
+			<x-class3d id='Recenter'>
+				<x-style3d property='position' value='0 -3 0'></x-style3d>
+			</x-class3d>
+			<x-class3d id='RingMarkers'>
+				<x-style3d property='side' value='both'></x-style3d>
+				<x-style3d property='open-ended' value='true'></x-style3d>
+				<x-style3d property='radius-top' value='40'></x-style3d>
+				<x-style3d property='radius-bottom' value='40'></x-style3d>
+				<x-style3d property='height' value='1'></x-style3d>
+				<x-style3d property='segments-radial' value='32'></x-style3d>
+			</x-class3d>
+			<x-class3d id='OriginMarker'>
+				<x-style3d property='side' value='both'></x-style3d>
+				<x-style3d property='open-ended' value='false'></x-style3d>
+				<x-style3d property='radius' value='.7'></x-style3d>
+				<x-style3d property='height' value='16'></x-style3d>
+				<x-style3d property='segments-radial' value='32'></x-style3d>
+			</x-class3d>
+			<x-background id='SceneBackground' background='camera' color='tan' src='Resources/textures/starburst/' srcextension='png'></x-background>
+<!--
 			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
 			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
 			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 10'></x-camera>
-			<x-background id='SceneBackground' skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
 
 			<x-cone height='1.5' radius='.5' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
 			<x-cone height='1.5' radius='.5' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
@@ -74,26 +98,114 @@ See details at http://xseen.org/license
 			<x-octahedron radius='1.5' color='pink' position='+2 3 0'></x-octahedron>
 			<x-tetrahedron radius='1.5' color='CornflowerBlue' position='+5 3 0'></x-tetrahedron>
 			<x-torus radius='2.0' tube='1.0' segments-radial='8' segments-tubular='6' color='purple' position='0 1 -3'></x-torus>
+-->
+			<x-light id='Top_White' type='directional' color='.7 .7 .9' direction='0 -1 0'></x-light>
+			<x-light id='Front' type='directional' color='.8 .8 0' direction='+.866 -.5 0'></x-light>
+			<x-light id='LeftRear' type='directional' color='.8 .8 0' direction='-.707 -.5 -.5'></x-light>
+			<x-light id='Top_Red' type='directional' color='.6 0 0' direction='0 -1 0'></x-light>
+			<x-light id='Bottom_Gray' type='directional' color='.4 .4 .4' direction='0 1 0'></x-light>
+<!--
+			<x-cylinder class3d='Recenter RingMarkers' rotation='1.57 0 0' color='red' ></x-cylinder>
+			<x-cylinder class3d='Recenter RingMarkers' rotation='0 1.57 0' color='green' ></x-cylinder>
+			<x-cylinder class3d='Recenter RingMarkers' rotation='0 0 1.57' color='blue' ></x-cylinder>
+-->
+			<x-model id='model' class3d='Recenter' src='Resources/models/Opel-GT-Retopo/scene.gltf'  playonload='*'></x-model>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='10 0 15'></x-camera>
+
 		</x-scene>
 		<div id='XSeenLog'></div>
 		<script src='DoRestOfCubes.js'></script>
 
 <script>
+var Backgrounds = {
+					'sky'		: [
+									new Option('White', 'White'), 
+									new Option('Antique White', 'AntiqueWhite'), 
+									new Option('Azure', 'Azure'), 
+									new Option('Beige', 'Beige'), 
+									new Option('Black', 'Black'), 
+									new Option('Burly Wood', 'BurlyWood'), 
+									new Option('Cornflower Blue', 'CornflowerBlue'), 
+									new Option('Dark Magenta', 'DarkMagenta'), 
+									new Option('Deep Pink', 'DeepPink'), 
+									new Option('Dim Gray', 'DimGray'), 
+									new Option('Golden Rod', 'GoldenRod'), 
+									new Option('Gray', 'Gray'), 
+									new Option('Honeydew', 'HoneyDew'), 
+									new Option('Ivory', 'Ivory'), 
+									new Option('Lavender Blush', 'LavenderBlush'), 
+									new Option('Light Cyan', 'LightCyan'), 
+									new Option('Medium Orchid', 'MediumOrchid'), 
+									new Option('Mint Cream', 'MintCream'), 
+									new Option('Pale Green', 'PaleGreen'), 
+									new Option('Salmon', 'Salmon'), 
+									new Option('Sea Shell', 'SeaShell'), 
+									new Option('Spring Green', 'SpringGreen'), 
+									new Option('Tan', 'Tan'), 
+									new Option('Teal', 'Teal'), 
+									new Option('Turquoise', 'Turquoise'), 
+									],
+					'fixed'		: [
+									new Option ('City Scape', 'Resources/textures/CityScape.png'),
+									new Option ('Gray', 'Resources/textures/gray99/nz.jpg'),
+									new Option ('Swirl', 'Resources/textures/textureTest.png'),
+									new Option ('Avenue of the Giants', 'Resources/textures/Sphere/Avenue-Giants.jpg'),
+									new Option ('Berlin', 'Resources/textures/Sphere/Berlin.jpg'),
+									new Option ('Intersection', 'Resources/textures/Sphere/Intersection.jpg'),
+									],
+					'sphere'	: [
+									new Option ('Avenue of the Giants', 'Resources/textures/Sphere/Avenue-Giants.jpg'),
+									new Option ('Berlin', 'Resources/textures/Sphere/Berlin.jpg'),
+									new Option ('Boonville Cemetery', 'Resources/textures/Sphere/Boonville-Cemetery-Mendocino-County-CA.jpg'),
+									new Option ('Boston City Hall', 'Resources/textures/Sphere/CityHall-Boston.jpg'),
+									new Option ('Desert Stop', 'Resources/textures/Sphere/Desert-Stop-NV.jpg'),
+									new Option ('Dubai', 'Resources/textures/Sphere/Dubai.jpg'),
+									new Option ('Foiano della Chiana', 'Resources/textures/Sphere/Foiano-della-Chiana.jpg'),
+									new Option ('Intersection', 'Resources/textures/Sphere/Intersection.jpg'),
+									],
+					'cube'		: [
+									new Option ('Starbust', 'Resources/textures/starburst/'),
+									],
+					'camera'	: [],
+				};
+function updateBackgroundOptions (code) {
+	if (code == '') {
+		var backgroundEle = document.getElementById('BackgroundType');
+		code = backgroundEle.options[backgroundEle.selectedIndex].value;
+	}
+	var toPopulate = (jQuery)('#Background')[0];
+	toPopulate.length = 0;
+	for (var ii=0; ii<Backgrounds[code].length; ii++) {
+		toPopulate.add (Backgrounds[code][ii]);
+	}
+}
+
 window.document.addEventListener('DOMContentLoaded', function(ev)
 	{
+		
+		updateBackgroundOptions ('');
 		(jQuery)(document).ready(function(){
 
+			(jQuery)('#BackgroundType').change (function(ev) {
+				var code = ev.currentTarget.options[ev.currentTarget.selectedIndex].value;
+				updateBackgroundOptions (code);
+			});
+
 			(jQuery)('#Change').click (function() {
-				var backF, backFile, backdrop;
-				backF = document.getElementById('BackdropId');
-				backFile = backF.options[backF.selectedIndex].value;
-				if (backFile == '') {
-					alert ('Need to choose a background style');
-					return;
+				var backgroundEle, srcEle, background, src, xBackground;
+				backgroundEle = document.getElementById('BackgroundType');
+				srcEle = document.getElementById('Background');
+				xBackground = document.getElementById('SceneBackground');
+				background = backgroundEle.options[backgroundEle.selectedIndex].value;
+				xBackground.setAttribute ('background', background);
+				if (background != 'camera') {
+					src = srcEle.options[srcEle.selectedIndex].value;
+					if (background == 'sky') {
+						xBackground.setAttribute ('color', src);
+					} else {
+						xBackground.setAttribute ('src', src);
+					}
 				}
-				console.log ("New Background: " + backFile);
-				backdrop = document.getElementById('SceneBackground');
-				backdrop.setAttribute('src', 'Resources/textures/'+backFile+'_*.jpg');
 			});
 		});
 	}

@@ -703,6 +703,38 @@ tag = XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8});
 XSeen.Parser._addStandardAppearance (tag);
 
+//	TODO: New tag for 'triangles'
+/*
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'triangles',
+						'init'	: XSeen.Tags.triangles.init,
+						'fin'	: XSeen.Tags.triangles.fin,
+						'event'	: XSeen.Tags.triangles.event,
+						'tick'	: XSeen.Tags.triangles.tick
+						})
+		.addSceneSpace()
+		.defineAttribute ({'name':'index', dataType:'integer-array', 'defaultValue':[]});
+XSeen.Parser._addStandardAppearance (tag);
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'points',
+						'init'	: XSeen.Tags.points.init,
+						'fin'	: XSeen.Tags.points.fin,
+						'event'	: XSeen.Tags.points.event,
+						'tick'	: XSeen.Tags.points.tick
+						})
+		.defineAttribute ({'name':'vertices', dataType:'float-array', 'defaultValue':[]});
+
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'normals',
+						'init'	: XSeen.Tags.normals.init,
+						'fin'	: XSeen.Tags.normals.fin,
+						'event'	: XSeen.Tags.normals.event,
+						'tick'	: XSeen.Tags.normals.tick
+						})
+		.defineAttribute ({'name':'vectors', dataType:'float-array', 'defaultValue':[]});
+*/
+
 //	Tags for assets. These should only be used as children of <asset>
 tag = XSeen.Parser.defineTag ({
 						'name'	: 'material',

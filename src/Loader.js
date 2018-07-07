@@ -55,6 +55,13 @@ XSeen.parseUrl = function (url) {
     		};
 };
 
+XSeen.isImage = function (url) {
+		var u = XSeen.parseUrl (url);
+		var ext = u.extension.toLowerCase();
+		if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif') {return true;}
+		return false;
+};
+
 XSeen.Loader = {
 						// define internal variables
 	'urlQueue'			: [],

@@ -353,6 +353,10 @@ XSeen.Parser = {
 			var value = ele.getAttribute(attr.attribute);
 			if (value === null || value == '') {value = classValue;}
 			value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
+// TODO: Add another field to indicate if the value is an array. 'type' contains to be the basic data type in the array
+//	The return 'value' is an array of elements each of which is type 'type'
+//	Need to think how to parse the string to get the desired results
+//	Changes also needed above to accept the new input field 'isArray' (boolean)
 			return value;
 		},
 	'getClassAttributeValue' : function (attribute, classList)

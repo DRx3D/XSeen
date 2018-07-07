@@ -185,8 +185,10 @@ XSeen.onLoad = function() {
 	}
 	if (XSeen.Runtime.isTransparent) {
 		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
+		console.log ('Creating a transparent rendering canvas.');
 	} else {
 		Renderer = new THREE.WebGLRenderer();
+		console.log ('Creating a opaque rendering canvas.');
 	}
 	XSeen.Runtime.Renderer			= Renderer,
 	XSeen.Runtime.RendererStandard	= Renderer,

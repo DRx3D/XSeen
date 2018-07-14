@@ -91,17 +91,17 @@ XSeen.Parser = {
 
 
 	'TypeInfo'		: {
-						'string'	: {'isNumeric':false},
-						'boolean'	: {'isNumeric':false},
-						'integer'	: {'isNumeric':false},
-						'color'		: {'isNumeric':true},
-						'float'		: {'isNumeric':true},
-						'vec2'		: {'isNumeric':true},
-						'vec3'		: {'isNumeric':true},
-						'xyz'		: {'isNumeric':true},
-						'vec4'		: {'isNumeric':true},
-						'rotation'	: {'isNumeric':true},
-						'vector'	: {'isNumeric':true},
+						'string'	: {'isNumeric':false, 'arrayAllowed':false, parseElements:false, numElements:1, },
+						'boolean'	: {'isNumeric':false, 'arrayAllowed':false, parseElements:false, numElements:1, },
+						'integer'	: {'isNumeric':false, 'arrayAllowed':true, parseElements:true, numElements:1, },
+						'color'		: {'isNumeric':true, 'arrayAllowed':false, parseElements:true, numElements:-1, },
+						'float'		: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:1, },
+						'vec2'		: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:2, },
+						'vec3'		: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:3, },
+						'xyz'		: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:3, },
+						'vec4'		: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:4, },
+						'rotation'	: {'isNumeric':true, 'arrayAllowed':false, parseElements:true, numElements:-1, },
+						'vector'	: {'isNumeric':true, 'arrayAllowed':true, parseElements:true, numElements:0, },
 					},
 
 	'defineTag' : function (tagObj, init, fin, events)
@@ -142,26 +142,37 @@ XSeen.Parser = {
 										'defaultValue'		: defaultValue,
 										'isCaseInsensitive'	: true,
 										'isAnimatable'		: null,
-										'enumeration'		: []
+										'enumeration'		: [],
+										'isArray'			: false,
 									};
 						}
 						//console.log ('Data type of ' + attrObj.name + ' is ' + attrObj.dataType);
 						if (typeof(attrObj.isAnimatable) == 'undefined') {
 							attrObj.isAnimatable = (XSeen.Parser.TypeInfo[attrObj.dataType].isNumeric) ? true : false;
 						}
+						if (typeof(attrObj.elementCount) == 'undefined') {
+							attrObj.elementCount = XSeen.Parser.TypeInfo[attrObj.dataType].numElements;
+						} else {
+							attrObj.elementCount = Math.max (XSeen.Parser.TypeInfo[attrObj.dataType].numElements, attrObj.elementCount);
+						}
 						var name = attrObj.name.toLowerCase();
-						var t = typeof(attrObj.isCaseInsensitive);
 						attrObj.enumeration = (typeof(attrObj.enumeration) == 'object') ? attrObj.enumeration : [];
 						attrObj.isCaseInsensitive = (typeof(attrObj.isCaseInsensitive) !== 'undefined') ? attrObj.isCaseInsensitive : false;
-						if (attrObj.dataType != 'string') {attrObj.isCaseInsensitive = true;}
+						if (attrObj.dataType != 'string') {
+							attrObj.isCaseInsensitive = true;
+						} else {
+							attrObj.isArray = false;
+						}
 						this.attributes.push ({
 								'attribute'			: name,
 								'type'				: attrObj.dataType,
 								'default'			: attrObj.defaultValue,
 								'enumeration'		: attrObj.enumeration,
+								'elementCount'		: attrObj.elementCount,
 								'isCaseInsensitive'	: attrObj.isCaseInsensitive,
 								'isAnimatable'		: (typeof(attrObj.isAnimatable) !== null) ? attrObj.isAnimatable : false,
 								'isEnumerated'		: (attrObj.enumeration.length == 0) ? false : true,
+								'isArray'			: (typeof(attrObj.isArray) !== null) ? attrObj.isArray : false,
 								'clone'				: this.cloneAttribute,
 								'setAttrName'		: this.setAttrName,
 								});
@@ -196,6 +207,7 @@ XSeen.Parser = {
 								'isCaseInsensitive'	: this.isCaseInsensitive,
 								'isAnimatable'		: this.isAnimatable,
 								'isEnumerated'		: this.isEnumerated,
+								'isArray'			: this.isArray,
 								'clone'				: this.clone,
 								'setAttrName'		: this.setAttrName,
 					};
@@ -233,7 +245,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			console.log ('Found ' + tagName);
+			//console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -352,11 +364,70 @@ XSeen.Parser = {
 			var classValue = this.getClassAttributeValue (attr.attribute, class3d)
 			var value = ele.getAttribute(attr.attribute);
 			if (value === null || value == '') {value = classValue;}
-			value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
-// TODO: Add another field to indicate if the value is an array. 'type' contains to be the basic data type in the array
-//	The return 'value' is an array of elements each of which is type 'type'
-//	Need to think how to parse the string to get the desired results
-//	Changes also needed above to accept the new input field 'isArray' (boolean)
+			//var valueParser = XSeen.Parser.Types[attr.type];
+			if (attr.isArray) {
+/*
+ * TODO: Add another field to indicate if the value is an array. 'type' contains to be the basic data type in the array
+ *	The return 'value' is an array of elements each of which is type 'type'
+ *	Need to think how to parse the string to get the desired results
+ *	Changes also needed above to accept the new input field 'isArray' (boolean)
+ *
+ *	1) Preprocessing value by removing all of the following characters: (),[]
+ *	and converting all white space to a single space (this may apply to all value parsing)
+ *	2) Get # of components array element
+ *	3) Parse each array element individually, storing the parsed value into an array
+ *	4) Not sure how to handle an parse (character sequence) error
+ *	5) JavaScript Regex parser can split a string into elements <regex>.split(<string>)
+ *		[+-]?\d* for decimal integers
+ *		[+-]?\d*\.?\d* for floating point (non-exponential)
+ *		[+-]?\d*\.?\d*[eE][+-]\d+ for floating point (exponential)
+ *	  Need hex and octal integers. Does not support non-numeric color or rotation formats 
+ *	Method for (2) can return an array containing the component grouping for parsing
+ *	It needs the value data type and value string
+ *
+ */
+				function getElementsFromArray (ea, ndx, increment) {
+					var ev = [];
+					for (var ii=ndx; ii<ndx+increment; ii++) {
+						ev.push(ea[ii]);
+					}
+					return ev;
+				}
+				// Illegal datatype for an array. Return default
+				if (!XSeen.Parser.TypeInfo[attr.type].arrayAllowed || attr.elementCount < 1) {
+					if (value == '') {value = attr.default;}
+					return value;
+				}
+
+				// Pass entire elementArray into <dataType> parser. It returns the parsed object
+				// Somehow need to get #elements per parsed value XSeen.Parser.TypeInfo[<dataType>].numElements
+				// Need to do something similar for regular elements. Perhaps check datatype,
+				//	if string then call _elementSplit; otherwise use it
+				var elementArray = XSeen.Parser.Types._elementSplit (value);
+				var increment = attr.elementCount;
+				var collectionCount = increment / XSeen.Parser.TypeInfo[attr.type].numElements;
+				var ndx = 0;
+				var valueArray=[], elementValues=[], tmp;
+				while (ndx < elementArray.length) {
+					tmp = [];
+					for (var jj=0; jj<collectionCount; jj++) {
+						elementValues = getElementsFromArray (elementArray, ndx, XSeen.Parser.TypeInfo[attr.type].numElements);
+						ndx += XSeen.Parser.TypeInfo[attr.type].numElements;
+						tmp.push (XSeen.Parser.Types[attr.type](elementValues, attr.default, false, attr.enumeration));
+					}
+					if (collectionCount == 1) {
+						valueArray.push (tmp[0]);
+					} else {
+						valueArray.push (tmp);
+					}
+					//ndx += increment;
+				}
+				return valueArray;
+
+			} else {
+				//value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
+				value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
+			}
 			return value;
 		},
 	'getClassAttributeValue' : function (attribute, classList)
@@ -372,6 +443,7 @@ XSeen.Parser = {
 			}
 			return classValue;
 		},
+
 
 /*
  *	Returns all of the available information about a specified field in a given tag. The
@@ -433,6 +505,17 @@ XSeen.Parser = {
 				if (enumeration.length == 0) {return value;}
 				return def;
 			},
+/*
+ *	Splits a string on white space, comma, paranthese, brackets; after triming for same
+ *	Designed for a serialized collection of numeric values as an vector.
+ *	Output is the array of split values
+ */
+		'_elementSplit'	: function(string) 
+			{
+				myRe = /[\s,\(\[\]\)]+/;
+				return string.replace(/^[\s,\(\[\]\)]+|[\s,\(\[\]\)]+$/g, '').split (myRe);
+			},
+
 		'_splitArray'	: function (value, def, minCount)
 			{
 				if (typeof(value) == 'object') {
@@ -619,7 +702,10 @@ XSeen.Parser = {
  *	The default is e(). The 'e' and parantheses are optional. Case and spacing are important.
  *	The return value is always a quaternion
  *
- *	Only the Euler rotation without 'e(' and ')' is implemented. The default should be of the this type.
+ *	Only the following formats are implementated:
+ *	1) Euler rotation without 'e(' and ')'
+ *	2) Euler rotation with 'e(' and ')'
+ *	3) Homogeneous (axis-angle) rotation with 'h(' and ')'
  */
 		'rotation'	: function(value, def, insensitive, enumeration)
 			{
@@ -632,7 +718,7 @@ XSeen.Parser = {
 					if (value.substring(0,2) == 'h(') {
 						processed = true;
 						value = value.substring(2,value.length-1);
-						var axisAngle = this.vec4 (value, def, true, []);
+						var axisAngle = this.vec4 (value, def, true, [0, 1, 0, 0]);
 						quat = this.rotation2Quat (axisAngle);
 						
 					} else if (value.substring(0,2) == 'q(') {

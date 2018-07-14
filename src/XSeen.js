@@ -38,8 +38,12 @@
  *	0.7.26: Initial support for multiple cameras
  *	0.7.27: Spherical (photosphere) backgrounds
  *	0.7.28: Change event handling for background attributes
- *	0.7.29: Support indexed triangle sets. This is probably done through Face3. 
+ *	0.7.29: Support indexed triangle sets. 
+ *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
+ *	0.7.31: Cleaned up some extra console output statements
+ *	0.7.32: Support position attribute mutations for all 'solid' tags.
  *	
+ *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Fix display size wrt browser window size
  *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
@@ -61,11 +65,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 27,
+					'_Patch'		: 32,
 					'_PreRelease'	: 'alpha.2',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-01',
+					'_RDate'		: '2018-07-13',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -163,7 +167,7 @@ XSeen.RenderFrame = function()
 		XSeen.Runtime.currentTime = XSeen.Runtime.Time.getElapsedTime();
 		XSeen.Runtime.frameNumber ++;
 
-		var newEv = new CustomEvent('xseen', XSeen.Events.propertiesRenderFrame(XSeen.Runtime));
+		var newEv = new CustomEvent('xseen-render', XSeen.Events.propertiesRenderFrame(XSeen.Runtime));
 		XSeen.Runtime.RootTag.dispatchEvent(newEv);
 		
 /*

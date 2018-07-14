@@ -100,7 +100,7 @@ XSeen.Events = {
 						if ((xEvents.redispatch || ev.type == 'click' || ev.type == 'dblclick') && typeof(xEvents.object.object) !== 'undefined') {
 							//console.log ('Repropigate event');
 							// Generate an XSeen (Custom)Event of the same type and dispatch it
-							var newEv = new CustomEvent('xseen', xEvents.propertiesCursor(ev, xEvents.object));
+							var newEv = new CustomEvent('xseen-touch', xEvents.propertiesCursor(ev, xEvents.object));
 							xEvents.tag.dispatchEvent(newEv);
 							ev.stopPropagation();		// No propagation beyond this tag
 						} else {
@@ -121,6 +121,7 @@ XSeen.Events = {
 										'originator':	selectedObject.object.userData,
 										'name':			selectedObject.object.name,
 										'distance':		selectedObject.distance,
+										'target':		selectedObject,
 										'position': {
 												'x': selectedObject.point.x,
 												'y': selectedObject.point.y,
@@ -132,8 +133,8 @@ XSeen.Events = {
 												'z': selectedObject.face.normal.z,
 												},
 										'uv': {
-												'x': selectedObject.uv.x,
-												'y': selectedObject.uv.y,
+												'x': 0.0,		// selectedObject.uv.x,
+												'y': 0.0,		// selectedObject.uv.y,
 												},
 										'screenX':	ev.screenX,
 										'screenY':	ev.screenY,

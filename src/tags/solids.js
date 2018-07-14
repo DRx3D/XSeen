@@ -180,7 +180,6 @@ XSeen.Tags.Solids._animateRotation = function (obj, field) {
 		};
 	}
 	if (field == 'rotateZ') {
-		console.log ('Defining function for Z rotation');
 		return function (td) {
 			var rotation = td.current - target.obj.userData.previousRotation.z;
 			target.obj.rotateZ(rotation);
@@ -197,7 +196,7 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
 					e._xseen.tagObject.material.needsUpdate = true;
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
-					console.log ('Changing envMap to |' + value + '|');
+					//console.log ('Changing envMap to |' + value + '|');
 					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
 				} else if (attributeName == 'metalness') {
 					//console.log ('Setting metalness to ' + value);
@@ -205,6 +204,11 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				} else if (attributeName == 'roughness') {
 					//console.log ('Setting roughness to ' + value);
 					e._xseen.tagObject.material.roughness = value;
+				} else if (attributeName == 'position') {
+					console.log ('Setting position to ' + value);
+					e._xseen.tagObject.position.x = value.x;
+					e._xseen.tagObject.position.y = value.y;
+					e._xseen.tagObject.position.z = value.z;
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -466,6 +470,68 @@ XSeen.Tags.ring = {
 	'event'	: function (ev, attr) {},
 };
 
+/*
+ * Methods for handling triangles
+ *
+ *	The 'triangles' tag requires at least child 'points' to function. Geometry
+ *	definition is done on the way up ('fin' method).
+ *
+ * 'points' and 'normals' do not have any effect except as children of 'triangles'
+ *
+ * TODO: Need to expand parser vocabulary to include array(Vec3) and array(Integer)
+ */
+ 
+XSeen.Tags.triangles = {
+	'init'	: function (e,p) 
+		{
+			e._xseen.geometry = new THREE.Geometry();
+		},
+	'fin'	: function (e,p) 
+		{
+/*
+ * Create geometry
+ *	Use vertices from e._xseen.vertices and e._xseen.attributes.index
+ *	If normals are defined (e._xseen.normalsDefined), then use those; otherwise, compute them
+ */
+			var face;
+			e._xseen.attributes.index.forEach (function(faceIndex) {
+				face = new THREE.Face3 (faceIndex[0], faceIndex[1], faceIndex[2]); // , normal/normal3, color/color3, materialIndex
+				e._xseen.geometry.faces.push(face); 
+			});
+			e._xseen.geometry.computeFaceNormals();
+			e._xseen.geometry.computeVertexNormals();
+			XSeen.Tags._solid (e, p, e._xseen.geometry);
+		},
+	'event'	: function (ev, attr) {},
+};
+XSeen.Tags.points = {
+	'init'	: function (e,p)
+		{
+			if (typeof(p._xseen.geometry) != 'undefined') {
+				e._xseen.attributes.vertices.forEach (function(vertex) {
+					//console.log ('Adding vertex: ' + vertex);
+					p._xseen.geometry.vertices.push (vertex);
+				});
+			}
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+XSeen.Tags.normals = {
+	'init'	: function (e,p)
+		{
+			if (count(e._xseen.attributes.vectors) >= 1) {
+				p._xseen.normals = e._xseen.attributes.vectors;
+				p._xseen.normalsDefined = true;
+			} else {
+				p._xseen.normals = [];
+				p._xseen.normalsDefined = false;
+			}
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
 
 /*
  * ===================================================================================
@@ -705,6 +771,15 @@ XSeen.Parser._addStandardAppearance (tag);
 
 //	TODO: New tag for 'triangles'
 /*
+ * Define a Triangle node that allows geometry to be created from user-defined triangles
+ *	Initial simple case only supports
+ *	1) Indexed triangle sets (a collection of vertices that are referenced by index to form the triangle collection)
+ *	2) Normals per vertex
+ *	3) No special additions to material - supports single solid color, texture maps, etc. No color by face or vertex
+ *
+ * As with all other solid nodes, once the geometry is created it cannot be manipulated
+ *
+ */
 tag = XSeen.Parser.defineTag ({
 						'name'	: 'triangles',
 						'init'	: XSeen.Tags.triangles.init,
@@ -713,7 +788,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.triangles.tick
 						})
 		.addSceneSpace()
-		.defineAttribute ({'name':'index', dataType:'integer-array', 'defaultValue':[]});
+		.defineAttribute ({'name':'index', dataType:'integer', 'defaultValue':[], isArray:true, elementCount:3, });
 XSeen.Parser._addStandardAppearance (tag);
 
 tag = XSeen.Parser.defineTag ({
@@ -723,7 +798,9 @@ tag = XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.points.event,
 						'tick'	: XSeen.Tags.points.tick
 						})
-		.defineAttribute ({'name':'vertices', dataType:'float-array', 'defaultValue':[]});
+		.defineAttribute ({'name':'vertices', dataType:'xyz', 'defaultValue':[], isArray:true, })
+		.addTag();
+//XSeen.Parser.dumpTable();
 
 tag = XSeen.Parser.defineTag ({
 						'name'	: 'normals',
@@ -732,8 +809,8 @@ tag = XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.normals.event,
 						'tick'	: XSeen.Tags.normals.tick
 						})
-		.defineAttribute ({'name':'vectors', dataType:'float-array', 'defaultValue':[]});
-*/
+		.defineAttribute ({'name':'vectors', dataType:'xyz', 'defaultValue':[], isArray:true, })
+		.addTag();
 
 //	Tags for assets. These should only be used as children of <asset>
 tag = XSeen.Parser.defineTag ({

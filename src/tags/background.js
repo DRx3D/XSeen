@@ -75,7 +75,7 @@ XSeen.Tags.background = {
 					}
 				}
 				return true;
-				return exists;
+				//return exists;			// Function not working...
 			}
 
 			var t = e._xseen.attributes.radius;

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Test Rotations and Groups</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+	</head>
+	<body>
+		<x-scene>
+			<x-light id='White_Direction' type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light id='Green_Direction' type='directional' color='green' direction='.707 0  .707'></x-light>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 14'></x-camera>
+			<x-background id='Background' background='sky' color='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+
+<x-class3d id='size'>
+	<x-style3d property='height' value='1.5'></x-style3d>
+	<x-style3d property='radius' value='1.'></x-style3d>
+</x-class3d>
+<x-class3d id='appearance'>
+	<x-style3d property='color' value='yellow'></x-style3d>
+</x-class3d>
+
+	<x-cone class3d='size appearance'></x-cone>
+	<x-cone class3d='size appearance' position='-3 0 0' rotation='0 0 1.57' color='teal'></x-cone>
+	<x-group rotation='.78 0 0'>
+		<x-cone class3d='size appearance' position='3 0 0' rotation='0 0 -1.57' color='violet'></x-cone>
+	</x-group>
+	<x-group rotation='.78 0 0'>
+		<x-cone class3d='size appearance' position='0 0 3' color='red'></x-cone>
+	</x-group>
+	<x-group position='0 4 0'>
+		<x-cone class3d='size appearance' rotation='h(1 0 0 .78)' color='green'></x-cone>
+	</x-group>
+		</x-scene>
+	</body>
+</html>
+
+

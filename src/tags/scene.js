@@ -87,6 +87,7 @@ XSeen.Tags.scene = {
 					}
 				});
 //			XSeen.LogDebug("Rendered all elements -- Starting animation");
+
 		},
 	'event'	: function (ev, attr)
 		{

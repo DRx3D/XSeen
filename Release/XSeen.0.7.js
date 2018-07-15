@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.32-alpha.2+7_b0259fd
- *  Built Fri Jul 13 20:23:25 2018
+ *  XSeen V0.7.32-rc1+7_2851318
+ *  Built Sat Jul 14 20:51:34 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1632,7 +1632,8 @@ XSeen.onLoad = function() {
 	//XSeen.Runtime.Renderer.setPixelRatio( window.devicePixelRatio );	// See https://stackoverflow.com/questions/31407778/display-scene-at-lower-resolution-in-three-js
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
-	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+//	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
 	
@@ -2610,7 +2611,7 @@ XSeen.Parser = {
  *	0.7.29: Support indexed triangle sets. 
  *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
  *	0.7.31: Cleaned up some extra console output statements
- *	0.7.32: Support position attribute mutations for all 'solid' tags.
+ *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
  *	
  *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
@@ -2635,10 +2636,10 @@ XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
 					'_Patch'		: 32,
-					'_PreRelease'	: 'alpha.2',
+					'_PreRelease'	: 'rc1',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-13',
+					'_RDate'		: '2018-07-14',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

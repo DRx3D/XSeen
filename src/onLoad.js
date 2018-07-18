@@ -64,37 +64,6 @@ XSeen.onLoad = function() {
 							console.error( 'External source loader: An error happened' );
 						}
 			);
-
-/*
-                } else {
-	        	xseenCode = '' +
-   "<x-class3d id='geometry'>\n" +
-   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
-   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
-   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
-   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-class3d id='material'>\n" +
-   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
-   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
-   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
-   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-group rotation='0 3.14 0'>\n" +
-   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
-   "</x-group>";
-		xseenCode = '<x-group>' + xseenCode + '</x-group>';
-		console.log ('Adding inline-generated nodes');
-		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-            }
- */
 	};
 	
 	var sceneOccurrences, ii;
@@ -190,9 +159,9 @@ XSeen.onLoad = function() {
 		Renderer = new THREE.WebGLRenderer();
 		console.log ('Creating a opaque rendering canvas.');
 	}
-	XSeen.Runtime.Renderer			= Renderer,
-	XSeen.Runtime.RendererStandard	= Renderer,
+	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
+	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
 	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
@@ -201,7 +170,8 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
 //	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
-	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+//	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+	XSeen.Runtime.Camera = XSeen.Runtime.ViewManager.create (XSeen.Runtime.Size.aspect);
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
 	

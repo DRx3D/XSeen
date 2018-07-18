@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Asset Test</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../Release/XSeenExternals.js'></script>
+		<script src='../../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/solids.js'></script>
+		<script src='../src/tags/camera.js'></script>
+	</head>
+	<body>
+		<div style='position:absolute; left:30px; top:20px; opacity:.7; z-index:200; width:350px; '>
+			<div style='margin:4px; padding:5px; border:1px black solid; border-radius:5px; background-color:yellow; '>
+				<div style='float:left; width:49%; padding:0 2px 0 0; text-align:center; '>
+					Choose a different object mapping texture
+					<form method='post' onsubmit='return false;'>
+						<select id='Texture' onchange='updateTexture(this.options[this.selectedIndex].value);'>
+							<option value='Berlin'>Berlin</option>
+							<option value='Boston'>Boston</option>
+							<option value='Forest'>Forest</option>
+							<option value='Italy'>Italy</option>
+						</select>
+					</form>
+				</div>
+				<div style='float:left; width:49%; padding:0 0 0 2px; text-align:center; '>
+					Choose a different camera
+					<form method='post' onsubmit='return false;'>
+						<select id='Texture' onchange='updateCamera(this.options[this.selectedIndex].value);'>
+							<option value='CenteredPerspective'>Centered, persepctive</option>
+							<option value='TopPerspective'>Top-down, persepctive</option>
+							<option value='CenteredStereo'>Centered, stereographic</option>
+							<option value='CenteredDevice'>Centered, device</option>
+						</select>
+					</form>
+				</div>
+				&nbsp;
+			</div>
+		</div>
+		<x-scene>
+			<x-asset>
+				<x-material id='Forest' map='Resources/textures/Sphere/Avenue-Giants.jpg' color='white'></x-material>
+				<x-material id='Berlin' map='Resources/textures/Sphere/Berlin.jpg' color='white'></x-material>
+				<x-material id='Boston' map='Resources/textures/Sphere/CityHall-Boston.jpg' color='white'></x-material>
+				<x-material id='Italy' map='Resources/textures/Sphere/Foiano-della-Chiana.jpg' color='white'></x-material>
+			</x-asset>
+			<x-class3d id='Look'>
+				<x-style3d material='Berlin'></x-style3d>
+			</x-class3d>
+			
+			<x-background background='sky' color='lightblue'></x-background>
+			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
+			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
+
+			<x-camera id='CenteredPerspective' priority='14' type='perspective' track='orbit' position='0 0 13'></x-camera>
+			<x-camera id='TopPerspective' priority='5' type='perspective' track='orbit' position='20 0 0'></x-camera>
+			<x-camera id='CenteredStereo' priority='1' type='stereo' track='orbit' position='0 0 13'></x-camera>
+			<x-camera id='CenteredDevice' priority='7' type='perspective' track='device' position='0 0 20'></x-camera>
+			
+			<x-sphere class='object3d' material='Berlin' position='4 2 -3' radius='3'></x-sphere>
+			<x-cone class='object3d' material='Berlin' position='-6 3 -2' radius='2' height='5'></x-cone>
+			<x-dodecahedron class='object3d' material='Berlin' position='0 3 -14' radius='4'></x-dodecahedron>
+			<x-tknot class='object3d' material='Berlin' position='-3 -6 -10' radius='3' tube='.7'></x-tknot>
+			<x-icosahedron class='object3d' material='Berlin' position='8 -2 4' radius='4'></x-icosahedron>
+		</x-scene>
+<script>
+function updateTexture(textureId) {
+	var eles = document.getElementsByClassName('object3d');
+
+	for (var ii=0; ii<eles.length; ii++) {
+		eles[ii].setAttribute ('material', textureId);
+	}
+}
+function updateCamera(cameraId) {
+	var ele = document.getElementById (cameraId);
+	ele.setActive();
+}
+</script>
+	</body>
+</html>
+
+

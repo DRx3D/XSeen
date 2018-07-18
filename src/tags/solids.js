@@ -30,6 +30,7 @@ XSeen.Tags._appearance = function (e) {
 			if (e._xseen.attributes.material != '') {
 				var ele = document.getElementById (e._xseen.attributes.material);
 				if (typeof(ele) != 'undefined') {
+					console.log ('Using asset material: ' + e._xseen.attributes.material);
 					appearance = ele._xseen.tagObject;
 				} else {
 					console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
@@ -209,6 +210,14 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					e._xseen.tagObject.position.x = value.x;
 					e._xseen.tagObject.position.y = value.y;
 					e._xseen.tagObject.position.z = value.z;
+				} else if (attributeName == 'material') {
+					var ele = document.getElementById (value);
+					if (typeof(ele) != 'undefined') {
+						console.log ('Changing to asset material: ' + value);
+						e._xseen.tagObject.material = ele._xseen.tagObject;
+					} else {
+						console.log ('No material asset: |'+value+'|');
+					}
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}

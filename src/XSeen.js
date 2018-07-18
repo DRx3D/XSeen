@@ -42,6 +42,7 @@
  *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
  *	0.7.31: Cleaned up some extra console output statements
  *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
+ *	0.7.33: Camera switching API plus fix for leaving stereo camera. (RC2)
  *	
  *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
@@ -65,11 +66,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 32,
+					'_Patch'		: 33,
 					'_PreRelease'	: 'rc1',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-14',
+					'_RDate'		: '2018-07-17',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -109,7 +110,7 @@ XSeen.Runtime = {
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: {},
+			'Renderer'				: {},			// Active renderer in current use.
 			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
 			'RendererStereo'		: {},			// these and 'camera' chooses which one
 			'Camera'				: {},			// Current camera in use

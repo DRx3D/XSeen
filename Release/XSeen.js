@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.32-rc1+7_2851318
- *  Built Sat Jul 14 20:51:34 2018
+ *  XSeen V0.7.33-rc1+7_a7d4b75
+ *  Built Tue Jul 17 18:32:22 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -82,11 +82,31 @@ var XSeen = XSeen || {};
 XSeen.CameraManager = {
 		'PRIORITY_MINIMUM'	: 0,
 		'PRIORITY_DEFAULT'	: 1,
+		'FOV'				: 50,		// Vertical field-of-view
+		'NearClip'			: 0.1,
+		'FarClip'			: 10000,
 		'DefinedCameras'	: [],		// Contains references to camera nodes ...[priority][order]
 		'CurrentNode'		: null,
 		
 /*
- *
+ * Create or reset the standard XSeen camera from THREE
+ */
+		'create'			: function (aspectRatio)
+					{
+						camera = new THREE.PerspectiveCamera( this.FOV, aspectRatio, this.NearClip, this.FarClip );
+						return camera;
+					},
+		'reset'				: function (camera, aspectRatio)
+					{
+						camera.aspect = aspectRatio;
+						camera.far = this.FarClip;
+						camera.fov = this.FOV;
+						camera.near = this.NearClip;
+						camera.updateProjectionMatrix ();
+						return camera;
+					},
+/*
+ * Add an XSene camera. This is really a set of parameters defined by the 'camera' tag.
  */
 		'add'				: function (camera)
 					{
@@ -94,8 +114,15 @@ XSeen.CameraManager = {
 						if (typeof(this.DefinedCameras[camera._xseen.priority]) == 'undefined') {this.DefinedCameras[camera._xseen.priority] = [];}
 						this.DefinedCameras[camera._xseen.priority].push (camera);
 						camera._xseen.ndxCamera = this.DefinedCameras[camera._xseen.priority].length - 1;
+						camera.setActive = function() {
+							camera._xseen.sceneInfo.ViewManager.setActive (this);
+						}
 					},
-					
+
+/*
+ * Returns the currently available highest priority camera.
+ *	This always returns a camera because the DEFAULT camera is always available
+ */
 		'next'				: function ()
 					{
 						for (var p=this.DefinedCameras.length-1; p>=this.PRIORITY_MINIMUM; p--) {
@@ -107,19 +134,81 @@ XSeen.CameraManager = {
 						}
 						return this.DefinedCameras[this.PRIORITY_MINIMUM][0];	// System default
 					},
+
+/*
+ * Activate a specific camera
+ *	camera - The DOM element for the 'camera' tag to be activated
+ *
+ *	This method "knows" about the structure of XSeen's Runtime object
+ */
+		'setActive'			: function (cameraElement)
+					{
+						if (cameraElement === null) {return;}
+						if (this.CurrentNode !== null) {this.CurrentNode._xseen.active = false;}
+						cameraElement._xseen.active = true;
+						var xRuntime = cameraElement._xseen.sceneInfo;
+						this.reset (xRuntime.Camera, xRuntime.Size.aspect);
+						
+						if (cameraElement._xseen.isStereographic) {
+							xRuntime.Renderer = xRuntime.RendererStereo;
+							xRuntime.rendererHasControls = false;
+							xRuntime.isStereographic = true;
+							// Need to add a button to the display to go full screen
+						} else {
+							xRuntime.Renderer = xRuntime.RendererStandard;
+							xRuntime.rendererHasControls = cameraElement._xseen.rendererHasControls;
+							xRuntime.isStereographic = false;
+
+							xRuntime.Renderer.setScissorTest( false );
+							var size = xRuntime.Renderer.getSize();
+							xRuntime.Renderer.setScissor( 0, 0, size.width, size.height );
+							xRuntime.Renderer.setViewport( 0, 0, size.width, size.height );
+							//xRuntime.Renderer.render( scene, xRuntime.Camera );
+							// Need to remove any 'full screen' button
+						}
+						
+						xRuntime.Camera.position.set (
+									cameraElement._xseen.attributes.position.x,
+									cameraElement._xseen.attributes.position.y,
+									cameraElement._xseen.attributes.position.z);
+						xRuntime.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
+
+						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
+						xRuntime.useDeviceOrientation = cameraElement._xseen.useDeviceOrientation;
+						
+
+						if (!cameraElement._xseen.rendererHasControls) {
+							if (xRuntime.useDeviceOrientation) {	// Device controls camera. Set focus point
+								if (cameraElement._xseen.track == 'object') {	// tracking scene object
+									xRuntime.CameraControl = new THREE.DeviceOrientationControls(cameraElement._xseen.target, true);
+								} else {							// tracking environment
+									xRuntime.CameraControl = new THREE.DeviceOrientationControls(xRuntime.Camera);
+								}
+
+							} else {											// No device orientation control. Use something else
+								if (cameraElement._xseen.track == 'orbit') {
+									xRuntime.CameraControl = new THREE.OrbitControls( xRuntime.Camera, xRuntime.RendererStandard.domElement );
+								} else if (cameraElement._xseen.track == 'trackball') {
+									//console.log ('Trackball');
+								} else if (cameraElement._xseen.track == 'none') {
+									//console.log ('No tracking');
+									xRuntime.rendererHasControls = true;
+								} else {
+									console.log ('Something else');
+								}
+							}
+						}
+						console.log ('Setting active camera to ' + cameraElement.id);
+						this.CurrentNode = cameraElement;
+					},
 					
 		'setNext'			: function ()
 					{
 						var camera = this.next();
-						if (this.CurrentNode !== null) {this.CurrentNode._xseen.active = false;}
-						camera._xseen.active = true;
-						camera._xseen.sceneInfo.Camera.position.set (
-									camera._xseen.attributes.position.x,
-									camera._xseen.attributes.position.y,
-									camera._xseen.attributes.position.z);
-						camera._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
-						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
-						this.CurrentNode = camera;
+						this.setActive (camera);
+						
+						console.log ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
+						//this.CurrentNode = camera;
 					}
 };
 // File: ./Constants.js
@@ -1496,37 +1585,6 @@ XSeen.onLoad = function() {
 							console.error( 'External source loader: An error happened' );
 						}
 			);
-
-/*
-                } else {
-	        	xseenCode = '' +
-   "<x-class3d id='geometry'>\n" +
-   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
-   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
-   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
-   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-class3d id='material'>\n" +
-   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
-   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
-   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
-   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-group rotation='0 3.14 0'>\n" +
-   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
-   "</x-group>";
-		xseenCode = '<x-group>' + xseenCode + '</x-group>';
-		console.log ('Adding inline-generated nodes');
-		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-            }
- */
 	};
 	
 	var sceneOccurrences, ii;
@@ -1622,9 +1680,9 @@ XSeen.onLoad = function() {
 		Renderer = new THREE.WebGLRenderer();
 		console.log ('Creating a opaque rendering canvas.');
 	}
-	XSeen.Runtime.Renderer			= Renderer,
-	XSeen.Runtime.RendererStandard	= Renderer,
+	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
+	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
 	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
@@ -1633,7 +1691,8 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
 //	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
-	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+//	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+	XSeen.Runtime.Camera = XSeen.Runtime.ViewManager.create (XSeen.Runtime.Size.aspect);
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
 	
@@ -2612,6 +2671,7 @@ XSeen.Parser = {
  *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
  *	0.7.31: Cleaned up some extra console output statements
  *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
+ *	0.7.33: Camera switching API plus fix for leaving stereo camera. (RC2)
  *	
  *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
@@ -2635,11 +2695,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 32,
+					'_Patch'		: 33,
 					'_PreRelease'	: 'rc1',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-14',
+					'_RDate'		: '2018-07-17',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -2679,7 +2739,7 @@ XSeen.Runtime = {
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: {},
+			'Renderer'				: {},			// Active renderer in current use.
 			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
 			'RendererStereo'		: {},			// these and 'camera' chooses which one
 			'Camera'				: {},			// Current camera in use
@@ -3623,6 +3683,9 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
+			e._xseen.rendererHasControls = false;		// Only for renderers with built-in controls (e.g., vr)
+			e._xseen.useDeviceOrientation = false;
+			e._xseen.isStereographic = false;
 /*
  *	These are now set in the Camera Manager
 			e._xseen.sceneInfo.Camera.position.set (
@@ -3670,22 +3733,23 @@ XSeen.Tags.camera = {
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
-						e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
-						e._xseen.sceneInfo.useDeviceOrientation = true;
+						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
+						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
+						e._xseen.useDeviceOrientation = true;
+						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
 						e._xseen.track = 'orbit';
-						e._xseen.sceneInfo.useDeviceOrientation = false;
+						e._xseen.useDeviceOrientation = false;
+						//e._xseen.sceneInfo.useDeviceOrientation = false;
 					}
 				}
 				
 			} else if (e._xseen.type == 'stereo') {	// Stereo perspective cameras
-				var track = (e._xseen.target === null) ? 'environment' : 'object'
+				var track = (e._xseen.target === null) ? e._xseen.track : 'object'
 				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {track = 'orbit';}
 				e._xseen.track = track;
-				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
-				e._xseen.sceneInfo.rendererHasControls = false;
-				e._xseen.sceneInfo.isStereographic = true;
-				// Need to add a button to the display to go full screen
+				e._xseen.isStereographic = true;
+				e._xseen.rendererHasControls = false;
  
 			} else if (e._xseen.type == 'vr') {	// Stereo perspective cameras
 				if (e._xseen.sceneInfo.isVrCapable) {
@@ -3751,7 +3815,7 @@ XSeen.Tags.camera = {
  *	This applies to stereo (device & object) and perspective with track != none.
  *	TODO: orthographic camera
  */
-			if (!e._xseen.sceneInfo.rendererHasControls) {
+			if (false && !e._xseen.rendererHasControls) {
 				if (e._xseen.sceneInfo.useDeviceOrientation) {
 					if (e._xseen.track == 'object') {	// tracking scene object
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
@@ -3766,7 +3830,7 @@ XSeen.Tags.camera = {
 						//console.log ('Trackball');
 					} else if (e._xseen.track == 'none') {
 						//console.log ('No tracking');
-						e._xseen.sceneInfo.rendererHasControls = true;
+						e._xseen.rendererHasControls = true;
 					} else {
 						console.log ('Something else');
 					}
@@ -4599,6 +4663,7 @@ XSeen.Tags._appearance = function (e) {
 			if (e._xseen.attributes.material != '') {
 				var ele = document.getElementById (e._xseen.attributes.material);
 				if (typeof(ele) != 'undefined') {
+					console.log ('Using asset material: ' + e._xseen.attributes.material);
 					appearance = ele._xseen.tagObject;
 				} else {
 					console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
@@ -4778,6 +4843,14 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					e._xseen.tagObject.position.x = value.x;
 					e._xseen.tagObject.position.y = value.y;
 					e._xseen.tagObject.position.z = value.z;
+				} else if (attributeName == 'material') {
+					var ele = document.getElementById (value);
+					if (typeof(ele) != 'undefined') {
+						console.log ('Changing to asset material: ' + value);
+						e._xseen.tagObject.material = ele._xseen.tagObject;
+					} else {
+						console.log ('No material asset: |'+value+'|');
+					}
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}

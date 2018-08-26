@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!--
+ * Conversion of X3D simple mode to XSeen
+ * Source: VSA-1.x3d
+ *
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2018 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Converted 3DPrint Exchange Model</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='https://XSeen.org/Release/XSeenExternals.js'></script>
+		<script src='https://XSeen.org/Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='https://XSeen.org/Release/xseen.css'>
+		<script src='https://XSeen.org/Release/XSeen.js'></script>
+<style>
+#DisplayPanel {	float:right; 
+				min-width:400px; 
+				width: calc (100% - 800px);
+				background-color:lightblue; 
+				padding:10px; 
+				border:2px solid darkblue; 
+				text-align:left; 
+				font-family:arial, helvetica, sans-serif; 
+				}
+#DisplayPanel h2 {text-align:center; }
+#DisplayContents {	margin:.4em .2em .1em .2em; 
+					border:1px green solid; 
+					border-radius:4px; 
+					padding:3px 2px 3px 5px; 
+					font-size:88%; 
+					}
+#DisplayContents ol {margin-top:0; margin-bottom:.4em; }
+#DisplayContents .tree-action {}
+#DisplayContents .tree-node-0 {padding-left:0px; }
+#DisplayContents .tree-node-1 {padding-left:4px; }
+#DisplayContents .tree-node-2 {padding-left:8px; }
+#DisplayContents .tree-node-3 {padding-left:12px; }
+#DisplayContents .tree-node-4 {padding-left:16px; }
+#DisplayContents .tree-node-5 {padding-left:20px; }
+#DisplayContents .tree-node-6 {padding-left:24px; }
+#DisplayContents .tree-node-7 {padding-left:28px; }
+#DisplayContents .tree-node-8 {padding-left:32px; }
+#DisplayContents .tree-node-9 {padding-left:36px; }
+#DisplayContents .tree-node-10 {padding-left:40px; }
+#DisplayContents .tree-node-11 {padding-left:44px; }
+#DisplayContents .tree-node-12 {padding-left:48px; }
+#DisplayContents .tree-node-13 {padding-left:52px; }
+#DisplayContents .tree-node-14 {padding-left:56px; }
+
+</style>
+	</head>
+	<body>
+<x-scene id='XSeen' style="position:relative; top:5px, left:0;" width="800" height="600" src='ValveSpindleOnly.color.xseen' title='XSeen Root'>
+</x-scene>
+
+<div id='DisplayPanel' style='float:right; width:400px; background-color:lightblue; padding:10px; border:2px solid darkblue; text-align:left; font-family:arial, helvetica, sans-serif; '>
+	<h2 style='text-align:center; '>Display Panel</h2>
+	<div id='DisplayContents' style='margin:1em; border:1px green solid; border-radius:4px; padding:3px; font-size:88%; '>
+		Select a point on the geometry
+	</div>
+</div>
+<script>
+console.log ('Starting script');
+window.document.addEventListener('DOMContentLoaded', function(ev)
+	{
+		console.log ('Creating event listener');
+		var xseen = document.getElementById ('XSeen');
+		xseen.addEventListener ('xseen-touch', function (ev) {
+			console.log ('Event handler');
+			if (ev.detail.type != 'mousedown') {return; }
+			// Construct a inside-out (aka backwards) list of all nodes from the touch to #XSeen
+			var loop = true;
+			var parents = [];
+			node = ev.detail.originator;
+			while (loop) {
+				if (node.id == 'XSeen') {
+					parents.push ({
+								'name'		: node.localName,
+								'ID'		: (typeof(node.id) == 'undefined') ? '' : node.id,
+								'title'		: (typeof(node.title) == 'undefined') ? 'n/a' : node.title, 
+								'nChildren'	: node.children.length, 
+								'node'		: node,
+								'Xname'		: 'scene',
+								'Xtype'		: 'SCENE',
+								'Xposition'	: [0, 0, 0],
+								'Xrotation'	: [0, 0, 0],
+								});
+					loop = false;
+				} else {
+					parents.push ({
+								'name'		: node.localName,
+								'ID'		: (typeof(node.id) == 'undefined') ? '' : node.id,
+								'title'		: (typeof(node.title) == 'undefined') ? '' : node.title, 
+								'nChildren'	: node.children.length, 
+								'node'		: node,
+								'Xname'		: node._xseen.tagObject.name,
+								'Xtype'		: node._xseen.tagObject.type,
+								'Xposition'	: node._xseen.tagObject.position,
+								'Xrotation'	: node._xseen.tagObject.rotation,
+								});
+					node = node.parentElement;
+				}
+			}
+			var html, title;
+			html = '<div class="tree-action">Clicked at ' + formatVec3(ev.detail.position);
+			html += "<div class='tree-node-2'><b>Details</b>\n";
+			html += "<div class='tree-node-1'>Face<ol type='a'>\n";
+			html += "<li>" + ev.detail.target.face.a + ': ' + formatVec3(ev.detail.target.object.geometry.vertices[ev.detail.target.face.a]) + '</li>\n';
+			html += "<li>" + ev.detail.target.face.b + ': ' + formatVec3(ev.detail.target.object.geometry.vertices[ev.detail.target.face.b]) + '</li>\n';
+			html += "<li>" + ev.detail.target.face.c + ': ' + formatVec3(ev.detail.target.object.geometry.vertices[ev.detail.target.face.c]) + '</li>\n';
+			html += "</ol></div></div></div>\n";
+			
+			nNode = parents.length - 1;
+			for (var ii=nNode; ii>=0; ii--) {
+				title = parents[ii].Xtype + ' [' + parents[ii].Xname + '] at ' + formatVec3(parents[ii].Xposition) + ' with ' + formatVec3(parents[ii].Xrotation);
+				html += '<div class="tree-node-' + (nNode - ii) + '" title="' + title + '">' + parents[ii].name + '#' + parents[ii].ID + ' (' + parents[ii].nChildren + ') "' + parents[ii].title + '"</div>';
+			}
+			var insert=document.getElementById ('DisplayContents');
+			insert.innerHTML = html;
+		});
+	});
+var Formatter = new Intl.NumberFormat ('EN-us', {'style':'decimal', 'maximumFractionDigits':3});
+function formatFloat (value) {
+	var s = Formatter.format(value);
+	return s;
+}
+function formatVec3 (xyz, y, z) {
+	var sx, sy, sz, s;
+	if (typeof (xyz) == 'number') {
+		sx = formatFloat (xyz);
+		sy = formatFloat (y);
+		sz = formatFloat (z);
+	} else if (xyz.length == 3) {
+		sx = formatFloat (xyz[0]);
+		sy = formatFloat (xyz[1]);
+		sz = formatFloat (xyz[2]);
+	} else if (typeof(xyz.x) != 'undefined') {
+		sx = formatFloat (xyz.x);
+		sy = formatFloat (xyz.y);
+		sz = formatFloat (xyz.z);
+	} else if (typeof(xyz._x) != 'undefined') {
+		sx = formatFloat (xyz._x);
+		sy = formatFloat (xyz._y);
+		sz = formatFloat (xyz._z);
+	} else {
+		sx = '';
+		sy = '';
+		sz = '';
+	}
+	s = '(' + sx + ', ' + sy + ', ' + sz + ')';
+	return s;
+}
+</script>
+</body>
+</html>

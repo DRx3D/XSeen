@@ -17,23 +17,27 @@ See details at http://xseen.org/license
 		<script src='../../Release/XSeenExternals.js'></script>
 		<script src='../../Release/WebVR.js'></script>
 		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
-		<script src='../../Release/XSeen.js'></script>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/solids.js'></script>
 	</head>
 	<body>
 		<x-scene>
+			<x-asset>
+				<x-geometry id='StdCone' shape='cone' height='1.5' radius='.5'></x-geometry>
+			</x-asset>
 			<x-light type='directional' color='white' direction='0 0 -1'></x-light>
 			<x-light type='directional' color='green' direction='.707 0  .707'></x-light>
 			<!-- x-camera id='SceneCamera' type='vr' track='device' position='1 0 10'></x-camera -->
 			<x-camera id='SceneCamera' type='stereo' track='device' position='1 0 10'></x-camera>
 			<x-background skycolor='#882244' src='Resources/textures/desert_1_*.jpg'></x-background>
 
-			<x-cone height='1.5' radius='.5' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
-			<x-cone height='1.5' radius='.5' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
-			<x-cone height='1.5' radius='.5' color='magenta' position='-1  1  1' id='m-3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='pink' position='-1 -1  1' id='p-3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='cyan' position='-1  1 -1' id='c-3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='magenta' position='-1  1  1' id='m-3-3+3'></x-cone>
 			<x-sphere radius='.3' color='yellow' position='-.5 -.5  1' id='y-3-3+3'></x-sphere>
-			<x-cone height='1.5' radius='.5' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
-			<x-cone height='1.5' radius='.5' color='magenta' position='1  1 -1' id='m3-3+3'></x-cone>
-			<x-cone height='1.5' radius='.5' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='yellow' position='1 -1  1' id='y3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='magenta' position='1  1 -1' id='m3-3+3'></x-cone>
+			<x-cone geometry='StdCone' color='cyan' position='1  1  1' id='c3-3+3'></x-cone>
 			<x-sphere radius='.3' color='pink' position='.5 -.5  1' id='p3-3+3'></x-sphere>
 
 			<x-cone height='2.0' color='yellow' position='-5 0 2'></x-cone>

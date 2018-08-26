@@ -193,23 +193,39 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
+
+// Set standard reference for base object based on stored type
+				var baseMaterial, baseGeometry, baseMesh, baseType='';
+				if (e._xseen.tagObject.isMesh) {
+					baseMaterial	= e._xseen.tagObject.material;
+					baseGeometry	= e._xseen.tagObject.geometry;
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'mesh';
+				} else if (e._xseen.tagObject.isMaterial) {
+					baseMaterial	= e._xseen.tagObject;
+					baseType		= 'material';
+				} else if (e._xseen.tagObject.isGeometry) {
+					baseGeometry	= e._xseen.tagObject;
+					baseType		= 'geometry';
+				}
+					
 				if (attributeName == 'color') {				// Different operation for each attribute
-					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
-					e._xseen.tagObject.material.needsUpdate = true;
+					baseMaterial.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
+					baseMaterial.needsUpdate = true;
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
 					//console.log ('Changing envMap to |' + value + '|');
 					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
 				} else if (attributeName == 'metalness') {
 					//console.log ('Setting metalness to ' + value);
-					e._xseen.tagObject.material.metalness = value;
+					baseMaterial.metalness = value;
 				} else if (attributeName == 'roughness') {
 					//console.log ('Setting roughness to ' + value);
-					e._xseen.tagObject.material.roughness = value;
+					baseMaterial.roughness = value;
 				} else if (attributeName == 'position') {
 					console.log ('Setting position to ' + value);
-					e._xseen.tagObject.position.x = value.x;
-					e._xseen.tagObject.position.y = value.y;
-					e._xseen.tagObject.position.z = value.z;
+					baseMesh.position.x = value.x;
+					baseMesh.position.y = value.y;
+					baseMesh.position.z = value.z;
 				} else if (attributeName == 'material') {
 					var ele = document.getElementById (value);
 					if (typeof(ele) != 'undefined') {
@@ -229,6 +245,10 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 // TODO: This is very specific and only for debug/development purposes. Needs to be fixed.
 XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			var envMap, basePath = 'Resources/textures/';
+			envMap = null;
+			XSeen.Loader.TextureCube (envMapUrl, [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
+/*
 			if (envMapUrl == 'desert') {
 				XSeen.Loader.TextureCube (basePath + 'desert_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
 
@@ -247,13 +267,14 @@ XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 													'gray99-front.png',
 													'gray99-back.png',
 											]);
- */
+ * /
 			} else if (envMapUrl == 'color') {
 				XSeen.Loader.TextureCube (basePath + 'starburst/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
 
 			} else {
 				envMap = null;
 			}
+ */
 			return envMap;
 };
 
@@ -276,6 +297,151 @@ XSeen.Tags.Solids.loadSuccess = function (userdata) {
 	}
 };
 
+/*
+ *	Generalized geometry creator
+ *	This is done so the 'geometry' asset tag can easily create what is needed
+ *
+ *	Arguments:
+ *		e		The current DOM node
+ *		shape	The requested shape for this tag
+ *
+ *	If geometry attribute specified, defined, and matches 'shape'; then return that.
+ *	Otherwise return an empty object or process arguments
+ */
+XSeen.Tags._geometry = function (e, shape) {
+	if (typeof(e._xseen.attributes.geometry) != 'undefined' && e._xseen.attributes.geometry != '') {
+		var ele = document.getElementById (e._xseen.attributes.geometry);
+		if (typeof(ele) != 'undefined') {
+			console.log ('Using asset geometry: ' + e._xseen.attributes.geometry + '(' + ele._xseen.tagObject.type + ')');
+			if (ele._xseen.tagObject.type.toLowerCase() == shape+'geometry') {
+				return ele._xseen.tagObject;
+			} else {
+				console.log ('-- mismatch between requested shape and asset geometry');
+			}
+		} else {
+			console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
+		}
+		return new THREE.Geometry();
+	}
+
+	
+// 'geometry' attribute not defined
+				
+	var geometry;
+	if (shape == 'box') {
+		geometry = new THREE.BoxGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes.depth,
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['segments-depth']
+									);
+	} else if (shape == 'cone') {
+		geometry = new THREE.ConeGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['open-ended'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'cylinder') {
+		geometry = new THREE.CylinderGeometry(
+										e._xseen.attributes['radius-top'], 
+										e._xseen.attributes['radius-bottom'], 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['open-ended'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'dodecahedron') {
+		geometry = new THREE.DodecahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'icosahedron') {
+		geometry = new THREE.IcosahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'octahedron') {
+		geometry = new THREE.OctahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'sphere') {
+		geometry = new THREE.SphereGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['phi-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['phi-length'] * XSeen.CONST.Deg2Rad,
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'tetrahedron') {
+		geometry = new THREE.TetrahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'torus') {
+		geometry = new THREE.TorusGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.tube, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-tubular'], 
+										e._xseen.attributes.arc * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'tknot') {
+		geometry = new THREE.TorusKnotGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.tube, 
+										e._xseen.attributes['segments-tubular'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['wind-p'], 
+										e._xseen.attributes['wind-q'], 
+									);
+
+	} else if (shape == 'plane') {
+		geometry = new THREE.PlaneGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+									);
+
+	} else if (shape == 'ring') {
+		geometry = new THREE.RingGeometry(
+										e._xseen.attributes['radius-inner'], 
+										e._xseen.attributes['radius-outer'], 
+										e._xseen.attributes['segments-theta'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+	} else {
+		geometry = new THREE.Geometry();
+	}
+	return geometry;
+};
+
+
+// Parsing of regular 'solids' tags.
+
+// First handle tags for use in asset block (material, geometry)
+
 XSeen.Tags.material = {
 	'init'	: function (e,p)
 		{
@@ -286,17 +452,24 @@ XSeen.Tags.material = {
 	'event'	: function (ev, attr) {},
 };
 
+XSeen.Tags.geometry = {
+	'init'	: function (e,p)
+		{
+			var geometry = XSeen.Tags._geometry (e, e._xseen.attributes.shape);
+			e._xseen.tagObject = geometry;
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+
+
+
+//	Handle tags for scene node creation
 XSeen.Tags.box = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.BoxGeometry(
-										e._xseen.attributes.width, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes.depth,
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['segments-depth']
-									);
+			var geometry = XSeen.Tags._geometry (e, 'box');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -306,15 +479,7 @@ XSeen.Tags.box = {
 XSeen.Tags.cone = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.ConeGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['open-ended'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'cone');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -324,16 +489,7 @@ XSeen.Tags.cone = {
 XSeen.Tags.cylinder = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.CylinderGeometry(
-										e._xseen.attributes['radius-top'], 
-										e._xseen.attributes['radius-bottom'], 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['open-ended'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'cylinder');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -343,10 +499,7 @@ XSeen.Tags.cylinder = {
 XSeen.Tags.dodecahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.DodecahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'dodecahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -356,10 +509,7 @@ XSeen.Tags.dodecahedron = {
 XSeen.Tags.icosahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.IcosahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'icosahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -369,10 +519,7 @@ XSeen.Tags.icosahedron = {
 XSeen.Tags.octahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.OctahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'octahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -382,15 +529,7 @@ XSeen.Tags.octahedron = {
 XSeen.Tags.sphere = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.SphereGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['phi-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['phi-length'] * XSeen.CONST.Deg2Rad,
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'sphere');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -400,10 +539,7 @@ XSeen.Tags.sphere = {
 XSeen.Tags.tetrahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TetrahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'tetrahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -413,13 +549,7 @@ XSeen.Tags.tetrahedron = {
 XSeen.Tags.torus = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TorusGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.tube, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-tubular'], 
-										e._xseen.attributes.arc * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'torus');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -429,14 +559,7 @@ XSeen.Tags.torus = {
 XSeen.Tags.tknot = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TorusKnotGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.tube, 
-										e._xseen.attributes['segments-tubular'], 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['wind-p'], 
-										e._xseen.attributes['wind-q'], 
-									);
+			var geometry = XSeen.Tags._geometry (e, 'tknot');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -450,12 +573,7 @@ XSeen.Tags.tknot = {
 XSeen.Tags.plane = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.PlaneGeometry(
-										e._xseen.attributes.width, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-									);
+			var geometry = XSeen.Tags._geometry (e, 'plane');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -465,14 +583,7 @@ XSeen.Tags.plane = {
 XSeen.Tags.ring = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.RingGeometry(
-										e._xseen.attributes['radius-inner'], 
-										e._xseen.attributes['radius-outer'], 
-										e._xseen.attributes['segments-theta'], 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'ring');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -487,8 +598,31 @@ XSeen.Tags.ring = {
  *
  * 'points' and 'normals' do not have any effect except as children of 'triangles'
  *
- * TODO: Need to expand parser vocabulary to include array(Vec3) and array(Integer)
+ * TODO: Add new tag 'attribute'. It has 1 attribute 'attribute' that is the case insensitive (i.e. lower case)
+ *	name of the immediate parent's legal attribute. The child text-value of this tag is inserted into the parent's
+ *	data structure. It gives a means to provide very large data without using an attribute.
+ *	The parent must process the attribute during the 'fin' phase; otherwise the data is not present (or not current)
+ *	This is motivated by very large ITS. It would be used for the 'index' attribute of 'triangles' and the 
+ *	'vertex' attribute of 'points'.
+ *	This allows more flexibility in 'converter.pl' to handle those cases.
+ *
  */
+ 
+XSeen.Tags.attribute = {
+	'init':	function (e, p)
+		{
+			var attributeName = e._xseen.attributes.attribute.toLowerCase();
+			if (typeof (p._xseen.attributes[attributeName]) != 'undefined') {
+				// Need to be parsed according to the rules for p._xseen.attributes...
+				// Need to investigate the parsing routines to see how exactly to do that
+				var attrs = XSeen.Parser.getAttrInfo (p.localName.toLowerCase(), attributeName);
+				var values = XSeen.Parser.parseArrayValue (e.textContent, attrs.elementCount, attrs.dataType, attrs.default);
+				p._xseen.attributes[attributeName] = values;
+			}
+		},
+	'fin':	function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
  
 XSeen.Tags.triangles = {
 	'init'	: function (e,p) 
@@ -514,7 +648,8 @@ XSeen.Tags.triangles = {
 	'event'	: function (ev, attr) {},
 };
 XSeen.Tags.points = {
-	'init'	: function (e,p)
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p)
 		{
 			if (typeof(p._xseen.geometry) != 'undefined') {
 				e._xseen.attributes.vertices.forEach (function(vertex) {
@@ -523,11 +658,11 @@ XSeen.Tags.points = {
 				});
 			}
 		},
-	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr) {},
 };
 XSeen.Tags.normals = {
-	'init'	: function (e,p)
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p)
 		{
 			if (count(e._xseen.attributes.vectors) >= 1) {
 				p._xseen.normals = e._xseen.attributes.vectors;
@@ -537,7 +672,6 @@ XSeen.Tags.normals = {
 				p._xseen.normalsDefined = false;
 			}
 		},
-	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr) {},
 };
 
@@ -552,6 +686,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 
 // General material properties
@@ -600,7 +735,17 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.Solids._changeAttribute}]})
 		.addTag();
 };
-		
+
+XSeen.Parser.defineTag ({
+						'name'	: 'attribute',
+						'init'	: XSeen.Tags.attribute.init,
+						'fin'	: XSeen.Tags.attribute.fin,
+						'event'	: XSeen.Tags.attribute.event,
+						'tick'	: XSeen.Tags.attribute.tick
+						})
+		.defineAttribute ({'name':'attribute', dataType:'string', 'defaultValue':''})
+		.addTag();
+
 var tag;
 tag = XSeen.Parser.defineTag ({
 						'name'	: 'box',
@@ -831,3 +976,52 @@ tag = XSeen.Parser.defineTag ({
 						})
 XSeen.Parser._addStandardAppearance (tag);
 
+/*
+ *	Define 'geometry' for use with Assets. 
+ *	This tag defines all geometric attributes from all tags in this collection
+ *	Tags not used for a particular geometric selection are ignored
+ *	Once defined, geometry cannot change; however, changes to any geometric property cause the geometry to be 
+ *	recalcuated. Changing a geometric property deletes (removes from the scene graph) the current geometry and replaces it
+ *	with new geometry. This may take longer than a rendered frame, so do it judiciously.
+ *	No material attributes are defined and any user-supplied attributes are ignored
+ *	No spatial attributes are defined.
+ *	This tag is ignored outside of an asset declaration block
+ */
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'geometry',
+						'init'	: XSeen.Tags.geometry.init,
+						'fin'	: XSeen.Tags.geometry.fin,
+						'event'	: XSeen.Tags.geometry.event,
+						'tick'	: XSeen.Tags.geometry.tick
+						})
+		.defineAttribute ({'name':'shape', dataType:'string', 'defaultValue':'box', 
+// (remove triangles)							enumeration:['box', 'cone', 'cylinder', 'dodecahedron', 'icosahedron', 'octahedron', 'sphere', 'tetrahedron', 'torus', 'tknot', 'plane', 'ring', 'triangles'], 
+							enumeration:['box', 'cone', 'cylinder', 'dodecahedron', 'icosahedron', 'octahedron', 'sphere', 'tetrahedron', 'torus', 'tknot', 'plane', 'ring'], 
+							isCaseInsensitive:true})
+		.defineAttribute ({'name':'depth', dataType:'float', 'defaultValue':1.0})				// box
+		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})				// box, cone, cylinder, plane, 
+		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})				// box, plane, 
+		.defineAttribute ({'name':'segments-depth', dataType:'integer', 'defaultValue':1})		// box
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})		// box, cone, cylinder, plane, 
+		.defineAttribute ({'name':'segments-width', dataType:'integer', 'defaultValue':1})		// box, sphere, plane, 
+		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})				// cone, dodecahedron, icosahedron, octahedron, sphere, tetrahedron, torus, tknot, 
+		.defineAttribute ({'name':'open-ended', dataType:'boolean', 'defaultValue':false})		// cone, cylinder, 
+		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':1.0})			// cone, cylinder, sphere, ring, 
+		.defineAttribute ({'name':'theta-length', dataType:'float', 'defaultValue':360.0})		// cone, cylinder, sphere, ring, 
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})		// cone
+		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})		// cone, cylinder, torus, tknot, ring, 
+		.defineAttribute ({'name':'radius-bottom', dataType:'float', 'defaultValue':1.0})		// cylinder
+		.defineAttribute ({'name':'radius-top', dataType:'float', 'defaultValue':1.0})			// cylinder
+		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0})				// dodecahedron, icosahedron, octahedron, tetrahedron
+		.defineAttribute ({'name':'phi-start', dataType:'float', 'defaultValue':0.0})			// sphere
+		.defineAttribute ({'name':'phi-length', dataType:'float', 'defaultValue':360.0})		// sphere
+		.defineAttribute ({'name':'tube', dataType:'float', 'defaultValue':1.0})				// torus, tknot, 
+		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})					// torus
+		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':6})	// torus, tknot, 
+		.defineAttribute ({'name':'wind-p', dataType:'integer', 'defaultValue':2})				// tknot
+		.defineAttribute ({'name':'wind-q', dataType:'integer', 'defaultValue':3})				// tknot
+		.defineAttribute ({'name':'radius-inner', dataType:'float', 'defaultValue':0.5})		// ring
+		.defineAttribute ({'name':'radius-outer', dataType:'float', 'defaultValue':1.0})		// ring
+		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})		// ring
+		.defineAttribute ({'name':'index', dataType:'integer', 'defaultValue':[], isArray:true, elementCount:3, }) // triangles
+		.addTag();

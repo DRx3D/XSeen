@@ -167,6 +167,7 @@ XSeen.RenderFrame = function()
 			if (XSeen.Loader.loadingComplete()) {	//	Code needs to set Runtime.nodeChange whenever nodes are added/removed
 				XSeen.Tags.scene.addScene();
 				document.getElementById('XSeen-Splash').style.display = 'none';
+				console.log ('***Rendering first frame');
 			} else {
 				return;
 			}

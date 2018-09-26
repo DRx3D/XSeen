@@ -217,9 +217,10 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="Resources/logo.svg" style="z-index:1; position:fixed; top:0; left:0; " width="100%">';
+	var splashScreen = '<img id="XSeen-Splash" src="Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
+	console.log ('Splash screen');
 
 	
 // Introduce things

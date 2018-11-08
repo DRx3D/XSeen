@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 606 276">
+  <g stroke-width='5' fill='yellow' stroke='yellow' transform="translate(303,103)">
+    <ellipse cx="0" cy="0" rx="303" ry="103" style="stroke:black;stroke-width:1" fill="black" />
+    <ellipse cx="0" cy="36" rx="201" ry="137" style="stroke:black;stroke-width:1" fill="black" />
+    <ellipse cx="0" cy="36" rx="200" ry="136" style="stroke:red;stroke-width:0" fill="#50A050" />
+    <ellipse cx="0" cy="0" rx="300" ry="100" style="stroke:yellow;stroke-width:5" fill="rgb(0,0,96)" />
+    <path d="M -200 -75 c 200 0 200 149 400 149 c -260 0 -140 -149 -400 -149 z" />
+    <path d="M -200 75 c 200 0 200 -149 400 -149 c -260 0 -140 149 -400 149 z" />
+    <g transform="translate(0,130)">
+      <g stroke-width='15' transform="translate(-58,0) scale(.2,.2)">
+        <path d="M -200 -75 c 200 0 200 149 400 149 c -260 0 -140 -149 -400 -149 z" />
+        <path d="M -200 75 c 200 0 200 -149 400 -149 c -260 0 -140 149 -400 149 z" />
+	  </g>
+      <text x='-10' y='13' fill='yellow' stroke='transparent' style='font-family:Arial;font-size:36px;font-weight:bold;'>SEEN</text>
+      <text x='-11' y='12' fill='rgb(32,32,192)' stroke='transparent' style='font-family:Arial;font-size:36px;font-weight:bold;'>SEEN</text>
+    </g>
+  </g>
+</svg>

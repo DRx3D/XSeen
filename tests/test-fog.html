@@ -18,10 +18,10 @@ See details at http://xseen.org/license
 			body { margin: 0; }
 			#xscene {border:0; }
 		</style>
-		<script src='../../Release/XSeenExternals.js'></script>
-		<script src='../../Release/WebVR.js'></script>
-		<link rel='stylesheet' type='text/css' href='../../Release/xseen.css'>
-		<script src='../../Release/XSeen.js'></script>
+		<script src='../Release/XSeenExternals.js'></script>
+		<script src='../Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
 	</head>
 	<body>
 		<x-scene>
@@ -31,8 +31,8 @@ See details at http://xseen.org/license
 			</x-class3d>
 			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
 			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
-			<x-camera id='SceneCamera' type='perspective' track='device' position='1 0 -10'></x-camera>
-			<x-background skycolor='tan' src='Resources/textures/desert_1_*.jpg'></x-background>
+			<x-camera id='SceneCamera' type='stereo' track='device' position='1 0 -10'></x-camera>
+			<x-background background='cube' skycolor='tan' src='Resources/textures/desert_1/' srcextension='jpg'></x-background>
 			<x-fog near='2' far='40'></x-fog>
 
 			<x-group rotation='0 3.14 0'>

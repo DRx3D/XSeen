@@ -64,37 +64,6 @@ XSeen.onLoad = function() {
 							console.error( 'External source loader: An error happened' );
 						}
 			);
-
-/*
-                } else {
-	        	xseenCode = '' +
-   "<x-class3d id='geometry'>\n" +
-   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
-   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
-   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
-   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-class3d id='material'>\n" +
-   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
-   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
-   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
-   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-group rotation='0 3.14 0'>\n" +
-   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
-   "</x-group>";
-		xseenCode = '<x-group>' + xseenCode + '</x-group>';
-		console.log ('Adding inline-generated nodes');
-		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-            }
- */
 	};
 	
 	var sceneOccurrences, ii;
@@ -143,6 +112,12 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'fullscreen'	: {
+									'name'		: 'fullscreen',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
@@ -154,7 +129,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -190,87 +165,108 @@ XSeen.onLoad = function() {
 		Renderer = new THREE.WebGLRenderer();
 		console.log ('Creating a opaque rendering canvas.');
 	}
-	XSeen.Runtime.Renderer			= Renderer,
-	XSeen.Runtime.RendererStandard	= Renderer,
+	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
+	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
 	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
 	XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);	// TODO: test
-	//XSeen.Runtime.Renderer.setPixelRatio( window.devicePixelRatio );	// See https://stackoverflow.com/questions/31407778/display-scene-at-lower-resolution-in-three-js
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
-//	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
-	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+	XSeen.Runtime.Camera = XSeen.Runtime.ViewManager.create (XSeen.Runtime.Size.aspect);
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
+//	document.body.appendChild (XSeen.Runtime.SceneDom);
 	
 	XSeen.Runtime.mediaAvailable = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);	// flag for device media availability
 
-
-/*
- *	Experimental code for device camera
- *
- *	From: https://www.html5rocks.com/en/tutorials/getusermedia/intro/
- *		https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
- *
- *	Revision plans:
- *	1.	Remove 'usecamera' x-scene attribute and use element transparency instead.
- *		a. This is a one-time setting and can't be changed
- *		b. Camera not allowed unless this is set
- *	2.	Renderer, StereoRenderer definitions need to go in onLoad
- *	3.	Runtime definition remains, but many items are populated in onLoad
- *	4.	x-background specified use of camera
- *	5.	This code would need to go there
- *	6.	If camera is operational, skycolor or any other background is disabled
- *	7.	Create separate object for dealing with camera
- */
 	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
-/*
-		var video = document.createElement( 'video' );
-		//if (XSeen.Runtime.Attributes.usecamera) {
-			video.setAttribute("autoplay", "1"); 
-			video.height			= XSeen.Runtime.SceneDom.height;
-			video.width				= XSeen.Runtime.SceneDom.width;
-			video.style.height		= video.height + 'px';
-			video.style.width		= video.width + 'px';
-			video.style.position	= 'absolute';
-			video.style.top			= '0';
-			video.style.left		= '0';
-			video.style.zIndex		= -1;
-			const constraints = {video: {facingMode: "environment"}};
-
-			function handleSuccess(stream) {
-				XSeen.Runtime.RootTag.appendChild (video);
-				video.srcObject = stream;
-			}
-			function handleError(error) {
-				//console.error('Reeeejected!', error);
-				console.log ('Device camera not available -- ignoring');
-			}
-
-			navigator.mediaDevices.enumerateDevices()
-				.then(gotDevices);
-//				.then(gotDevices).then(getStream).catch(handleError);
-
-			function gotDevices(deviceInfos) {
-				var msgs = '';
-				for (var i = 0; i !== deviceInfos.length; ++i) {
-					var deviceInfo = deviceInfos[i];
-					console.log('Found a media device of type: ' + deviceInfo.kind);
-					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
-				}
-				//alert (msgs);
-			}
-
-			navigator.mediaDevices.getUserMedia(constraints).
-				then(handleSuccess).catch(handleError);
-*/
 	} else {
 		console.log ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
 	}
-// End of experimental code
 
+	
+	// Set up display characteristics, especially for VR
+	if (navigator.getVRDisplays) {
+		navigator.getVRDisplays()
+			.then( function ( displays ) {
+				if ( displays.length > 0 ) {
+					XSeen.Runtime.isVrCapable = true;
+				} else {
+					XSeen.Runtime.isVrCapable = false;
+				}
+			} );
+	}
+/*
+ * Stereo camera effect and device orientation controls are set on each camera
+ */
+	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
+
+	
+	// Define a few equivalences
+
+	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
+	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
+	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
+	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
+	
+/*
+ * Create XSeen default elements
+ *	Default camera by adding a first-child node to x-scene
+ *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ *	Splash screen
+ *		<img src='logo.svg' width='100%'>
+ */
+	var defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var tmp = document.createElement('div');
+	tmp.innerHTML = defaultCamera;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	tmp.innerHTML = splashScreen;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
+	console.log ('Splash screen');
+	
+// Set up control screen (FullScreen / Splitscreen / VR) buttons
+	if (XSeen.Runtime.Attributes.fullscreen) {
+		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
+		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+	}
+
+	
+// Introduce things
+	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo(XSeen.Version.splashText);
+	//XSeen.LogDebug ("Debug line");
+	//XSeen.LogWarn ("Warn line");
+	//XSeen.LogError ("Error line");
+	
+// Load all other onLoad methods
+	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
+		XSeen.onLoadCallBack[ii]();
+	}
+	
+// Create XSeen event listeners
+	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
+
+// Create event to indicate the XSeen has fully loaded. It is dispatched on the 
+//	<x-scene> tag but bubbles up so it can be caught.
+	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesInitialize(XSeen.Runtime));
+	XSeen.Runtime.RootTag.dispatchEvent(newEv);
+	return;
+}
+	
+
+/*
+ * All initializations complete. Start parsing scene
+ */
+XSeen.onLoadStartProcessing = function() {
 
 	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
@@ -287,77 +283,11 @@ XSeen.onLoad = function() {
 									'sceneInfo'		: XSeen.Runtime,	// Runtime data added to each tag
 									};
 	}
-	
-	// Set up display characteristics, especially for VR
-	if (navigator.getVRDisplays) {
-		navigator.getVRDisplays()
-			.then( function ( displays ) {
-				if ( displays.length > 0 ) {
-					XSeen.Runtime.isVrCapable = true;
-				} else {
-					XSeen.Runtime.isVrCapable = false;
-				}
-			} );
-	}
-/*
-	// Stereo camera effect -- from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
-	var x_effect = new THREE.StereoEffect(Renderer);
-	Renderer.controls = {'update' : function() {return;}};
-	
-	// Mobile (device orientation) controls
-	Renderer.controls = new THREE.DeviceOrientationControls(camera);
-	
-	// Not sure how to handle when both are requested since they both seem to go into
-	//	the same address. Perhaps order is important since the stereographic control is null
- */
-	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
-	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
-
-	
-	// Define a few equivalences
-
-	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
-	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
-	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
-	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
-	
-/*
- *	Create default camera by adding a first-child node to x-scene
- *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
- */
-	defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
-	var tmp = document.createElement('div');
-	tmp.innerHTML = defaultCamera;
-	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-
-	
-// Introduce things
-	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
-	XSeen.LogInfo(XSeen.Version.splashText);
-	//XSeen.LogDebug ("Debug line");
-	//XSeen.LogWarn ("Warn line");
-	//XSeen.LogError ("Error line");
-	
-// Load all other onLoad methods
-	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
-		XSeen.onLoadCallBack[ii]();
-	}
-
-// Create XSeen event listeners
-	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
-
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
 	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
-// TODO: Start rendering loop
-
 	return;
 };
 
@@ -368,7 +298,7 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	var MinimumValue = 50;
 	var size = Array();
 	size.width = sceneRoot.offsetWidth;
-	size.height = sceneRoot.offsetHeight;
+	size.height = Math.floor(sceneRoot.offsetHeight -5);	// Firefox requires 5 less for an unknown reason
 	if (size.width < MinimumValue) {
 		var t = sceneRoot.getAttribute('width');
 		if (t < MinimumValue) {t = MinimumValue;}
@@ -382,5 +312,6 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
+	console.log ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
 }

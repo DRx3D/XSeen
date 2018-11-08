@@ -66,7 +66,7 @@ XSeen.DisplayControl = {
 					event.currentTarget.style.opacity = 0.5;
 				};
 
-// Button no longer active, undefine event handlers
+// Button no longer active, un-define event handlers
 		} else {
 			button.onmouseenter = null;
 			button.onmouseleave = null;
@@ -84,7 +84,7 @@ XSeen.DisplayControl = {
 	'stylizeElement'	: function (button) {
 		button.style.backgroundColor	= '#212214';
 		button.style.height				= '24px';
-		button.style.backgroundImage	= 'url(XSeen-64x24.png)';
+		button.style.backgroundImage	= 'url(../Logo/xseen-symbol-color.svg)';
 		button.style.backgroundRepeat	= 'no-repeat';
 		button.style.paddingLeft		= '70px';
 		button.style.borderRadius		= '4px';
@@ -98,6 +98,9 @@ XSeen.DisplayControl = {
 		button.dataset._colorDefault	= '#aaa';			// default color
 		button.dataset._active			= false;			// button not active
 		button.style.color				= button.dataset._colorDefault;
+		button.style.position			= 'fixed';
+		button.style.bottom				= '66px';
+		button.style.left				= '45%';
 	},
 
 // Add features necessary to make the transition to VR	

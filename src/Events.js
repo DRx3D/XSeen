@@ -51,7 +51,7 @@ XSeen.Events = {
  * General XSeen event handler. All XSeen events get processed here during the CAPTURE phase
  *	The main types of events are mousedown, mouseup, and mousemove. All click events are proceeded by mousedown
  *
- *	If the cusor is used for navigation and selection, then a mousedown event can switch the mode to selection 
+ *	If the cursor is used for navigation and selection, then a mousedown event can switch the mode to selection 
  *	(MODE_SELECT). A mouseup event will switch the mode to navigation (MODE_NAVIGATE). If event mode is locked
  *	then cursor events do not change the mode.
  *
@@ -174,6 +174,24 @@ XSeen.Events = {
 						return  properties;
 					},
 
+		'propertiesInitialize'	: function (Runtime)
+					{
+						var properties = {
+								'detail':		{					// This object contains all of the XSeen data
+										'type'			: 'initialize',
+										'originalType'	: 'initialize',
+										'originator'	: Runtime.RootTag,			// Reference to scene object
+										'name'			: Runtime.RootTag.name,		// Name of scene object
+										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
+										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
+										'Runtime'		: Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						return  properties;
+					},
 };
 /*
 Events

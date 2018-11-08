@@ -245,7 +245,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -386,6 +386,7 @@ XSeen.Parser = {
  *	It needs the value data type and value string
  *
  */
+/*
 				function getElementsFromArray (ea, ndx, increment) {
 					var ev = [];
 					for (var ii=ndx; ii<ndx+increment; ii++) {
@@ -393,16 +394,21 @@ XSeen.Parser = {
 					}
 					return ev;
 				}
+ */
 				// Illegal datatype for an array. Return default
 				if (!XSeen.Parser.TypeInfo[attr.type].arrayAllowed || attr.elementCount < 1) {
 					if (value == '') {value = attr.default;}
 					return value;
 				}
+				if (typeof(value) == 'undefined' || value === null || value.length == 0) {return value; }
 
 				// Pass entire elementArray into <dataType> parser. It returns the parsed object
 				// Somehow need to get #elements per parsed value XSeen.Parser.TypeInfo[<dataType>].numElements
 				// Need to do something similar for regular elements. Perhaps check datatype,
 				//	if string then call _elementSplit; otherwise use it
+				valueArray = XSeen.Parser.parseArrayValue (value, attr.elementCount, attr.type, attr.default);
+				return valueArray;
+/*
 				var elementArray = XSeen.Parser.Types._elementSplit (value);
 				var increment = attr.elementCount;
 				var collectionCount = increment / XSeen.Parser.TypeInfo[attr.type].numElements;
@@ -423,7 +429,8 @@ XSeen.Parser = {
 					//ndx += increment;
 				}
 				return valueArray;
-
+ */
+ 
 			} else {
 				//value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
 				value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
@@ -442,6 +449,44 @@ XSeen.Parser = {
 				}
 			}
 			return classValue;
+		},
+
+/*
+ * Pass entire elementArray into <dataType> parser. It returns the parsed object
+ * Somehow need to get #elements per parsed value XSeen.Parser.TypeInfo[<dataType>].numElements
+ * Need to do something similar for regular elements. Perhaps check datatype,
+ * if string then call _elementSplit; otherwise use it
+ */
+	'parseArrayValue'	: function (attrValue, elementCount, attrType, attrDefault)
+		{
+			function getElementsFromArray (ea, ndx, increment) {
+				var ev = [];
+				for (var ii=ndx; ii<ndx+increment; ii++) {
+					ev.push(ea[ii]);
+				}
+				return ev;
+			}
+
+			var elementArray = XSeen.Parser.Types._elementSplit (attrValue);
+			var numElements = XSeen.Parser.TypeInfo[attrType].numElements;
+			var collectionCount = elementCount / numElements;
+			var totalElements = elementArray.length;
+			var ndx = 0;
+			var valueArray=[], elementValues=[], tmp;
+			while (ndx < totalElements) {
+				tmp = [];
+				for (var jj=0; jj<collectionCount; jj++) {
+					elementValues = getElementsFromArray (elementArray, ndx, numElements);
+					ndx += numElements;
+					tmp.push (XSeen.Parser.Types[attrType](elementValues, attrDefault, false, ''));
+				}
+				if (collectionCount == 1) {
+					valueArray.push (tmp[0]);
+				} else {
+					valueArray.push (tmp);
+				}
+			}
+			return valueArray;
 		},
 
 
@@ -465,10 +510,12 @@ XSeen.Parser = {
 		}
 		attrInfo.attrExists = true;
 		var attribute = tag.attributes[tag.attrIndex[attrName]];
-		attrInfo.tag = tag;
-		attrInfo.attribute = attribute;
-		attrInfo.handlerName = tag.event;
-		attrInfo.dataType = attribute.type;
+		attrInfo.tag			= tag;
+		attrInfo.attribute		= attribute;
+		attrInfo.handlerName	= tag.event;
+		attrInfo.dataType		= attribute.type;
+		attrInfo.default		= attribute.default;
+		attrInfo.elementCount	= attribute.elementCount;
 		attrInfo.good = true;
 		return attrInfo;
 	},
@@ -507,7 +554,7 @@ XSeen.Parser = {
 			},
 /*
  *	Splits a string on white space, comma, paranthese, brackets; after triming for same
- *	Designed for a serialized collection of numeric values as an vector.
+ *	Designed for a serialized collection of numeric values as a vector.
  *	Output is the array of split values
  */
 		'_elementSplit'	: function(string) 

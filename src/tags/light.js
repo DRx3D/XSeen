@@ -15,11 +15,34 @@
 
 
 XSeen.Tags.light = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				//var type = XSeen.Tags.light._saveAttributes (e);
+				XSeen.Tags.light._processChange (e);
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+	'_processChange'	: function (e, attributeName, value) {
+			var lamp, color, intensity;
+			color = e._xseen.attributes.color;
+			intensity = e._xseen.attributes.intensity - 0;
+			lamp = e._xseen.tagObject;
+			if (!e._xseen.attributes.on) {intensity = 0;}
+			lamp.intensity = intensity;
+			lamp.color = color;
+		},
+		
+		
+		
 	'init'	: function (e,p) 
 		{
 			var color = e._xseen.attributes.color;
 			var intensity = e._xseen.attributes.intensity - 0;
 			var lamp, type=e._xseen.attributes.type;
+			if (!e._xseen.attributes.on) {intensity = 0;}
 
 			if (type == 'point') {
 				// Ignored field -- e._xseen.attributes.location
@@ -77,4 +100,5 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'direction', dataType:'vec3', 'defaultValue':[0,0,-1], 'isAnimatable':true})
 		.defineAttribute ({'name':'cutoffangle', dataType:'float', 'defaultValue':3.14, 'isAnimatable':true})
 		.defineAttribute ({'name':'beamwidth', dataType:'float', 'defaultValue':1.57, 'isAnimatable':true})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.light._changeAttribute}]})
 		.addTag();

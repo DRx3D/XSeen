@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.32-rc1+7_2851318
- *  Built Sat Jul 14 20:51:34 2018
+ *  XSeen V0.7.41+7_f568368
+ *  Built Thu Nov  8 10:25:35 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -82,11 +82,31 @@ var XSeen = XSeen || {};
 XSeen.CameraManager = {
 		'PRIORITY_MINIMUM'	: 0,
 		'PRIORITY_DEFAULT'	: 1,
+		'FOV'				: 50,		// Vertical field-of-view
+		'NearClip'			: 0.1,
+		'FarClip'			: 10000,
 		'DefinedCameras'	: [],		// Contains references to camera nodes ...[priority][order]
 		'CurrentNode'		: null,
 		
 /*
- *
+ * Create or reset the standard XSeen camera from THREE
+ */
+		'create'			: function (aspectRatio)
+					{
+						camera = new THREE.PerspectiveCamera( this.FOV, aspectRatio, this.NearClip, this.FarClip );
+						return camera;
+					},
+		'reset'				: function (camera, aspectRatio)
+					{
+						camera.aspect = aspectRatio;
+						camera.far = this.FarClip;
+						camera.fov = this.FOV;
+						camera.near = this.NearClip;
+						camera.updateProjectionMatrix ();
+						return camera;
+					},
+/*
+ * Add an XSene camera. This is really a set of parameters defined by the 'camera' tag.
  */
 		'add'				: function (camera)
 					{
@@ -94,8 +114,16 @@ XSeen.CameraManager = {
 						if (typeof(this.DefinedCameras[camera._xseen.priority]) == 'undefined') {this.DefinedCameras[camera._xseen.priority] = [];}
 						this.DefinedCameras[camera._xseen.priority].push (camera);
 						camera._xseen.ndxCamera = this.DefinedCameras[camera._xseen.priority].length - 1;
+						camera.setActive = function() {
+							camera._xseen.sceneInfo.ViewManager.setActive (this);
+						}
+						console.log ('.. returning from camera.add');
 					},
-					
+
+/*
+ * Returns the currently available highest priority camera.
+ *	This always returns a camera because the DEFAULT camera is always available
+ */
 		'next'				: function ()
 					{
 						for (var p=this.DefinedCameras.length-1; p>=this.PRIORITY_MINIMUM; p--) {
@@ -107,19 +135,81 @@ XSeen.CameraManager = {
 						}
 						return this.DefinedCameras[this.PRIORITY_MINIMUM][0];	// System default
 					},
+
+/*
+ * Activate a specific camera
+ *	camera - The DOM element for the 'camera' tag to be activated
+ *
+ *	This method "knows" about the structure of XSeen's Runtime object
+ */
+		'setActive'			: function (cameraElement)
+					{
+						if (cameraElement === null) {return;}
+						if (this.CurrentNode !== null) {this.CurrentNode._xseen.active = false;}
+						cameraElement._xseen.active = true;
+						var xRuntime = cameraElement._xseen.sceneInfo;
+						this.reset (xRuntime.Camera, xRuntime.Size.aspect);
+						
+						if (cameraElement._xseen.isStereographic) {
+							xRuntime.Renderer = xRuntime.RendererStereo;
+							xRuntime.rendererHasControls = false;
+							xRuntime.isStereographic = true;
+							// Need to add a button to the display to go full screen
+						} else {
+							xRuntime.Renderer = xRuntime.RendererStandard;
+							xRuntime.rendererHasControls = cameraElement._xseen.rendererHasControls;
+							xRuntime.isStereographic = false;
+
+							xRuntime.Renderer.setScissorTest( false );
+							var size = xRuntime.Renderer.getSize();
+							xRuntime.Renderer.setScissor( 0, 0, size.width, size.height );
+							xRuntime.Renderer.setViewport( 0, 0, size.width, size.height );
+							//xRuntime.Renderer.render( scene, xRuntime.Camera );
+							// Need to remove any 'full screen' button
+						}
+						
+						xRuntime.Camera.position.set (
+									cameraElement._xseen.attributes.position.x,
+									cameraElement._xseen.attributes.position.y,
+									cameraElement._xseen.attributes.position.z);
+						xRuntime.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
+
+						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
+						xRuntime.useDeviceOrientation = cameraElement._xseen.useDeviceOrientation;
+						
+
+						if (!cameraElement._xseen.rendererHasControls) {
+							if (xRuntime.useDeviceOrientation) {	// Device controls camera. Set focus point
+								if (cameraElement._xseen.track == 'object') {	// tracking scene object
+									xRuntime.CameraControl = new THREE.DeviceOrientationControls(cameraElement._xseen.target, true);
+								} else {							// tracking environment
+									xRuntime.CameraControl = new THREE.DeviceOrientationControls(xRuntime.Camera);
+								}
+
+							} else {											// No device orientation control. Use something else
+								if (cameraElement._xseen.track == 'orbit') {
+									xRuntime.CameraControl = new THREE.OrbitControls( xRuntime.Camera, xRuntime.RendererStandard.domElement );
+								} else if (cameraElement._xseen.track == 'trackball') {
+									//console.log ('Trackball');
+								} else if (cameraElement._xseen.track == 'none') {
+									//console.log ('No tracking');
+									xRuntime.rendererHasControls = true;
+								} else {
+									console.log ('Something else');
+								}
+							}
+						}
+						console.log ('Setting active camera to ' + cameraElement.id);
+						this.CurrentNode = cameraElement;
+					},
 					
 		'setNext'			: function ()
 					{
 						var camera = this.next();
-						if (this.CurrentNode !== null) {this.CurrentNode._xseen.active = false;}
-						camera._xseen.active = true;
-						camera._xseen.sceneInfo.Camera.position.set (
-									camera._xseen.attributes.position.x,
-									camera._xseen.attributes.position.y,
-									camera._xseen.attributes.position.z);
-						camera._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
-						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
-						this.CurrentNode = camera;
+						this.setActive (camera);
+						
+						console.log ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
+						//this.CurrentNode = camera;
 					}
 };
 // File: ./Constants.js
@@ -381,7 +471,7 @@ XSeen.DisplayControl = {
 					event.currentTarget.style.opacity = 0.5;
 				};
 
-// Button no longer active, undefine event handlers
+// Button no longer active, un-define event handlers
 		} else {
 			button.onmouseenter = null;
 			button.onmouseleave = null;
@@ -399,7 +489,7 @@ XSeen.DisplayControl = {
 	'stylizeElement'	: function (button) {
 		button.style.backgroundColor	= '#212214';
 		button.style.height				= '24px';
-		button.style.backgroundImage	= 'url(XSeen-64x24.png)';
+		button.style.backgroundImage	= 'url(../Logo/xseen-symbol-color.svg)';
 		button.style.backgroundRepeat	= 'no-repeat';
 		button.style.paddingLeft		= '70px';
 		button.style.borderRadius		= '4px';
@@ -413,6 +503,9 @@ XSeen.DisplayControl = {
 		button.dataset._colorDefault	= '#aaa';			// default color
 		button.dataset._active			= false;			// button not active
 		button.style.color				= button.dataset._colorDefault;
+		button.style.position			= 'fixed';
+		button.style.bottom				= '66px';
+		button.style.left				= '45%';
 	},
 
 // Add features necessary to make the transition to VR	
@@ -889,7 +982,7 @@ XSeen.Events = {
  * General XSeen event handler. All XSeen events get processed here during the CAPTURE phase
  *	The main types of events are mousedown, mouseup, and mousemove. All click events are proceeded by mousedown
  *
- *	If the cusor is used for navigation and selection, then a mousedown event can switch the mode to selection 
+ *	If the cursor is used for navigation and selection, then a mousedown event can switch the mode to selection 
  *	(MODE_SELECT). A mouseup event will switch the mode to navigation (MODE_NAVIGATE). If event mode is locked
  *	then cursor events do not change the mode.
  *
@@ -1012,6 +1105,24 @@ XSeen.Events = {
 						return  properties;
 					},
 
+		'propertiesInitialize'	: function (Runtime)
+					{
+						var properties = {
+								'detail':		{					// This object contains all of the XSeen data
+										'type'			: 'initialize',
+										'originalType'	: 'initialize',
+										'originator'	: Runtime.RootTag,			// Reference to scene object
+										'name'			: Runtime.RootTag.name,		// Name of scene object
+										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
+										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
+										'Runtime'		: Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						return  properties;
+					},
 };
 /*
 Events
@@ -1496,37 +1607,6 @@ XSeen.onLoad = function() {
 							console.error( 'External source loader: An error happened' );
 						}
 			);
-
-/*
-                } else {
-	        	xseenCode = '' +
-   "<x-class3d id='geometry'>\n" +
-   "        <x-style3d property='radius' value='1'></x-style3d>\n" +
-   "        <x-style3d property='tube' value='.4'></x-style3d>\n" +
-   "        <x-style3d property='segments-radial' value='16'></x-style3d>\n" +
-   "        <x-style3d property='segments-tubular' value='128'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-class3d id='material'>\n" +
-   "        <x-style3d property='type' value='pbr'></x-style3d>\n" +
-   "        <x-style3d property='color' value='#00ffff'></x-style3d>\n" +
-   "        <x-style3d property='emissive' value='#000000'></x-style3d>\n" +
-   "        <x-style3d property='env-map' value='forest'></x-style3d>\n" +
-   "</x-class3d>\n" +
-   "<x-group rotation='0 3.14 0'>\n" +
-   "        <x-tknot class3d='geometry material' type='phong' position='0 10 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='0' position='-5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='0' position='0 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='0' position='5 5 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='0' roughness='.5' position='-5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='.5' roughness='.5' position='0 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='.5' position='5 0 0'></x-tknot>\n" +
-   "        <x-tknot class3d='geometry material' metalness='1.' roughness='1' position='5 -5 0'></x-tknot>\n" +
-   "</x-group>";
-		xseenCode = '<x-group>' + xseenCode + '</x-group>';
-		console.log ('Adding inline-generated nodes');
-		domElement.insertAdjacentHTML('afterbegin', xseenCode);
-            }
- */
 	};
 	
 	var sceneOccurrences, ii;
@@ -1575,6 +1655,12 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'fullscreen'	: {
+									'name'		: 'fullscreen',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
@@ -1586,7 +1672,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -1622,87 +1708,108 @@ XSeen.onLoad = function() {
 		Renderer = new THREE.WebGLRenderer();
 		console.log ('Creating a opaque rendering canvas.');
 	}
-	XSeen.Runtime.Renderer			= Renderer,
-	XSeen.Runtime.RendererStandard	= Renderer,
+	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
+	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
 	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
 	XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);	// TODO: test
-	//XSeen.Runtime.Renderer.setPixelRatio( window.devicePixelRatio );	// See https://stackoverflow.com/questions/31407778/display-scene-at-lower-resolution-in-three-js
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
-//	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 75, XSeen.Runtime.Size.aspect, 0.1, 10000 );
-	XSeen.Runtime.Camera = new THREE.PerspectiveCamera( 50, XSeen.Runtime.Size.aspect, 0.1, 10000 );
+	XSeen.Runtime.Camera = XSeen.Runtime.ViewManager.create (XSeen.Runtime.Size.aspect);
 	XSeen.Runtime.SceneDom = XSeen.Runtime.Renderer.domElement;
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
+//	document.body.appendChild (XSeen.Runtime.SceneDom);
 	
 	XSeen.Runtime.mediaAvailable = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);	// flag for device media availability
 
-
-/*
- *	Experimental code for device camera
- *
- *	From: https://www.html5rocks.com/en/tutorials/getusermedia/intro/
- *		https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
- *
- *	Revision plans:
- *	1.	Remove 'usecamera' x-scene attribute and use element transparency instead.
- *		a. This is a one-time setting and can't be changed
- *		b. Camera not allowed unless this is set
- *	2.	Renderer, StereoRenderer definitions need to go in onLoad
- *	3.	Runtime definition remains, but many items are populated in onLoad
- *	4.	x-background specified use of camera
- *	5.	This code would need to go there
- *	6.	If camera is operational, skycolor or any other background is disabled
- *	7.	Create separate object for dealing with camera
- */
 	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
-/*
-		var video = document.createElement( 'video' );
-		//if (XSeen.Runtime.Attributes.usecamera) {
-			video.setAttribute("autoplay", "1"); 
-			video.height			= XSeen.Runtime.SceneDom.height;
-			video.width				= XSeen.Runtime.SceneDom.width;
-			video.style.height		= video.height + 'px';
-			video.style.width		= video.width + 'px';
-			video.style.position	= 'absolute';
-			video.style.top			= '0';
-			video.style.left		= '0';
-			video.style.zIndex		= -1;
-			const constraints = {video: {facingMode: "environment"}};
-
-			function handleSuccess(stream) {
-				XSeen.Runtime.RootTag.appendChild (video);
-				video.srcObject = stream;
-			}
-			function handleError(error) {
-				//console.error('Reeeejected!', error);
-				console.log ('Device camera not available -- ignoring');
-			}
-
-			navigator.mediaDevices.enumerateDevices()
-				.then(gotDevices);
-//				.then(gotDevices).then(getStream).catch(handleError);
-
-			function gotDevices(deviceInfos) {
-				var msgs = '';
-				for (var i = 0; i !== deviceInfos.length; ++i) {
-					var deviceInfo = deviceInfos[i];
-					console.log('Found a media device of type: ' + deviceInfo.kind);
-					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
-				}
-				//alert (msgs);
-			}
-
-			navigator.mediaDevices.getUserMedia(constraints).
-				then(handleSuccess).catch(handleError);
-*/
 	} else {
 		console.log ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
 	}
-// End of experimental code
 
+	
+	// Set up display characteristics, especially for VR
+	if (navigator.getVRDisplays) {
+		navigator.getVRDisplays()
+			.then( function ( displays ) {
+				if ( displays.length > 0 ) {
+					XSeen.Runtime.isVrCapable = true;
+				} else {
+					XSeen.Runtime.isVrCapable = false;
+				}
+			} );
+	}
+/*
+ * Stereo camera effect and device orientation controls are set on each camera
+ */
+	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
+
+	
+	// Define a few equivalences
+
+	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
+	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
+	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
+	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
+	
+/*
+ * Create XSeen default elements
+ *	Default camera by adding a first-child node to x-scene
+ *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ *	Splash screen
+ *		<img src='logo.svg' width='100%'>
+ */
+	var defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var tmp = document.createElement('div');
+	tmp.innerHTML = defaultCamera;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	tmp.innerHTML = splashScreen;
+	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
+	console.log ('Splash screen');
+	
+// Set up control screen (FullScreen / Splitscreen / VR) buttons
+	if (XSeen.Runtime.Attributes.fullscreen) {
+		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
+		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+	}
+
+	
+// Introduce things
+	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo(XSeen.Version.splashText);
+	//XSeen.LogDebug ("Debug line");
+	//XSeen.LogWarn ("Warn line");
+	//XSeen.LogError ("Error line");
+	
+// Load all other onLoad methods
+	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
+		XSeen.onLoadCallBack[ii]();
+	}
+	
+// Create XSeen event listeners
+	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
+
+// Create event to indicate the XSeen has fully loaded. It is dispatched on the 
+//	<x-scene> tag but bubbles up so it can be caught.
+	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesInitialize(XSeen.Runtime));
+	XSeen.Runtime.RootTag.dispatchEvent(newEv);
+	return;
+}
+	
+
+/*
+ * All initializations complete. Start parsing scene
+ */
+XSeen.onLoadStartProcessing = function() {
 
 	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
@@ -1719,77 +1826,11 @@ XSeen.onLoad = function() {
 									'sceneInfo'		: XSeen.Runtime,	// Runtime data added to each tag
 									};
 	}
-	
-	// Set up display characteristics, especially for VR
-	if (navigator.getVRDisplays) {
-		navigator.getVRDisplays()
-			.then( function ( displays ) {
-				if ( displays.length > 0 ) {
-					XSeen.Runtime.isVrCapable = true;
-				} else {
-					XSeen.Runtime.isVrCapable = false;
-				}
-			} );
-	}
-/*
-	// Stereo camera effect -- from http://charliegerard.github.io/blog/Virtual-Reality-ThreeJs/
-	var x_effect = new THREE.StereoEffect(Renderer);
-	Renderer.controls = {'update' : function() {return;}};
-	
-	// Mobile (device orientation) controls
-	Renderer.controls = new THREE.DeviceOrientationControls(camera);
-	
-	// Not sure how to handle when both are requested since they both seem to go into
-	//	the same address. Perhaps order is important since the stereographic control is null
- */
-	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
-	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
-
-	
-	// Define a few equivalences
-
-	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
-	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
-	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
-	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
-	
-/*
- *	Create default camera by adding a first-child node to x-scene
- *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
- */
-	defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
-	var tmp = document.createElement('div');
-	tmp.innerHTML = defaultCamera;
-	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-
-	
-// Introduce things
-	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
-	XSeen.LogInfo(XSeen.Version.splashText);
-	//XSeen.LogDebug ("Debug line");
-	//XSeen.LogWarn ("Warn line");
-	//XSeen.LogError ("Error line");
-	
-// Load all other onLoad methods
-	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
-		XSeen.onLoadCallBack[ii]();
-	}
-
-// Create XSeen event listeners
-	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
-
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
 	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
-// TODO: Start rendering loop
-
 	return;
 };
 
@@ -1800,7 +1841,7 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	var MinimumValue = 50;
 	var size = Array();
 	size.width = sceneRoot.offsetWidth;
-	size.height = sceneRoot.offsetHeight;
+	size.height = Math.floor(sceneRoot.offsetHeight -5);	// Firefox requires 5 less for an unknown reason
 	if (size.width < MinimumValue) {
 		var t = sceneRoot.getAttribute('width');
 		if (t < MinimumValue) {t = MinimumValue;}
@@ -1814,6 +1855,7 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
+	console.log ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
 }
 // File: ./Tag.js
@@ -2064,7 +2106,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -2205,6 +2247,7 @@ XSeen.Parser = {
  *	It needs the value data type and value string
  *
  */
+/*
 				function getElementsFromArray (ea, ndx, increment) {
 					var ev = [];
 					for (var ii=ndx; ii<ndx+increment; ii++) {
@@ -2212,16 +2255,21 @@ XSeen.Parser = {
 					}
 					return ev;
 				}
+ */
 				// Illegal datatype for an array. Return default
 				if (!XSeen.Parser.TypeInfo[attr.type].arrayAllowed || attr.elementCount < 1) {
 					if (value == '') {value = attr.default;}
 					return value;
 				}
+				if (typeof(value) == 'undefined' || value === null || value.length == 0) {return value; }
 
 				// Pass entire elementArray into <dataType> parser. It returns the parsed object
 				// Somehow need to get #elements per parsed value XSeen.Parser.TypeInfo[<dataType>].numElements
 				// Need to do something similar for regular elements. Perhaps check datatype,
 				//	if string then call _elementSplit; otherwise use it
+				valueArray = XSeen.Parser.parseArrayValue (value, attr.elementCount, attr.type, attr.default);
+				return valueArray;
+/*
 				var elementArray = XSeen.Parser.Types._elementSplit (value);
 				var increment = attr.elementCount;
 				var collectionCount = increment / XSeen.Parser.TypeInfo[attr.type].numElements;
@@ -2242,7 +2290,8 @@ XSeen.Parser = {
 					//ndx += increment;
 				}
 				return valueArray;
-
+ */
+ 
 			} else {
 				//value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
 				value = XSeen.Parser.Types[attr.type] (value, attr.default, attr.caseInsensitive, attr.enumeration);
@@ -2261,6 +2310,44 @@ XSeen.Parser = {
 				}
 			}
 			return classValue;
+		},
+
+/*
+ * Pass entire elementArray into <dataType> parser. It returns the parsed object
+ * Somehow need to get #elements per parsed value XSeen.Parser.TypeInfo[<dataType>].numElements
+ * Need to do something similar for regular elements. Perhaps check datatype,
+ * if string then call _elementSplit; otherwise use it
+ */
+	'parseArrayValue'	: function (attrValue, elementCount, attrType, attrDefault)
+		{
+			function getElementsFromArray (ea, ndx, increment) {
+				var ev = [];
+				for (var ii=ndx; ii<ndx+increment; ii++) {
+					ev.push(ea[ii]);
+				}
+				return ev;
+			}
+
+			var elementArray = XSeen.Parser.Types._elementSplit (attrValue);
+			var numElements = XSeen.Parser.TypeInfo[attrType].numElements;
+			var collectionCount = elementCount / numElements;
+			var totalElements = elementArray.length;
+			var ndx = 0;
+			var valueArray=[], elementValues=[], tmp;
+			while (ndx < totalElements) {
+				tmp = [];
+				for (var jj=0; jj<collectionCount; jj++) {
+					elementValues = getElementsFromArray (elementArray, ndx, numElements);
+					ndx += numElements;
+					tmp.push (XSeen.Parser.Types[attrType](elementValues, attrDefault, false, ''));
+				}
+				if (collectionCount == 1) {
+					valueArray.push (tmp[0]);
+				} else {
+					valueArray.push (tmp);
+				}
+			}
+			return valueArray;
 		},
 
 
@@ -2284,10 +2371,12 @@ XSeen.Parser = {
 		}
 		attrInfo.attrExists = true;
 		var attribute = tag.attributes[tag.attrIndex[attrName]];
-		attrInfo.tag = tag;
-		attrInfo.attribute = attribute;
-		attrInfo.handlerName = tag.event;
-		attrInfo.dataType = attribute.type;
+		attrInfo.tag			= tag;
+		attrInfo.attribute		= attribute;
+		attrInfo.handlerName	= tag.event;
+		attrInfo.dataType		= attribute.type;
+		attrInfo.default		= attribute.default;
+		attrInfo.elementCount	= attribute.elementCount;
 		attrInfo.good = true;
 		return attrInfo;
 	},
@@ -2326,7 +2415,7 @@ XSeen.Parser = {
 			},
 /*
  *	Splits a string on white space, comma, paranthese, brackets; after triming for same
- *	Designed for a serialized collection of numeric values as an vector.
+ *	Designed for a serialized collection of numeric values as a vector.
  *	Output is the array of split values
  */
 		'_elementSplit'	: function(string) 
@@ -2612,19 +2701,34 @@ XSeen.Parser = {
  *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
  *	0.7.31: Cleaned up some extra console output statements
  *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
+ *	0.7.33: Camera switching API plus fix for leaving stereo camera. (RC1)
+ *
+ *	0.7.34:	Added geometry to asset tag capabilities
+ *	0.7.35:	Added 'attribute' child tag so selected attribute values can be moved to content (TextNode)
+ *	0.7.36:	Fix display size wrt browser window size
+ *	0.7.37:	Create XSeen splash screen
+ *	0.7.38:	Created stereographic/full-screen button and request support function
+ *	0.7.39: Added support for wireframe switch to all solids
+ *	0.7.40:	Added support for DOM changes to lights
+ *	0.7.41:	Fixed use of color in fog
+
  *	
+ *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
+ *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
+ *	Create XSeen logo
  *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
- *	Fix display size wrt browser window size
  *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
  *	--	Above is desired for 0.7 release
- *	Add geometry to asset tag
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Fog needs mutation functionality
+ *	Camera needs fixing when multiple cameras with different controls are in use
+ *	Add Orthographic camera
  * 
  */
 
@@ -2635,11 +2739,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 32,
-					'_PreRelease'	: 'rc1',
+					'_Patch'		: 41,
+					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-14',
+					'_RDate'		: '2018-11-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -2679,7 +2783,7 @@ XSeen.Runtime = {
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: {},
+			'Renderer'				: {},			// Active renderer in current use.
 			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
 			'RendererStereo'		: {},			// these and 'camera' chooses which one
 			'Camera'				: {},			// Current camera in use
@@ -2729,6 +2833,8 @@ XSeen.RenderFrame = function()
 		if (XSeen.Runtime.frameNumber == 0) {		// TODO: Replace with 'dirty' flag. May not need loadingComplete
 			if (XSeen.Loader.loadingComplete()) {	//	Code needs to set Runtime.nodeChange whenever nodes are added/removed
 				XSeen.Tags.scene.addScene();
+				document.getElementById('XSeen-Splash').style.display = 'none';
+				console.log ('***Rendering first frame');
 			} else {
 				return;
 			}
@@ -2788,6 +2894,9 @@ XSeen.Update = {
 
 // Run the 'onLoad' method when the page is fully loaded
 window.document.addEventListener('DOMContentLoaded', XSeen.onLoad);
+
+//window.document.addEventListener('DOMContentLoaded', XSeen.onLoadStartProcessing);
+window.document.addEventListener('xseen-initialize', XSeen.onLoadStartProcessing);
 // File: tags/animate.js
 /*
  * XSeen JavaScript library
@@ -3591,7 +3700,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
 		.defineAttribute ({'name':'background', dataType:'string', 'defaultValue':'sky', enumeration:['sky', 'cube', 'sphere', 'fixed', 'camera'], isCaseInsensitive:true})
-		.defineAttribute ({'name':'srcExtension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpgsky', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'srcextension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpg', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'srcfront', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcback', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcleft', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
@@ -3623,6 +3732,9 @@ XSeen.Tags.camera = {
 			e._xseen.type = e._xseen.attributes.type;
 			e._xseen.track = e._xseen.attributes.track;
 			if (e._xseen.track == 'examine') e._xseen.track = 'trackball';
+			e._xseen.rendererHasControls = false;		// Only for renderers with built-in controls (e.g., vr)
+			e._xseen.useDeviceOrientation = false;
+			e._xseen.isStereographic = false;
 /*
  *	These are now set in the Camera Manager
 			e._xseen.sceneInfo.Camera.position.set (
@@ -3665,27 +3777,34 @@ XSeen.Tags.camera = {
  *	'device'	==> orbit if !hasDeviceOrientation
  */
  
+			console.log ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+ 
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
-						e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
-						e._xseen.sceneInfo.useDeviceOrientation = true;
+						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
+						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
+						e._xseen.useDeviceOrientation = true;
+						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
 						e._xseen.track = 'orbit';
-						e._xseen.sceneInfo.useDeviceOrientation = false;
+						e._xseen.useDeviceOrientation = false;
+						//e._xseen.sceneInfo.useDeviceOrientation = false;
 					}
 				}
 				
 			} else if (e._xseen.type == 'stereo') {	// Stereo perspective cameras
-				var track = (e._xseen.target === null) ? 'environment' : 'object'
+				var track = (e._xseen.target === null) ? e._xseen.track : 'object'
 				if (e._xseen.track == 'device' && !e._xseen.sceneInfo.hasDeviceOrientation) {track = 'orbit';}
 				e._xseen.track = track;
-				e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
-				e._xseen.sceneInfo.rendererHasControls = false;
-				e._xseen.sceneInfo.isStereographic = true;
-				// Need to add a button to the display to go full screen
+				e._xseen.isStereographic = true;
+				e._xseen.rendererHasControls = false;
+					var button;
+					button = XSeen.DisplayControl.buttonCreate ('fullscreen', e._xseen.sceneInfo.RootTag, button)
+					console.log (button);
+					e._xseen.sceneInfo.RootTag.appendChild(button);
  
 			} else if (e._xseen.type == 'vr') {	// Stereo perspective cameras
 				if (e._xseen.sceneInfo.isVrCapable) {
@@ -3693,13 +3812,15 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.rendererHasControls = true;
 					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
 				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
+					console.log ("VR requested, but no VR device found. Using 'stereo' instead.");
 					e._xseen.type = 'stereo';
 					e._xseen.track = 'device';
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 					e._xseen.sceneInfo.rendererHasControls = false;
 					e._xseen.sceneInfo.isStereographic = true;
-					// Need to add a button to the display to go full screen
+					// Need to add a button to the display to go full screen & stereo
 				} else {													// Flat screen
+					console.log ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
 					e._xseen.type = 'perspective';
 					e._xseen.track = 'orbit';
 				}
@@ -3750,8 +3871,11 @@ XSeen.Tags.camera = {
  *	Handle camera controls for (navigational) tracking. 
  *	This applies to stereo (device & object) and perspective with track != none.
  *	TODO: orthographic camera
+ *	TODO: Fix bug that causes the last camera defined to be the CameraControl. There is only only place to store the 
+ *			info and that is in sceneInfo. This needs to be changed so it is stored in the node and CameraManager
+ *			loads (or clears) it as needed
  */
-			if (!e._xseen.sceneInfo.rendererHasControls) {
+			if (!e._xseen.rendererHasControls) {
 				if (e._xseen.sceneInfo.useDeviceOrientation) {
 					if (e._xseen.track == 'object') {	// tracking scene object
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
@@ -3765,8 +3889,8 @@ XSeen.Tags.camera = {
 					} else if (e._xseen.track == 'trackball') {
 						//console.log ('Trackball');
 					} else if (e._xseen.track == 'none') {
-						//console.log ('No tracking');
-						e._xseen.sceneInfo.rendererHasControls = true;
+						console.log (e.id + ' has NO tracking');
+						e._xseen.rendererHasControls = false;
 					} else {
 						console.log ('Something else');
 					}
@@ -3780,7 +3904,12 @@ XSeen.Tags.camera = {
 			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
 			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
-	'fin'	: function (e, p) {},
+	'fin'	: function (e, p) 
+		{
+			e.setActive = function () {
+				XSeen.CameraManager.setActive(this);
+			}
+		},
 	'event'	: function (ev, attr)
 		{
 		},
@@ -3824,8 +3953,11 @@ XSeen.Parser.defineTag ({
 XSeen.Tags.fog = {
 	'init'	: function (e, p) 
 		{
+			
+			console.log ('Creating FOG with color ' + XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color));
+			console.log (e._xseen.attributes.color);
 			var fog = new THREE.Fog (
-						e._xseen.attributes.color,
+						 XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color),
 						e._xseen.attributes.near,
 						e._xseen.attributes.far);
 
@@ -4153,11 +4285,34 @@ XSeen.Parser.defineTag ({
 
 
 XSeen.Tags.light = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				//var type = XSeen.Tags.light._saveAttributes (e);
+				XSeen.Tags.light._processChange (e);
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+	'_processChange'	: function (e, attributeName, value) {
+			var lamp, color, intensity;
+			color = e._xseen.attributes.color;
+			intensity = e._xseen.attributes.intensity - 0;
+			lamp = e._xseen.tagObject;
+			if (!e._xseen.attributes.on) {intensity = 0;}
+			lamp.intensity = intensity;
+			lamp.color = color;
+		},
+		
+		
+		
 	'init'	: function (e,p) 
 		{
 			var color = e._xseen.attributes.color;
 			var intensity = e._xseen.attributes.intensity - 0;
 			var lamp, type=e._xseen.attributes.type;
+			if (!e._xseen.attributes.on) {intensity = 0;}
 
 			if (type == 'point') {
 				// Ignored field -- e._xseen.attributes.location
@@ -4215,6 +4370,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'direction', dataType:'vec3', 'defaultValue':[0,0,-1], 'isAnimatable':true})
 		.defineAttribute ({'name':'cutoffangle', dataType:'float', 'defaultValue':3.14, 'isAnimatable':true})
 		.defineAttribute ({'name':'beamwidth', dataType:'float', 'defaultValue':1.57, 'isAnimatable':true})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.light._changeAttribute}]})
 		.addTag();
 // File: tags/metadata.js
 /*
@@ -4599,6 +4755,7 @@ XSeen.Tags._appearance = function (e) {
 			if (e._xseen.attributes.material != '') {
 				var ele = document.getElementById (e._xseen.attributes.material);
 				if (typeof(ele) != 'undefined') {
+					console.log ('Using asset material: ' + e._xseen.attributes.material);
 					appearance = ele._xseen.tagObject;
 				} else {
 					console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
@@ -4761,23 +4918,47 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
+
+// Set standard reference for base object based on stored type
+				var baseMaterial, baseGeometry, baseMesh, baseType='';
+				if (e._xseen.tagObject.isMesh) {
+					baseMaterial	= e._xseen.tagObject.material;
+					baseGeometry	= e._xseen.tagObject.geometry;
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'mesh';
+				} else if (e._xseen.tagObject.isMaterial) {
+					baseMaterial	= e._xseen.tagObject;
+					baseType		= 'material';
+				} else if (e._xseen.tagObject.isGeometry) {
+					baseGeometry	= e._xseen.tagObject;
+					baseType		= 'geometry';
+				}
+					
 				if (attributeName == 'color') {				// Different operation for each attribute
-					e._xseen.tagObject.material.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
-					e._xseen.tagObject.material.needsUpdate = true;
+					baseMaterial.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
+					baseMaterial.needsUpdate = true;
 				} else if (attributeName == 'env-map') {				// Different operation for each attribute
 					//console.log ('Changing envMap to |' + value + '|');
 					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
 				} else if (attributeName == 'metalness') {
 					//console.log ('Setting metalness to ' + value);
-					e._xseen.tagObject.material.metalness = value;
+					baseMaterial.metalness = value;
 				} else if (attributeName == 'roughness') {
 					//console.log ('Setting roughness to ' + value);
-					e._xseen.tagObject.material.roughness = value;
+					baseMaterial.roughness = value;
 				} else if (attributeName == 'position') {
 					console.log ('Setting position to ' + value);
-					e._xseen.tagObject.position.x = value.x;
-					e._xseen.tagObject.position.y = value.y;
-					e._xseen.tagObject.position.z = value.z;
+					baseMesh.position.x = value.x;
+					baseMesh.position.y = value.y;
+					baseMesh.position.z = value.z;
+				} else if (attributeName == 'material') {
+					var ele = document.getElementById (value);
+					if (typeof(ele) != 'undefined') {
+						console.log ('Changing to asset material: ' + value);
+						e._xseen.tagObject.material = ele._xseen.tagObject;
+					} else {
+						console.log ('No material asset: |'+value+'|');
+					}
 				} else {
 					XSeen.LogWarn('No support for updating ' + attributeName);
 				}
@@ -4789,6 +4970,10 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 // TODO: This is very specific and only for debug/development purposes. Needs to be fixed.
 XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 			var envMap, basePath = 'Resources/textures/';
+			envMap = null;
+			XSeen.Loader.TextureCube (envMapUrl, [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
+
+/*
 			if (envMapUrl == 'desert') {
 				XSeen.Loader.TextureCube (basePath + 'desert_1/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
 
@@ -4807,13 +4992,14 @@ XSeen.Tags.Solids._envMap = function (e, envMapUrl) {
 													'gray99-front.png',
 													'gray99-back.png',
 											]);
- */
+ * /
 			} else if (envMapUrl == 'color') {
 				XSeen.Loader.TextureCube (basePath + 'starburst/', [], '.jpg', XSeen.Tags.Solids.loadSuccess({'e':e}));
 
 			} else {
 				envMap = null;
 			}
+ */
 			return envMap;
 };
 
@@ -4836,6 +5022,151 @@ XSeen.Tags.Solids.loadSuccess = function (userdata) {
 	}
 };
 
+/*
+ *	Generalized geometry creator
+ *	This is done so the 'geometry' asset tag can easily create what is needed
+ *
+ *	Arguments:
+ *		e		The current DOM node
+ *		shape	The requested shape for this tag
+ *
+ *	If geometry attribute specified, defined, and matches 'shape'; then return that.
+ *	Otherwise return an empty object or process arguments
+ */
+XSeen.Tags._geometry = function (e, shape) {
+	if (typeof(e._xseen.attributes.geometry) != 'undefined' && e._xseen.attributes.geometry != '') {
+		var ele = document.getElementById (e._xseen.attributes.geometry);
+		if (typeof(ele) != 'undefined') {
+			console.log ('Using asset geometry: ' + e._xseen.attributes.geometry + '(' + ele._xseen.tagObject.type + ')');
+			if (ele._xseen.tagObject.type.toLowerCase() == shape+'geometry') {
+				return ele._xseen.tagObject;
+			} else {
+				console.log ('-- mismatch between requested shape and asset geometry');
+			}
+		} else {
+			console.log ('Reference to undeclared material: ' + e._xseen.attributes.material);
+		}
+		return new THREE.Geometry();
+	}
+
+	
+// 'geometry' attribute not defined
+				
+	var geometry;
+	if (shape == 'box') {
+		geometry = new THREE.BoxGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes.depth,
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['segments-depth']
+									);
+	} else if (shape == 'cone') {
+		geometry = new THREE.ConeGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['open-ended'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'cylinder') {
+		geometry = new THREE.CylinderGeometry(
+										e._xseen.attributes['radius-top'], 
+										e._xseen.attributes['radius-bottom'], 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['open-ended'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'dodecahedron') {
+		geometry = new THREE.DodecahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'icosahedron') {
+		geometry = new THREE.IcosahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'octahedron') {
+		geometry = new THREE.OctahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'sphere') {
+		geometry = new THREE.SphereGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+										e._xseen.attributes['phi-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['phi-length'] * XSeen.CONST.Deg2Rad,
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'tetrahedron') {
+		geometry = new THREE.TetrahedronGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.detail
+									);
+
+	} else if (shape == 'torus') {
+		geometry = new THREE.TorusGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.tube, 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['segments-tubular'], 
+										e._xseen.attributes.arc * XSeen.CONST.Deg2Rad
+									);
+
+	} else if (shape == 'tknot') {
+		geometry = new THREE.TorusKnotGeometry(
+										e._xseen.attributes.radius, 
+										e._xseen.attributes.tube, 
+										e._xseen.attributes['segments-tubular'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['wind-p'], 
+										e._xseen.attributes['wind-q'], 
+									);
+
+	} else if (shape == 'plane') {
+		geometry = new THREE.PlaneGeometry(
+										e._xseen.attributes.width, 
+										e._xseen.attributes.height, 
+										e._xseen.attributes['segments-width'], 
+										e._xseen.attributes['segments-height'], 
+									);
+
+	} else if (shape == 'ring') {
+		geometry = new THREE.RingGeometry(
+										e._xseen.attributes['radius-inner'], 
+										e._xseen.attributes['radius-outer'], 
+										e._xseen.attributes['segments-theta'], 
+										e._xseen.attributes['segments-radial'], 
+										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
+										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
+									);
+	} else {
+		geometry = new THREE.Geometry();
+	}
+	return geometry;
+};
+
+
+// Parsing of regular 'solids' tags.
+
+// First handle tags for use in asset block (material, geometry)
+
 XSeen.Tags.material = {
 	'init'	: function (e,p)
 		{
@@ -4846,17 +5177,24 @@ XSeen.Tags.material = {
 	'event'	: function (ev, attr) {},
 };
 
+XSeen.Tags.geometry = {
+	'init'	: function (e,p)
+		{
+			var geometry = XSeen.Tags._geometry (e, e._xseen.attributes.shape);
+			e._xseen.tagObject = geometry;
+		},
+	'fin'	: function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
+
+
+
+
+//	Handle tags for scene node creation
 XSeen.Tags.box = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.BoxGeometry(
-										e._xseen.attributes.width, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes.depth,
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['segments-depth']
-									);
+			var geometry = XSeen.Tags._geometry (e, 'box');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4866,15 +5204,7 @@ XSeen.Tags.box = {
 XSeen.Tags.cone = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.ConeGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['open-ended'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'cone');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4884,16 +5214,7 @@ XSeen.Tags.cone = {
 XSeen.Tags.cylinder = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.CylinderGeometry(
-										e._xseen.attributes['radius-top'], 
-										e._xseen.attributes['radius-bottom'], 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['open-ended'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'cylinder');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4903,10 +5224,7 @@ XSeen.Tags.cylinder = {
 XSeen.Tags.dodecahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.DodecahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'dodecahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4916,10 +5234,7 @@ XSeen.Tags.dodecahedron = {
 XSeen.Tags.icosahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.IcosahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'icosahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4929,10 +5244,7 @@ XSeen.Tags.icosahedron = {
 XSeen.Tags.octahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.OctahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'octahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4942,15 +5254,7 @@ XSeen.Tags.octahedron = {
 XSeen.Tags.sphere = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.SphereGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-										e._xseen.attributes['phi-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['phi-length'] * XSeen.CONST.Deg2Rad,
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'sphere');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4960,10 +5264,7 @@ XSeen.Tags.sphere = {
 XSeen.Tags.tetrahedron = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TetrahedronGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.detail
-									);
+			var geometry = XSeen.Tags._geometry (e, 'tetrahedron');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4973,13 +5274,7 @@ XSeen.Tags.tetrahedron = {
 XSeen.Tags.torus = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TorusGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.tube, 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['segments-tubular'], 
-										e._xseen.attributes.arc * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'torus');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -4989,14 +5284,7 @@ XSeen.Tags.torus = {
 XSeen.Tags.tknot = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.TorusKnotGeometry(
-										e._xseen.attributes.radius, 
-										e._xseen.attributes.tube, 
-										e._xseen.attributes['segments-tubular'], 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['wind-p'], 
-										e._xseen.attributes['wind-q'], 
-									);
+			var geometry = XSeen.Tags._geometry (e, 'tknot');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -5010,12 +5298,7 @@ XSeen.Tags.tknot = {
 XSeen.Tags.plane = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.PlaneGeometry(
-										e._xseen.attributes.width, 
-										e._xseen.attributes.height, 
-										e._xseen.attributes['segments-width'], 
-										e._xseen.attributes['segments-height'], 
-									);
+			var geometry = XSeen.Tags._geometry (e, 'plane');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -5025,14 +5308,7 @@ XSeen.Tags.plane = {
 XSeen.Tags.ring = {
 	'init'	: function (e,p)
 		{
-			var geometry = new THREE.RingGeometry(
-										e._xseen.attributes['radius-inner'], 
-										e._xseen.attributes['radius-outer'], 
-										e._xseen.attributes['segments-theta'], 
-										e._xseen.attributes['segments-radial'], 
-										e._xseen.attributes['theta-start'] * XSeen.CONST.Deg2Rad, 
-										e._xseen.attributes['theta-length'] * XSeen.CONST.Deg2Rad
-									);
+			var geometry = XSeen.Tags._geometry (e, 'ring');
 			XSeen.Tags._solid (e, p, geometry);
 		},
 	'fin'	: function (e,p) {},
@@ -5047,8 +5323,31 @@ XSeen.Tags.ring = {
  *
  * 'points' and 'normals' do not have any effect except as children of 'triangles'
  *
- * TODO: Need to expand parser vocabulary to include array(Vec3) and array(Integer)
+ * TODO: Add new tag 'attribute'. It has 1 attribute 'attribute' that is the case insensitive (i.e. lower case)
+ *	name of the immediate parent's legal attribute. The child text-value of this tag is inserted into the parent's
+ *	data structure. It gives a means to provide very large data without using an attribute.
+ *	The parent must process the attribute during the 'fin' phase; otherwise the data is not present (or not current)
+ *	This is motivated by very large ITS. It would be used for the 'index' attribute of 'triangles' and the 
+ *	'vertex' attribute of 'points'.
+ *	This allows more flexibility in 'converter.pl' to handle those cases.
+ *
  */
+ 
+XSeen.Tags.attribute = {
+	'init':	function (e, p)
+		{
+			var attributeName = e._xseen.attributes.attribute.toLowerCase();
+			if (typeof (p._xseen.attributes[attributeName]) != 'undefined') {
+				// Need to be parsed according to the rules for p._xseen.attributes...
+				// Need to investigate the parsing routines to see how exactly to do that
+				var attrs = XSeen.Parser.getAttrInfo (p.localName.toLowerCase(), attributeName);
+				var values = XSeen.Parser.parseArrayValue (e.textContent, attrs.elementCount, attrs.dataType, attrs.default);
+				p._xseen.attributes[attributeName] = values;
+			}
+		},
+	'fin':	function (e,p) {},
+	'event'	: function (ev, attr) {},
+};
  
 XSeen.Tags.triangles = {
 	'init'	: function (e,p) 
@@ -5074,7 +5373,8 @@ XSeen.Tags.triangles = {
 	'event'	: function (ev, attr) {},
 };
 XSeen.Tags.points = {
-	'init'	: function (e,p)
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p)
 		{
 			if (typeof(p._xseen.geometry) != 'undefined') {
 				e._xseen.attributes.vertices.forEach (function(vertex) {
@@ -5083,11 +5383,11 @@ XSeen.Tags.points = {
 				});
 			}
 		},
-	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr) {},
 };
 XSeen.Tags.normals = {
-	'init'	: function (e,p)
+	'init'	: function (e,p) {},
+	'fin'	: function (e,p)
 		{
 			if (count(e._xseen.attributes.vectors) >= 1) {
 				p._xseen.normals = e._xseen.attributes.vectors;
@@ -5097,7 +5397,6 @@ XSeen.Tags.normals = {
 				p._xseen.normalsDefined = false;
 			}
 		},
-	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr) {},
 };
 
@@ -5111,7 +5410,8 @@ XSeen.Tags.normals = {
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
-		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['wireframe', 'phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 
 // General material properties
@@ -5160,7 +5460,17 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.addEvents ({'mutation':[{'attributes':XSeen.Tags.Solids._changeAttribute}]})
 		.addTag();
 };
-		
+
+XSeen.Parser.defineTag ({
+						'name'	: 'attribute',
+						'init'	: XSeen.Tags.attribute.init,
+						'fin'	: XSeen.Tags.attribute.fin,
+						'event'	: XSeen.Tags.attribute.event,
+						'tick'	: XSeen.Tags.attribute.tick
+						})
+		.defineAttribute ({'name':'attribute', dataType:'string', 'defaultValue':''})
+		.addTag();
+
 var tag;
 tag = XSeen.Parser.defineTag ({
 						'name'	: 'box',
@@ -5391,6 +5701,55 @@ tag = XSeen.Parser.defineTag ({
 						})
 XSeen.Parser._addStandardAppearance (tag);
 
+/*
+ *	Define 'geometry' for use with Assets. 
+ *	This tag defines all geometric attributes from all tags in this collection
+ *	Tags not used for a particular geometric selection are ignored
+ *	Once defined, geometry cannot change; however, changes to any geometric property cause the geometry to be 
+ *	recalcuated. Changing a geometric property deletes (removes from the scene graph) the current geometry and replaces it
+ *	with new geometry. This may take longer than a rendered frame, so do it judiciously.
+ *	No material attributes are defined and any user-supplied attributes are ignored
+ *	No spatial attributes are defined.
+ *	This tag is ignored outside of an asset declaration block
+ */
+tag = XSeen.Parser.defineTag ({
+						'name'	: 'geometry',
+						'init'	: XSeen.Tags.geometry.init,
+						'fin'	: XSeen.Tags.geometry.fin,
+						'event'	: XSeen.Tags.geometry.event,
+						'tick'	: XSeen.Tags.geometry.tick
+						})
+		.defineAttribute ({'name':'shape', dataType:'string', 'defaultValue':'box', 
+// (remove triangles)							enumeration:['box', 'cone', 'cylinder', 'dodecahedron', 'icosahedron', 'octahedron', 'sphere', 'tetrahedron', 'torus', 'tknot', 'plane', 'ring', 'triangles'], 
+							enumeration:['box', 'cone', 'cylinder', 'dodecahedron', 'icosahedron', 'octahedron', 'sphere', 'tetrahedron', 'torus', 'tknot', 'plane', 'ring'], 
+							isCaseInsensitive:true})
+		.defineAttribute ({'name':'depth', dataType:'float', 'defaultValue':1.0})				// box
+		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})				// box, cone, cylinder, plane, 
+		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})				// box, plane, 
+		.defineAttribute ({'name':'segments-depth', dataType:'integer', 'defaultValue':1})		// box
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})		// box, cone, cylinder, plane, 
+		.defineAttribute ({'name':'segments-width', dataType:'integer', 'defaultValue':1})		// box, sphere, plane, 
+		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})				// cone, dodecahedron, icosahedron, octahedron, sphere, tetrahedron, torus, tknot, 
+		.defineAttribute ({'name':'open-ended', dataType:'boolean', 'defaultValue':false})		// cone, cylinder, 
+		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':1.0})			// cone, cylinder, sphere, ring, 
+		.defineAttribute ({'name':'theta-length', dataType:'float', 'defaultValue':360.0})		// cone, cylinder, sphere, ring, 
+		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})		// cone
+		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})		// cone, cylinder, torus, tknot, ring, 
+		.defineAttribute ({'name':'radius-bottom', dataType:'float', 'defaultValue':1.0})		// cylinder
+		.defineAttribute ({'name':'radius-top', dataType:'float', 'defaultValue':1.0})			// cylinder
+		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0})				// dodecahedron, icosahedron, octahedron, tetrahedron
+		.defineAttribute ({'name':'phi-start', dataType:'float', 'defaultValue':0.0})			// sphere
+		.defineAttribute ({'name':'phi-length', dataType:'float', 'defaultValue':360.0})		// sphere
+		.defineAttribute ({'name':'tube', dataType:'float', 'defaultValue':1.0})				// torus, tknot, 
+		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})					// torus
+		.defineAttribute ({'name':'segments-tubular', dataType:'integer', 'defaultValue':6})	// torus, tknot, 
+		.defineAttribute ({'name':'wind-p', dataType:'integer', 'defaultValue':2})				// tknot
+		.defineAttribute ({'name':'wind-q', dataType:'integer', 'defaultValue':3})				// tknot
+		.defineAttribute ({'name':'radius-inner', dataType:'float', 'defaultValue':0.5})		// ring
+		.defineAttribute ({'name':'radius-outer', dataType:'float', 'defaultValue':1.0})		// ring
+		.defineAttribute ({'name':'segments-theta', dataType:'integer', 'defaultValue':8})		// ring
+		.defineAttribute ({'name':'index', dataType:'integer', 'defaultValue':[], isArray:true, elementCount:3, }) // triangles
+		.addTag();
 // File: tags/style3d.js
 /*
  * XSeen JavaScript library

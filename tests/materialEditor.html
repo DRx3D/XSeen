@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--
+ * Conversion of X3D simple mode to XSeen
+ * Source: Archimedes4.x3d
+ *
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2018 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: Converted 3DPrint Exchange Model</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+.panel {border:2px solid white; border-radius:5px; background-color:black; padding:4px; }
+.fixed {position:fixed; right:10px; top:10px; z-index:10000; }
+.editor-panel {width:325px; }
+.panel-frame {border:1px solid #ffffcc; border-radius:5px; padding:10px; }
+.region, .panel-region {color:#dddddd; }
+.content-title {text-align:center; font-family:"arial", "sans-serif"; }
+.panel-region .content {border:0px solid gray; border-radius:5px; padding:0px; }
+.panel-region .row {border:1px solid green; clear:both; }
+.panel-region .row-label {font-weight:bold; margin:3px 5px 1px 5px; text-align:left; }
+fieldset.row label {color:#ddddff; }
+.panel-region .row-content {min-width:250px; }
+		</style>
+		<script src='https://XSeen.org/Release/XSeenExternals.js'></script>
+		<script src='https://XSeen.org/Release/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='../Release/xseen.css'>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/solids.js'></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <style>
+  .custom-handle {
+    width: 3em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+  }
+  div.digits3 div.ui-slider-handle {width:2em; }
+  div.slider div.ui-slider-handle {top:8px; }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	</head>
+	<body>
+<x-scene style="position:relative; top:0px, left:0;" width='1000' height='800' src='Resources/models/Archimedes/Archimedes4.xseen'>
+<x-asset id='EditorAssets'>
+	<x-material id="initialPhongMaterial" side='both' ambientintensity="0.63" color="f3(1 0.858824 0.121569)" shininess="0.2" specular="f3(1 0.741176 0.988235)"></x-material>
+	<x-material id="initialPBRMaterial" side='both' type='pbr'
+					color='f3(.8 .8 .8)'
+					metalness='.5'
+					roughness='.5'
+					map=''
+					env-map='Resources/textures/desert_1/'
+
+					ambient-occlusion-map=''
+					ambient-occlusion-map-intensity=''
+					displacement-map=''
+					displacement-scale=''
+					displacement-bias=''
+					emissive=''
+					normal-map=''
+					normal-scale=''
+					emissive-intensity=''
+					opacity=''
+					transparent='no'
+					reflectivity=''
+					refraction-ratio=''
+	</x-material>
+</x-asset>
+</x-scene>
+<div id='EditorPanel' class='panel editor-panel fixed'>
+	<div class='panel-frame'>
+		<div class='region panel-region'>
+			<div class='content-title'>
+				<h3>Material Editor Panel</h3>
+			</div>
+			<div class='content'>
+				<fieldset class='row'>
+					<label>Rendering</label>
+					<div id='Choice_Rendering' class='row-content' data-shape-id='Target_Shape'>
+						<input type='radio' name='Rendering' value='phong' checked='true' data-material-id='initialPhongMaterial' data-field-id='PbrParameters' data-field-action='hide'>Initial Phong
+						<input type='radio' name='Rendering' value='pbr' data-material-id='initialPBRMaterial' data-field-id='PbrParameters' data-field-action='show'>PBR
+					</div>
+				</fieldset>
+				<fieldset class='row' data-material-id=''>
+					<label><b>PBR Parameters</b></label>
+					<div id='PbrParameters' class='row-content' style='display:none;'>
+						<fieldset class='row'>
+							<label>Base Color</label>
+							<div class='row-content'>
+								R: <input type='text' size='3' name='pbr_baseColor_r' value='255'>
+								G: <input type='text' size='3' name='pbr_baseColor_g' value='219'>
+								B: <input type='text' size='3' name='pbr_baseColor_b' value='31'>
+							</div>
+						</fieldset>
+						<fieldset class='row'>
+							<label>Metalness</label>
+							<div class='row-content'>
+								<div id="metalness" class='slider digits3' data-type='float' data-minimum='0.0' data-maximum='1.0' data-step='.01' data-value='0.5' data-attribute='metalness'>
+									<div class="custom-handle ui-slider-handle"></div>
+								</div>
+							</div>
+						</fieldset>
+						<fieldset class='row'>
+							<label>Roughness</label>
+							<div class='row-content'>
+								<div id="roughness" class='slider digits3' data-type='float' data-minimum='0.0' data-maximum='1.0' data-step='.01' data-value='0.5' data-attribute='roughness'>
+									<div class="custom-handle ui-slider-handle"></div>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+				</fieldset>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+function setRenderingMode (ele) {
+	var fieldId = (jQuery)(ele).data('field-id');
+	var fieldAction = (jQuery)(ele).data('field-action');
+	var materialId = (jQuery)(ele).data('material-id');
+	if (fieldAction == 'hide') {
+		(jQuery)('#'+fieldId).hide();
+	} else if (fieldAction == 'show') {
+		(jQuery)('#'+fieldId).show();
+	}
+	var shapeId = (jQuery)('#Choice_Rendering').data('shape-id');
+	var shape = (jQuery)('#'+shapeId);
+	if (typeof(shape[0]) != 'undefined') {
+		shape[0].setAttribute ('material', materialId);
+	}
+}
+
+var RenderingElements = [];
+window.document.addEventListener('DOMContentLoaded', function(ev)
+	{
+		(jQuery)(document).ready(function(){
+			var modeNodes, id;
+			var modeNodes = (jQuery)('#Choice_Rendering input');
+			for (var ii=0; ii<modeNodes.length; ii++) {
+				if (modeNodes[ii].checked) {
+					setRenderingMode (modeNodes[ii]);
+				}
+				id = (jQuery)(modeNodes[ii]).data('material-id');
+				RenderingElements[ii] = (jQuery)('#'+id)[0];
+				RenderingElements[id] = RenderingElements[ii]
+			}
+
+			(jQuery)('#Choice_Rendering input').change (function(ev) {
+				setRenderingMode (ev.currentTarget);
+			});
+		});
+	}
+);
+
+(jQuery)( function() {
+	var sliders, vmin, vmax, vstep, value;
+    var sliders = (jQuery)( ".slider" );
+	for (var ii=0; ii<sliders.length; ii++) {
+		vmin	= (jQuery)(sliders[ii]).data('minimum') - 0;
+		vmax	= (jQuery)(sliders[ii]).data('maximum') - 0;
+		if (Number.isNaN(vmin)) {vmin = 0;}
+		if (Number.isNaN(vmax)) {vmax = 100; }
+		if (vmax < vmin)	{vmax = vmin;}
+		vstep	= (jQuery)(sliders[ii]).data('step') - 0;
+		if (Number.isNaN(vstep))	{vstep = (vmax - vmin) / 100;}
+		value	= (jQuery)(sliders[ii]).data('value') - 0;
+		if (Number.isNaN(value))	{value = vmin;}
+
+		var test = {
+			min:	vmin,
+			max:	vmax,
+			step:	vstep,
+			value:	value,
+			create: function() {
+				var handle = (jQuery)(this).filter('.custom-handle');
+				handle.text( (jQuery)( this ).slider( "value" ) );
+			},
+			slide: function( event, ui ) {
+				var handle = (jQuery)(this).children('.custom-handle');
+				console.log ('Setting ' + ui.value + ' on ' + handle[0].nodeName + ' (' + this.id + ')');
+				handle.text( ui.value );
+			}
+		};
+
+		(jQuery)(sliders[ii]).slider ({
+			min:	vmin,
+			max:	vmax,
+			step:	vstep,
+			value:	value,
+			create: function() {
+				var handle = (jQuery)(this).filter('.custom-handle');
+				handle.text( (jQuery)( this ).slider( "value" ) );
+			},
+			slide: function( event, ui ) {
+				var handle = (jQuery)(this).children('.custom-handle');
+				console.log ('Setting ' + ui.value + ' on ' + handle[0].nodeName + ' (' + this.id + ')');
+				handle.text( ui.value );
+				RenderingElements.initialPBRMaterial.setAttribute ((jQuery)(this).data('attribute'), ui.value);
+			}
+		});
+	}
+  } );
+
+</script>
+</body>
+</html>

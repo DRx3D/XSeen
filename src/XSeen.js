@@ -42,19 +42,34 @@
  *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
  *	0.7.31: Cleaned up some extra console output statements
  *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
+ *	0.7.33: Camera switching API plus fix for leaving stereo camera. (RC1)
+ *
+ *	0.7.34:	Added geometry to asset tag capabilities
+ *	0.7.35:	Added 'attribute' child tag so selected attribute values can be moved to content (TextNode)
+ *	0.7.36:	Fix display size wrt browser window size
+ *	0.7.37:	Create XSeen splash screen
+ *	0.7.38:	Created stereographic/full-screen button and request support function
+ *	0.7.39: Added support for wireframe switch to all solids
+ *	0.7.40:	Added support for DOM changes to lights
+ *	0.7.41:	Fixed use of color in fog
+
  *	
+ *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
+ *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
+ *	Create XSeen logo
  *	Resolve CAD positioning issue
  *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
- *	Fix display size wrt browser window size
  *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
  *	--	Above is desired for 0.7 release
- *	Add geometry to asset tag
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Fog needs mutation functionality
+ *	Camera needs fixing when multiple cameras with different controls are in use
+ *	Add Orthographic camera
  * 
  */
 
@@ -65,11 +80,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 32,
-					'_PreRelease'	: 'rc1',
+					'_Patch'		: 41,
+					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-07-14',
+					'_RDate'		: '2018-11-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -109,7 +124,7 @@ XSeen.Runtime = {
 			'deltaTime'				: 0,			// Time since last frame
 			'frameNumber'			: 0,			// Number of frame about to be rendered
 			'Time'					: new THREE.Clock(),
-			'Renderer'				: {},
+			'Renderer'				: {},			// Active renderer in current use.
 			'RendererStandard'		: {},			// One of these two renderers are used. 'onLoad' declares 
 			'RendererStereo'		: {},			// these and 'camera' chooses which one
 			'Camera'				: {},			// Current camera in use
@@ -159,6 +174,8 @@ XSeen.RenderFrame = function()
 		if (XSeen.Runtime.frameNumber == 0) {		// TODO: Replace with 'dirty' flag. May not need loadingComplete
 			if (XSeen.Loader.loadingComplete()) {	//	Code needs to set Runtime.nodeChange whenever nodes are added/removed
 				XSeen.Tags.scene.addScene();
+				document.getElementById('XSeen-Splash').style.display = 'none';
+				console.log ('***Rendering first frame');
 			} else {
 				return;
 			}
@@ -218,3 +235,6 @@ XSeen.Update = {
 
 // Run the 'onLoad' method when the page is fully loaded
 window.document.addEventListener('DOMContentLoaded', XSeen.onLoad);
+
+//window.document.addEventListener('DOMContentLoaded', XSeen.onLoadStartProcessing);
+window.document.addEventListener('xseen-initialize', XSeen.onLoadStartProcessing);

@@ -1,0 +1,75 @@
+<?xml version = "1.0"?>
+<x-scene>
+	<x-class3d id='geometry'>
+		<x-style3d property='radius' value='1'></x-style3d>
+		<x-style3d property='tube' value='.4'></x-style3d>
+		<x-style3d property='segments-radial' value='16'></x-style3d>
+		<x-style3d property='segments-tubular' value='128'></x-style3d>
+	</x-class3d>
+	<x-class3d id='material_gray'>
+		<x-style3d property='color' value='#aaaaaa'></x-style3d>
+	</x-class3d>
+
+	<x-plane height='100' width='100' rotation='1.57 0 0' color='#666666' side='both'></x-plane>
+	<x-group>
+		<x-box color='#aaaaaa' position='0 5 0' height='10' width='2' depth='4'></x-box>
+		<x-box color='#abcdef' position='3 4.5 -3' height='9' width='3' depth='4'></x-box>
+		<x-box color='#fedbca' position='4 4 2' height='8' width='4' depth='2'></x-box>
+		<x-box color='#deebac' position='8 3.5 4' height='7' width='3' depth='3'></x-box>
+		<x-box color='#cbfaab' position='-6 3 -4' height='6' width='3' depth='3'></x-box>
+		<x-box color='#cbfbce' position='-4 2.5 2' height='5' width='3' depth='4'></x-box>
+		<x-box color='#eabdce' position='-2 2 6' height='4' width='6' depth='1'></x-box>
+		<x-box color='#effbef' position='0 1.5 10' height='3' width='4' depth='4'></x-box>
+		<x-box color='#acdeaf' position='9 1 -7' height='2' width='6' depth='8'></x-box>
+		<x-box color='#bfabae' position='-9 .5 10' height='1' width='20' depth='4'></x-box>
+	</x-group>
+	<x-group position='-22 0 12' rotation='0 -1.57 0'>
+		<x-box color='#dcafff' position='0 5 0' height='10' width='2' depth='4'></x-box>
+		<x-box color='#ebcaac' position='3 4.5 -3' height='9' width='3' depth='4'></x-box>
+		<x-box color='#afccfc' position='4 4 2' height='8' width='4' depth='2'></x-box>
+		<x-box color='#fbaeed' position='8 3.5 4' height='7' width='3' depth='3'></x-box>
+		<x-box color='#affbfd' position='-6 3 -4' height='6' width='3' depth='3'></x-box>
+		<x-box color='#eeacca' position='-4 2.5 2' height='5' width='3' depth='4'></x-box>
+		<x-box color='#ececee' position='-2 2 6' height='4' width='6' depth='1'></x-box>
+		<x-box color='#ececee' position='0 1.5 10' height='3' width='4' depth='4'></x-box>
+		<x-box color='#efcdff' position='9 1 -7' height='2' width='6' depth='8'></x-box>
+		<x-box color='#dcbebd' position='-9 .5 10' height='1' width='20' depth='4'></x-box>
+	</x-group>
+	<x-group position='22 0 -12' rotation='0 1.57 0'>
+		<x-box color='#beadfd' position='0 5 0' height='10' width='2' depth='4'></x-box>
+		<x-box color='#ecad99' position='3 4.5 -3' height='9' width='3' depth='4'></x-box>
+		<x-box color='#9fabc9' position='4 4 2' height='8' width='4' depth='2'></x-box>
+		<x-box color='#c99ebe' position='8 3.5 4' height='7' width='3' depth='3'></x-box>
+		<x-box color='#fecfea' position='-6 3 -4' height='6' width='3' depth='3'></x-box>
+		<x-box color='#beccec' position='-4 2.5 2' height='5' width='3' depth='4'></x-box>
+		<x-box color='#cfebef' position='-2 2 6' height='4' width='6' depth='1'></x-box>
+		<x-box color='#ce9cad' position='0 1.5 10' height='3' width='4' depth='4'></x-box>
+		<x-box color='#deddae' position='9 1 -7' height='2' width='6' depth='8'></x-box>
+		<x-box color='#99fbcb' position='-9 .5 10' height='1' width='20' depth='4'></x-box>
+	</x-group>
+	<x-group position='22 0 12' rotation='0 0 0'>
+		<x-box color='#ced9cf' position='0 5 0' height='10' width='2' depth='4'></x-box>
+		<x-box color='#9d99ff' position='3 4.5 -3' height='9' width='3' depth='4'></x-box>
+		<x-box color='#ebbcab' position='4 4 2' height='8' width='4' depth='2'></x-box>
+		<x-box color='#d9ecff' position='8 3.5 4' height='7' width='3' depth='3'></x-box>
+		<x-box color='#dacbee' position='-6 3 -4' height='6' width='3' depth='3'></x-box>
+		<x-box color='#dbedac' position='-4 2.5 2' height='5' width='3' depth='4'></x-box>
+		<x-box color='#cbbaba' position='-2 2 6' height='4' width='6' depth='1'></x-box>
+		<x-box color='#be9c99' position='0 1.5 10' height='3' width='4' depth='4'></x-box>
+		<x-box color='#fde9dd' position='9 1 -7' height='2' width='6' depth='8'></x-box>
+		<x-box color='#bfcf9e' position='-9 .5 10' height='1' width='20' depth='4'></x-box>
+	</x-group>
+	<x-group position='-12 0 -15' rotation='0 -3.14 0'>
+		<x-box color='#9fdfb9' position='0 5 0' height='10' width='2' depth='4'></x-box>
+		<x-box color='#dedcfc' position='3 4.5 -3' height='9' width='3' depth='4'></x-box>
+		<x-box color='#a9cfbe' position='4 4 2' height='8' width='4' depth='2'></x-box>
+		<x-box color='#cfbab9' position='8 3.5 4' height='7' width='3' depth='3'></x-box>
+		<x-box color='#aaeb9e' position='-6 3 -4' height='6' width='3' depth='3'></x-box>
+		<x-box color='#9dacef' position='-4 2.5 2' height='5' width='3' depth='4'></x-box>
+		<x-box color='#bbedac' position='-2 2 6' height='4' width='6' depth='1'></x-box>
+		<x-box color='#abafeb' position='0 1.5 10' height='3' width='4' depth='4'></x-box>
+		<x-box color='#de9cab' position='9 1 -7' height='2' width='6' depth='8'></x-box>
+		<x-box color='#9caebb' position='-9 .5 10' height='1' width='20' depth='4'></x-box>
+	</x-group>
+</x-scene>
+

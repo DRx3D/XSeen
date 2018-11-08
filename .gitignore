@@ -3,3 +3,4 @@ _ignore/*
 *.ny
 Resources/*
 Tutorials/*
+tests/*

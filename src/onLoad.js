@@ -112,6 +112,12 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'fullscreen'	: {
+									'name'		: 'fullscreen',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
@@ -123,7 +129,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -217,10 +223,16 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	console.log ('Splash screen');
+	
+// Set up control screen (FullScreen / Splitscreen / VR) buttons
+	if (XSeen.Runtime.Attributes.fullscreen) {
+		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
+		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+	}
 
 	
 // Introduce things

@@ -16,8 +16,11 @@
 XSeen.Tags.fog = {
 	'init'	: function (e, p) 
 		{
+			
+			console.log ('Creating FOG with color ' + XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color));
+			console.log (e._xseen.attributes.color);
 			var fog = new THREE.Fog (
-						e._xseen.attributes.color,
+						 XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color),
 						e._xseen.attributes.near,
 						e._xseen.attributes.far);
 

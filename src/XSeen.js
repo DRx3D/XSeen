@@ -47,7 +47,12 @@
  *	0.7.34:	Added geometry to asset tag capabilities
  *	0.7.35:	Added 'attribute' child tag so selected attribute values can be moved to content (TextNode)
  *	0.7.36:	Fix display size wrt browser window size
- *	0.7.36:	Create XSeen splash screen
+ *	0.7.37:	Create XSeen splash screen
+ *	0.7.38:	Created stereographic/full-screen button and request support function
+ *	0.7.39: Added support for wireframe switch to all solids
+ *	0.7.40:	Added support for DOM changes to lights
+ *	0.7.41:	Fixed use of color in fog
+
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
  *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
@@ -62,6 +67,9 @@
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Fog needs mutation functionality
+ *	Camera needs fixing when multiple cameras with different controls are in use
+ *	Add Orthographic camera
  * 
  */
 
@@ -72,11 +80,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 35,
-					'_PreRelease'	: 'rc1',
+					'_Patch'		: 41,
+					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-08-13',
+					'_RDate'		: '2018-11-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

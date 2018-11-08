@@ -56,6 +56,7 @@ XSeen.CameraManager = {
 						camera.setActive = function() {
 							camera._xseen.sceneInfo.ViewManager.setActive (this);
 						}
+						console.log ('.. returning from camera.add');
 					},
 
 /*

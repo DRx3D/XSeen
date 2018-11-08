@@ -61,6 +61,8 @@ XSeen.Tags.camera = {
  *	'device'	==> orbit if !hasDeviceOrientation
  */
  
+			console.log ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+ 
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
@@ -83,6 +85,10 @@ XSeen.Tags.camera = {
 				e._xseen.track = track;
 				e._xseen.isStereographic = true;
 				e._xseen.rendererHasControls = false;
+					var button;
+					button = XSeen.DisplayControl.buttonCreate ('fullscreen', e._xseen.sceneInfo.RootTag, button)
+					console.log (button);
+					e._xseen.sceneInfo.RootTag.appendChild(button);
  
 			} else if (e._xseen.type == 'vr') {	// Stereo perspective cameras
 				if (e._xseen.sceneInfo.isVrCapable) {
@@ -90,13 +96,15 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.rendererHasControls = true;
 					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
 				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
+					console.log ("VR requested, but no VR device found. Using 'stereo' instead.");
 					e._xseen.type = 'stereo';
 					e._xseen.track = 'device';
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 					e._xseen.sceneInfo.rendererHasControls = false;
 					e._xseen.sceneInfo.isStereographic = true;
-					// Need to add a button to the display to go full screen
+					// Need to add a button to the display to go full screen & stereo
 				} else {													// Flat screen
+					console.log ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
 					e._xseen.type = 'perspective';
 					e._xseen.track = 'orbit';
 				}
@@ -147,8 +155,11 @@ XSeen.Tags.camera = {
  *	Handle camera controls for (navigational) tracking. 
  *	This applies to stereo (device & object) and perspective with track != none.
  *	TODO: orthographic camera
+ *	TODO: Fix bug that causes the last camera defined to be the CameraControl. There is only only place to store the 
+ *			info and that is in sceneInfo. This needs to be changed so it is stored in the node and CameraManager
+ *			loads (or clears) it as needed
  */
-			if (false && !e._xseen.rendererHasControls) {
+			if (!e._xseen.rendererHasControls) {
 				if (e._xseen.sceneInfo.useDeviceOrientation) {
 					if (e._xseen.track == 'object') {	// tracking scene object
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
@@ -162,8 +173,8 @@ XSeen.Tags.camera = {
 					} else if (e._xseen.track == 'trackball') {
 						//console.log ('Trackball');
 					} else if (e._xseen.track == 'none') {
-						//console.log ('No tracking');
-						e._xseen.rendererHasControls = true;
+						console.log (e.id + ' has NO tracking');
+						e._xseen.rendererHasControls = false;
 					} else {
 						console.log ('Something else');
 					}
@@ -177,7 +188,12 @@ XSeen.Tags.camera = {
 			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
 			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
-	'fin'	: function (e, p) {},
+	'fin'	: function (e, p) 
+		{
+			e.setActive = function () {
+				XSeen.CameraManager.setActive(this);
+			}
+		},
 	'event'	: function (ev, attr)
 		{
 		},

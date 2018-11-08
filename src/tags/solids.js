@@ -685,7 +685,7 @@ XSeen.Tags.normals = {
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
-		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['wireframe', 'phong','pbr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 

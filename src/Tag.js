@@ -245,7 +245,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,

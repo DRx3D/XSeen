@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.35-rc1+7_55c9442
- *  Built Sat Aug 25 22:19:57 2018
+ *  XSeen V0.7.41+7_f568368
+ *  Built Thu Nov  8 10:25:35 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -117,6 +117,7 @@ XSeen.CameraManager = {
 						camera.setActive = function() {
 							camera._xseen.sceneInfo.ViewManager.setActive (this);
 						}
+						console.log ('.. returning from camera.add');
 					},
 
 /*
@@ -470,7 +471,7 @@ XSeen.DisplayControl = {
 					event.currentTarget.style.opacity = 0.5;
 				};
 
-// Button no longer active, undefine event handlers
+// Button no longer active, un-define event handlers
 		} else {
 			button.onmouseenter = null;
 			button.onmouseleave = null;
@@ -488,7 +489,7 @@ XSeen.DisplayControl = {
 	'stylizeElement'	: function (button) {
 		button.style.backgroundColor	= '#212214';
 		button.style.height				= '24px';
-		button.style.backgroundImage	= 'url(XSeen-64x24.png)';
+		button.style.backgroundImage	= 'url(../Logo/xseen-symbol-color.svg)';
 		button.style.backgroundRepeat	= 'no-repeat';
 		button.style.paddingLeft		= '70px';
 		button.style.borderRadius		= '4px';
@@ -502,6 +503,9 @@ XSeen.DisplayControl = {
 		button.dataset._colorDefault	= '#aaa';			// default color
 		button.dataset._active			= false;			// button not active
 		button.style.color				= button.dataset._colorDefault;
+		button.style.position			= 'fixed';
+		button.style.bottom				= '66px';
+		button.style.left				= '45%';
 	},
 
 // Add features necessary to make the transition to VR	
@@ -1651,6 +1655,12 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'fullscreen'	: {
+									'name'		: 'fullscreen',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
@@ -1662,7 +1672,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -1756,10 +1766,16 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	console.log ('Splash screen');
+	
+// Set up control screen (FullScreen / Splitscreen / VR) buttons
+	if (XSeen.Runtime.Attributes.fullscreen) {
+		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
+		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+	}
 
 	
 // Introduce things
@@ -2090,7 +2106,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -2690,7 +2706,12 @@ XSeen.Parser = {
  *	0.7.34:	Added geometry to asset tag capabilities
  *	0.7.35:	Added 'attribute' child tag so selected attribute values can be moved to content (TextNode)
  *	0.7.36:	Fix display size wrt browser window size
- *	0.7.36:	Create XSeen splash screen
+ *	0.7.37:	Create XSeen splash screen
+ *	0.7.38:	Created stereographic/full-screen button and request support function
+ *	0.7.39: Added support for wireframe switch to all solids
+ *	0.7.40:	Added support for DOM changes to lights
+ *	0.7.41:	Fixed use of color in fog
+
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
  *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
@@ -2705,6 +2726,9 @@ XSeen.Parser = {
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
+ *	Fog needs mutation functionality
+ *	Camera needs fixing when multiple cameras with different controls are in use
+ *	Add Orthographic camera
  * 
  */
 
@@ -2715,11 +2739,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 35,
-					'_PreRelease'	: 'rc1',
+					'_Patch'		: 41,
+					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-08-13',
+					'_RDate'		: '2018-11-08',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -3676,7 +3700,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
 		.defineAttribute ({'name':'background', dataType:'string', 'defaultValue':'sky', enumeration:['sky', 'cube', 'sphere', 'fixed', 'camera'], isCaseInsensitive:true})
-		.defineAttribute ({'name':'srcExtension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpgsky', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'srcextension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpg', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'srcfront', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcback', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcleft', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
@@ -3753,6 +3777,8 @@ XSeen.Tags.camera = {
  *	'device'	==> orbit if !hasDeviceOrientation
  */
  
+			console.log ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+ 
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
@@ -3775,6 +3801,10 @@ XSeen.Tags.camera = {
 				e._xseen.track = track;
 				e._xseen.isStereographic = true;
 				e._xseen.rendererHasControls = false;
+					var button;
+					button = XSeen.DisplayControl.buttonCreate ('fullscreen', e._xseen.sceneInfo.RootTag, button)
+					console.log (button);
+					e._xseen.sceneInfo.RootTag.appendChild(button);
  
 			} else if (e._xseen.type == 'vr') {	// Stereo perspective cameras
 				if (e._xseen.sceneInfo.isVrCapable) {
@@ -3782,13 +3812,15 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.rendererHasControls = true;
 					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
 				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
+					console.log ("VR requested, but no VR device found. Using 'stereo' instead.");
 					e._xseen.type = 'stereo';
 					e._xseen.track = 'device';
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
 					e._xseen.sceneInfo.rendererHasControls = false;
 					e._xseen.sceneInfo.isStereographic = true;
-					// Need to add a button to the display to go full screen
+					// Need to add a button to the display to go full screen & stereo
 				} else {													// Flat screen
+					console.log ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
 					e._xseen.type = 'perspective';
 					e._xseen.track = 'orbit';
 				}
@@ -3839,8 +3871,11 @@ XSeen.Tags.camera = {
  *	Handle camera controls for (navigational) tracking. 
  *	This applies to stereo (device & object) and perspective with track != none.
  *	TODO: orthographic camera
+ *	TODO: Fix bug that causes the last camera defined to be the CameraControl. There is only only place to store the 
+ *			info and that is in sceneInfo. This needs to be changed so it is stored in the node and CameraManager
+ *			loads (or clears) it as needed
  */
-			if (false && !e._xseen.rendererHasControls) {
+			if (!e._xseen.rendererHasControls) {
 				if (e._xseen.sceneInfo.useDeviceOrientation) {
 					if (e._xseen.track == 'object') {	// tracking scene object
 						e._xseen.sceneInfo.CameraControl = new THREE.DeviceOrientationControls(e._xseen.target, true);
@@ -3854,8 +3889,8 @@ XSeen.Tags.camera = {
 					} else if (e._xseen.track == 'trackball') {
 						//console.log ('Trackball');
 					} else if (e._xseen.track == 'none') {
-						//console.log ('No tracking');
-						e._xseen.rendererHasControls = true;
+						console.log (e.id + ' has NO tracking');
+						e._xseen.rendererHasControls = false;
 					} else {
 						console.log ('Something else');
 					}
@@ -3869,7 +3904,12 @@ XSeen.Tags.camera = {
 			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
 			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
-	'fin'	: function (e, p) {},
+	'fin'	: function (e, p) 
+		{
+			e.setActive = function () {
+				XSeen.CameraManager.setActive(this);
+			}
+		},
 	'event'	: function (ev, attr)
 		{
 		},
@@ -3913,8 +3953,11 @@ XSeen.Parser.defineTag ({
 XSeen.Tags.fog = {
 	'init'	: function (e, p) 
 		{
+			
+			console.log ('Creating FOG with color ' + XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color));
+			console.log (e._xseen.attributes.color);
 			var fog = new THREE.Fog (
-						e._xseen.attributes.color,
+						 XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color),
 						e._xseen.attributes.near,
 						e._xseen.attributes.far);
 
@@ -4242,11 +4285,34 @@ XSeen.Parser.defineTag ({
 
 
 XSeen.Tags.light = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				//var type = XSeen.Tags.light._saveAttributes (e);
+				XSeen.Tags.light._processChange (e);
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+	'_processChange'	: function (e, attributeName, value) {
+			var lamp, color, intensity;
+			color = e._xseen.attributes.color;
+			intensity = e._xseen.attributes.intensity - 0;
+			lamp = e._xseen.tagObject;
+			if (!e._xseen.attributes.on) {intensity = 0;}
+			lamp.intensity = intensity;
+			lamp.color = color;
+		},
+		
+		
+		
 	'init'	: function (e,p) 
 		{
 			var color = e._xseen.attributes.color;
 			var intensity = e._xseen.attributes.intensity - 0;
 			var lamp, type=e._xseen.attributes.type;
+			if (!e._xseen.attributes.on) {intensity = 0;}
 
 			if (type == 'point') {
 				// Ignored field -- e._xseen.attributes.location
@@ -4304,6 +4370,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'direction', dataType:'vec3', 'defaultValue':[0,0,-1], 'isAnimatable':true})
 		.defineAttribute ({'name':'cutoffangle', dataType:'float', 'defaultValue':3.14, 'isAnimatable':true})
 		.defineAttribute ({'name':'beamwidth', dataType:'float', 'defaultValue':1.57, 'isAnimatable':true})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.light._changeAttribute}]})
 		.addTag();
 // File: tags/metadata.js
 /*
@@ -5343,7 +5410,7 @@ XSeen.Tags.normals = {
 XSeen.Parser._addStandardAppearance = function (tag) {
 	tag
 		.defineAttribute ({'name':'selectable', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})
-		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['phong','pbr'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['wireframe', 'phong','pbr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 

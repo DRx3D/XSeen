@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+ * XSeen JavaScript Library
+ * http://xseen.org/
+ *
+ * (C)2017 Daly Realism, Los Angeles
+ * 
+
+Dual licensed under the MIT and GPL licenses.
+See details at http://xseen.org/license
+
+-->
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>XSeen: AR Mode with Camera Background</title>
+		<style>
+			body { margin: 0; }
+			#xscene {border:0; }
+		</style>
+		<script src='../ExternalLibraries/XSeenExternals.js'></script>
+		<script src='../ExternalLibraries/WebVR.js'></script>
+		<link rel='stylesheet' type='text/css' href='xseen.css?V=1'>
+		<script src='../Release/XSeen.js'></script>
+		<script src='../src/tags/background.js'></script>
+
+		<style>
+.sceneLabels {z-index:999999; position:absolute; font-family:arial,Helvetica,"sans serif"; font-size:82%; }
+.xseen-screen-drag {cursor:move; border-top-width:10px; }
+.sceneLabels > div {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
+.sceneLabels > div.xseen-screen-drag {border-top-width:10px; border-bottom-width:10px; }
+#HUD {top:4px; left:30px; white-space:nowrap; overflow:scroll}
+		</style>
+	</head>
+	<body>
+		<x-scene width='600' height='600' transparent='true'>
+			<x-class3d id='Recenter'>
+				<x-style3d property='position' value='0 -3 0'></x-style3d>
+			</x-class3d>
+			<x-background id='SceneBackground' background='camera' color='tan' src='Resources/textures/Sphere/Foiano-della-Chiana.jpg' srcextension='png'></x-background>
+			<x-light id='Top_White' type='directional' color='.7 .7 .9' direction='0 -1 0'></x-light>
+			<x-light id='Front' type='directional' color='.8 .8 0' direction='+.866 -.5 0'></x-light>
+			<x-light id='LeftRear' type='directional' color='.8 .8 0' direction='-.707 -.5 -.5'></x-light>
+			<x-light id='Top_Red' type='directional' color='.6 0 0' direction='0 -1 0'></x-light>
+			<x-light id='Bottom_Gray' type='directional' color='.4 .4 .4' direction='0 1 0'></x-light>
+			<x-model id='model' class3d='Recenter' src='Resources/models/Opel-GT-Retopo/scene.gltf'  playonload='*'></x-model>
+			<x-camera id='SceneCamera' type='perspective' track='device' position='10 0 15'></x-camera>
+		</x-scene>
+		<div id='XSeenLog'></div>
+
+	</body>
+</html>
+
+

@@ -365,7 +365,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':500})
 		.defineAttribute ({'name':'background', dataType:'string', 'defaultValue':'sky', enumeration:['sky', 'cube', 'sphere', 'fixed', 'camera'], isCaseInsensitive:true})
-		.defineAttribute ({'name':'srcExtension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpgsky', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'srcextension', dataType:'string', 'defaultValue':'jpg', enumeration:['jpg', 'jpeg', 'png', 'gif'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'srcfront', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcback', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
 		.defineAttribute ({'name':'srcleft', dataType:'string', 'defaultValue':'', 'isAnimatable':false})

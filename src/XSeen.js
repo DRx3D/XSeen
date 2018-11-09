@@ -52,6 +52,7 @@
  *	0.7.39: Added support for wireframe switch to all solids
  *	0.7.40:	Added support for DOM changes to lights
  *	0.7.41:	Fixed use of color in fog
+ *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
 
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop

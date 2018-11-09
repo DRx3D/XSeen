@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.41+7_f568368
- *  Built Thu Nov  8 10:25:35 2018
+ *  XSeen V0.7.41+7_ef57df1
+ *  Built Thu Nov  8 17:22:49 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -2711,6 +2711,7 @@ XSeen.Parser = {
  *	0.7.39: Added support for wireframe switch to all solids
  *	0.7.40:	Added support for DOM changes to lights
  *	0.7.41:	Fixed use of color in fog
+ *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
 
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
@@ -4110,7 +4111,7 @@ XSeen.Tags.label = {
 	
 	'fin'	: function (e, p)
 		{
-			var labelElement, targetElement, targetPosition, labelPosition, positionedInSpace;
+			var labelElement, targetElement, leaderColor, defaultColor, targetPosition, labelPosition, positionedInSpace;
 			var material;
 			labelElement = e.getElementsByTagName('div')[0];
 			labelPosition = new THREE.Vector3(0, 0, -1);	// center of near-clipping plane
@@ -4119,11 +4120,15 @@ XSeen.Tags.label = {
 				e._xseen.attributes.position.z = -1;
 				positionedInSpace = true;
 			}
-			material = new THREE.LineBasicMaterial( {color: XSeen.Parser.Types.colorRgbInt(e._xseen.attributes['leadercolor']), } );
+			//material = new THREE.LineBasicMaterial( {color: XSeen.Parser.Types.colorRgbInt(e._xseen.attributes['leadercolor']), } );
+			defaultColor = e._xseen.attributes['leadercolor'];
 
 			e._xseen.labelObj = [];
 			for (var ii=0; ii<e._xseen.targets.length; ii++) {
-				targetElement = e._xseen.targets[ii];
+				targetElement = e._xseen.targets[ii].element;
+				leaderColor = (typeof(e._xseen.targets[ii].leaderColor) == 'undefined') ? defaultColor : e._xseen.targets[ii].leaderColor;
+				material = new THREE.LineBasicMaterial( {color: XSeen.Parser.Types.colorRgbInt(leaderColor), } );
+
 				targetPosition = new THREE.Vector3();
 				targetElement._xseen.tagObject.getWorldPosition(targetPosition);
 
@@ -4242,7 +4247,8 @@ XSeen.Tags.leader = {
 		{
 			var targetElement = document.getElementById (e._xseen.attributes.target);
 			if (typeof(targetElement) === 'undefined' || targetElement === null) {return;}
-			p._xseen.targets.push (targetElement);
+			var ele = {'element': targetElement, 'leaderColor': e._xseen.attributes.leadercolor};
+			p._xseen.targets.push (ele);
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},
@@ -4266,6 +4272,7 @@ XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.leader.event
 						})
 		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'leadercolor', dataType:'color'})
 		.addTag();
 // File: tags/light.js
 /*

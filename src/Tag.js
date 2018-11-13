@@ -245,7 +245,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			console.log ('Found ' + tagName);
+			//console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -256,11 +256,11 @@ XSeen.Parser = {
 			var tagEntry;
 			if (typeof(XSeen.Parser.Table[tagName]) == 'undefined') {
 				XSeen.LogDebug("Unknown node: " + tagName + '. Skipping all children.');
-				console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
+				//console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
 				return;
 			} else if (element._xseen.parseComplete) {	// tag already parsed. Display messge and ignore tag
 				XSeen.LogDebug("Tag already parsed: " + tagName + '. Skipping all children.');
-                                console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
+				//console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
 			} else {
 				tagEntry = XSeen.Parser.Table[tagName];
 				if (typeof(element._xseen) == 'undefined') {
@@ -769,7 +769,7 @@ XSeen.Parser = {
 						quat = this.rotation2Quat (axisAngle);
 						
 					} else if (value.substring(0,2) == 'q(') {
-						console.log ('No support yet for quaternion form of rotation');
+						console.log ('WARN: No support yet for quaternion form of rotation');
 						value = def;
 						eulerAngles = this.vec3 (value, def, true, []);
 	

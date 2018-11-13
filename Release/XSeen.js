@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.41+7_ef57df1
- *  Built Thu Nov  8 17:22:49 2018
+ *  XSeen V0.7.44+7_9f7b1bf
+ *  Built Mon Nov 12 17:11:30 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1578,13 +1578,13 @@ XSeen.onLoad = function() {
         	loadExternalSuccess = function (userdata) {
                 	var e = userdata.e;
 					return function (response) {
-							console.log('Loading of external XSeen complete');
+							console.log('INFO: Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
 							var rootNode = xmlDoc.getElementsByTagName('x-scene');
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
-								console.log('Adding external node: ' + nodes[0].nodeName);
+								//console.log('Info: Adding external node: ' + nodes[0].nodeName);
 								e.appendChild(nodes[0]);
 							}
 					}
@@ -1601,10 +1601,10 @@ XSeen.onLoad = function() {
 						},
 						// onError callback
 						function ( err ) {
-							console.log ('Response Code: ' + err.target.status);
-							console.log ('Response URL: ' + err.target.responseURL);
-							console.log ('Response Text\n' + err.target.responseText);
-							console.error( 'External source loader: An error happened' );
+							console.log ('WARN: Response Code: ' + err.target.status);
+							console.log ('WARN: Response URL: ' + err.target.responseURL);
+							console.log ('WARN: Response Text\n' + err.target.responseText);
+							console.error( 'WARN: External source loader: An error happened' );
 						}
 			);
 	};
@@ -1672,7 +1672,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		//console.log ('INFO: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -1683,7 +1683,7 @@ XSeen.onLoad = function() {
 	});
 
 	if (!(typeof(XSeen.Runtime.Attributes.src) == 'undefined' || XSeen.Runtime.Attributes.src == '')) {
-		console.log ('*** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
+		console.log ('INFO: *** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
 		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
 	}
 
@@ -1703,10 +1703,10 @@ XSeen.onLoad = function() {
 	}
 	if (XSeen.Runtime.isTransparent) {
 		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
-		console.log ('Creating a transparent rendering canvas.');
+		//console.log ('INFO: Creating a transparent rendering canvas.');
 	} else {
 		Renderer = new THREE.WebGLRenderer();
-		console.log ('Creating a opaque rendering canvas.');
+		//console.log ('INFO: Creating a opaque rendering canvas.');
 	}
 	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
@@ -1769,7 +1769,6 @@ XSeen.onLoad = function() {
 	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	console.log ('Splash screen');
 	
 // Set up control screen (FullScreen / Splitscreen / VR) buttons
 	if (XSeen.Runtime.Attributes.fullscreen) {
@@ -2106,7 +2105,7 @@ XSeen.Parser = {
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			console.log ('Found ' + tagName);
+			//console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -2117,11 +2116,11 @@ XSeen.Parser = {
 			var tagEntry;
 			if (typeof(XSeen.Parser.Table[tagName]) == 'undefined') {
 				XSeen.LogDebug("Unknown node: " + tagName + '. Skipping all children.');
-				console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
+				//console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
 				return;
 			} else if (element._xseen.parseComplete) {	// tag already parsed. Display messge and ignore tag
 				XSeen.LogDebug("Tag already parsed: " + tagName + '. Skipping all children.');
-                                console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
+				//console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
 			} else {
 				tagEntry = XSeen.Parser.Table[tagName];
 				if (typeof(element._xseen) == 'undefined') {
@@ -2630,7 +2629,7 @@ XSeen.Parser = {
 						quat = this.rotation2Quat (axisAngle);
 						
 					} else if (value.substring(0,2) == 'q(') {
-						console.log ('No support yet for quaternion form of rotation');
+						console.log ('WARN: No support yet for quaternion form of rotation');
 						value = def;
 						eulerAngles = this.vec3 (value, def, true, []);
 	
@@ -2712,6 +2711,8 @@ XSeen.Parser = {
  *	0.7.40:	Added support for DOM changes to lights
  *	0.7.41:	Fixed use of color in fog
  *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
+ *	0.7.43:	Added mutation control of active, near, far in fog.
+ *	0.7.44:	Removed a number of console log debug output statements from XSeen
 
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
@@ -2740,11 +2741,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 41,
+					'_Patch'		: 44,
 					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-11-08',
+					'_RDate'		: '2018-11-12',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -3952,6 +3953,32 @@ XSeen.Parser.defineTag ({
  // Control Node definitions
 
 XSeen.Tags.fog = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				//var type = XSeen.Tags.light._saveAttributes (e);
+				XSeen.Tags.fog._processChange (e);
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+	'_processChange'	: function (e, attributeName, value) {
+			if (e._xseen.attributes.active) {
+				var fog, color, near, far;
+				fog = new THREE.Fog (
+						 XSeen.Parser.Types.colorRgbInt(e._xseen.attributes.color),
+						e._xseen.attributes.near,
+						e._xseen.attributes.far);
+				e._xseen.tagObject = fog;
+				e._xseen.sceneInfo.SCENE.fog = fog;
+			} else {
+				e._xseen.sceneInfo.SCENE.fog = null;
+			}
+		},
+		
+		
+		
 	'init'	: function (e, p) 
 		{
 			
@@ -3963,7 +3990,9 @@ XSeen.Tags.fog = {
 						e._xseen.attributes.far);
 
 			e._xseen.tagObject = fog;
-			e._xseen.sceneInfo.SCENE.fog = fog;
+			if (e._xseen.attributes.active) {
+				e._xseen.sceneInfo.SCENE.fog = fog;
+			}
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr)
@@ -3984,9 +4013,11 @@ XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.fog.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'active', dataType:'boolean', 'defaultValue':'true'})
 		.defineAttribute ({'name':'color', dataType:'color', 'defaultValue':'white'})
 		.defineAttribute ({'name':'near', dataType:'float', 'defaultValue':'1'})
 		.defineAttribute ({'name':'far', dataType:'float', 'defaultValue':'1'})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.fog._changeAttribute}]})
 		.addTag();
 // File: tags/group.js
 /*
@@ -4695,12 +4726,12 @@ XSeen.Tags.scene = {
 	'addScene': function () {
 			// Render all Children
 			var e = XSeen.Runtime.RootTag;
-			console.log ('Adding children to SCENE');
+			//console.log ('INFO: Adding children to SCENE');
 			e._xseen.idReference = e._xseen.idReference || Array();
 			e._xseen.children.forEach (function (child, ndx, wholeThing)
 				{
 					if (e._xseen.idReference[child.id] === undefined) {
-						console.log('Adding child of type ' + child.type + ' (' + child.name + '/' + child.id + ') with ' + child.children.length + ' children to THREE scene');
+						//console.log('Adding child of type ' + child.type + ' (' + child.name + '/' + child.id + ') with ' + child.children.length + ' children to THREE scene');
 						e._xseen.sceneInfo.SCENE.add(child);
 						e._xseen.idReference[child.id] = child;
 						//console.log('Check for successful add');

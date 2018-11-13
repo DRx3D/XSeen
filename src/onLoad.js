@@ -35,13 +35,13 @@ XSeen.onLoad = function() {
         	loadExternalSuccess = function (userdata) {
                 	var e = userdata.e;
 					return function (response) {
-							console.log('Loading of external XSeen complete');
+							console.log('INFO: Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
 							var rootNode = xmlDoc.getElementsByTagName('x-scene');
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
-								console.log('Adding external node: ' + nodes[0].nodeName);
+								//console.log('Info: Adding external node: ' + nodes[0].nodeName);
 								e.appendChild(nodes[0]);
 							}
 					}
@@ -58,10 +58,10 @@ XSeen.onLoad = function() {
 						},
 						// onError callback
 						function ( err ) {
-							console.log ('Response Code: ' + err.target.status);
-							console.log ('Response URL: ' + err.target.responseURL);
-							console.log ('Response Text\n' + err.target.responseText);
-							console.error( 'External source loader: An error happened' );
+							console.log ('WARN: Response Code: ' + err.target.status);
+							console.log ('WARN: Response URL: ' + err.target.responseURL);
+							console.log ('WARN: Response Text\n' + err.target.responseText);
+							console.error( 'WARN: External source loader: An error happened' );
 						}
 			);
 	};
@@ -129,7 +129,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		console.log ('Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		//console.log ('INFO: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -140,7 +140,7 @@ XSeen.onLoad = function() {
 	});
 
 	if (!(typeof(XSeen.Runtime.Attributes.src) == 'undefined' || XSeen.Runtime.Attributes.src == '')) {
-		console.log ('*** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
+		console.log ('INFO: *** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
 		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
 	}
 
@@ -160,10 +160,10 @@ XSeen.onLoad = function() {
 	}
 	if (XSeen.Runtime.isTransparent) {
 		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
-		console.log ('Creating a transparent rendering canvas.');
+		//console.log ('INFO: Creating a transparent rendering canvas.');
 	} else {
 		Renderer = new THREE.WebGLRenderer();
-		console.log ('Creating a opaque rendering canvas.');
+		//console.log ('INFO: Creating a opaque rendering canvas.');
 	}
 	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
@@ -226,7 +226,6 @@ XSeen.onLoad = function() {
 	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	console.log ('Splash screen');
 	
 // Set up control screen (FullScreen / Splitscreen / VR) buttons
 	if (XSeen.Runtime.Attributes.fullscreen) {

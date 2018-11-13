@@ -53,6 +53,8 @@
  *	0.7.40:	Added support for DOM changes to lights
  *	0.7.41:	Fixed use of color in fog
  *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
+ *	0.7.43:	Added mutation control of active, near, far in fog.
+ *	0.7.44:	Removed a number of console log debug output statements from XSeen
 
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
@@ -81,11 +83,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 7,
-					'_Patch'		: 41,
+					'_Patch'		: 44,
 					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-11-08',
+					'_RDate'		: '2018-11-12',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

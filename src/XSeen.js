@@ -55,39 +55,48 @@
  *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
  *	0.7.43:	Added mutation control of active, near, far in fog.
  *	0.7.44:	Removed a number of console log debug output statements from XSeen
-
- *	
+ *
+ *		Mostly events and support W3C Immersive Web AR display concepts
+ *	0.8.45:	Created new file ($.js) for general purpose tag support functions
+ *	0.8.46:	Added mutation support to 'group' tag
+ *	0.8.47: Fixed 'animate delay="x" ...' to only introduce a delay on the initial animation
+ *	0.8.48:	Added support for group mutation in 'solids.js'
+ *	0.8.49:	Added support for 'emissive' color in 'solids.js'
+ *	0.8.50: Cleaned up & refined splash screen placement
+ *	0.8.51: Added camera and device normals to events
+ *	0.8.52: Created XSeen drag (mousemove) event
+ *	0.8.53:	Improved support for device camera (see TODO note below) to match W3C Immersive Web concepts (full-screen)
+ *		Multi-touch events
+ 
+ *TODO:
+ *	Update to latest THREE and various libraries (V0.9)
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
- *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
- *	Create XSeen logo
+ *	Create event to start animation loop (xseen-readyanimate). This happens after multi-pass parsing is complete.
  *	Resolve CAD positioning issue
- *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
- *	--	Above is desired for 0.7 release
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
- *	Audio
+ *	Audio (V0.9)
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
  *	Fog needs mutation functionality
- *	Camera needs fixing when multiple cameras with different controls are in use
+ *	Scene camera needs fixing when multiple cameras with different controls are in use
  *	Add Orthographic camera
+ * xx Create XSeen logo
+ * xx Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  * 
  */
-
-//var Renderer = new THREE.WebGLRenderer();
-//var Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
-					'_Minor'		: 7,
-					'_Patch'		: 44,
+					'_Minor'		: 8,
+					'_Patch'		: 53,
 					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',
-					'_RDate'		: '2018-11-12',
+					'_RDate'		: '2019-03-07',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -159,6 +168,7 @@ XSeen.Runtime = {
 				'ruleset'	: [],					// Specific ruleset
 				'idLookup'	: []	},				// Cross-reference into 'rulesets' by 'id'
 			'selectable'			: [],			// Selectable geometry elements
+			'_deviceCameraElement'	: 0,			// Element for camera connection. May be deprecated
 			'isVrCapable'			: false,		// WebVR ready to run && access to VR device 
 			'hasDeviceOrientation'	: false,		// device has Orientation sensor
 			'hasVrImmersive'		: false,		// hasDeviceOrientation && stereographic capable (=== TRUE)
@@ -168,6 +178,7 @@ XSeen.Runtime = {
 			'isProcessingResize'	: false,		// semaphore for resizing processing
 			'mediaAvailable'		: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),	// flag for device media availability
 			'isTransparent'			: false,		// flag for XSeen transparent background
+			'allowAR'				: false,		// flag for allowing AR (does not presume camera permission)
 			};										// Need place-holder for xR scene (if any -- tbd)
 			
 XSeen.RenderFrame = function()

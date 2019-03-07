@@ -128,7 +128,7 @@ XSeen.Tags.animate = {
 
 	'fin'	: function (e,p)
 		{
-			console.log ('Check e._xseen.key for correct values');
+			//console.log ('Check e._xseen.key for correct values');
 
 			var duration = e._xseen.attributes.duration * 1000;	// TEMP: Convert to milliseconds
 			var delay = e._xseen.attributes.delay * 1000;		// Convert to milliseconds
@@ -150,7 +150,7 @@ XSeen.Tags.animate = {
 			var interpolation, startingValue;
 			var attrObject = e._xseen.attrObject;
 			var toAttribute = e._xseen.attributes.attribute;
-			console.log ('Check for keyframes ... count: ' + e._xseen.key.length);
+			//console.log ('Check for keyframes ... count: ' + e._xseen.key.length);
 			if (e._xseen.key.length == 0) {		// Block handles no key frames
 				var target = XSeen.Tags.animate._getTo (e, e._xseen.attrObject, e._xseen.attributes.attribute);
 				if (target.to === null) {return; }
@@ -189,6 +189,7 @@ XSeen.Tags.animate = {
 
 			
 				tween	.delay(delay)
+						.repeatDelay(0)
 						.repeat(repeat)
 						.interpolation(target.interpolation)
 						.yoyo(yoyo);
@@ -220,6 +221,7 @@ XSeen.Tags.animate = {
 				tween0 = new TWEEN.Tween(fieldTHREE, e._xseen.tagObject);
 				tween0	.to(e._xseen.key[0].to, duration)
 						.delay(delay)
+						.repeatDelay(0)
 						.interpolation(e._xseen.key[0].interpolation)
 						.easing(TWEEN.Easing[e._xseen.key[0].easingType][e._xseen.key[0].easing]);
 				tweenP = tween0;
@@ -227,13 +229,14 @@ XSeen.Tags.animate = {
 					tween = new TWEEN.Tween(fieldTHREE, e._xseen.tagObject);
 					tween	.to(e._xseen.key[ii].to, duration)
 							.delay(delay)
+							.repeatDelay(0)
 							.interpolation(e._xseen.key[ii].interpolation)
 							.easing(TWEEN.Easing[e._xseen.key[ii].easingType][e._xseen.key[ii].easing]);
 					tweenP.chain(tween);
 					tweenP = tween;
 				}
 				if (repeat === Infinity) {
-					console.log ('test');
+					//console.log ('test');
 					tween.chain(tween0);
 				}
 				tween0.start();
@@ -251,7 +254,7 @@ XSeen.Tags.animate = {
  *	All handlers (goes into .handlers)
  *	TWEEN object
  */
-			console.log ('Close up shop for animate...');
+			//console.log ('Close up shop for animate...');
 			e._xseen.handlers = {};
 			e._xseen.handlers.setstart = XSeen.Tags.animate.setstart;
 			e._xseen.handlers.setstop = XSeen.Tags.animate.setstop;
@@ -261,18 +264,18 @@ XSeen.Tags.animate = {
 
 	'event'	: function (ev, attr)
 		{
-			console.log ('Handling event ... for ' + attr);
+			//console.log ('Handling event ... for ' + attr);
 		},
 
 
 	'setstart'	: function (ev)
 		{
-			console.log ('Starting animation');
+			//console.log ('Starting animation');
 			XSeen.Tags.animate.destination._xseen.animating.start();
 		},
 	'setstop'	: function (ev) 
 		{
-			console.log ('Stopping animation');
+			//console.log ('Stopping animation');
 			XSeen.Tags.animate.destination._xseen.animating.stop();
 		},
 /*
@@ -282,12 +285,12 @@ XSeen.Tags.animate = {
  */
 	'setpause'	: function (ev) 
 		{
-			console.log ('Pausing (really stopping) animation');
+			//console.log ('Pausing (really stopping) animation');
 			XSeen.Tags.animate.destination._xseen.animating.stop();
 		},
 	'setresetstart'	: function (ev) 	// TODO: Create seperate 'reset' method
 		{
-			console.log ('Reset and start animation');
+			//console.log ('Reset and start animation');
 			XSeen.Tags.animate.destination._xseen.animatingField = XSeen.Tags.animate.destination._xseen.initialValue;
 			XSeen.Tags.animate.destination._xseen.animating.start();
 		},
@@ -363,7 +366,7 @@ XSeen.Tags.key = {
 	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr)
 		{
-			console.log ('Handling event ... for ' + attr);
+			//console.log ('Handling event ... for ' + attr);
 		},
 };
 

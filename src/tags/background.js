@@ -56,21 +56,21 @@ XSeen.Tags.background = {
 			// This function doesn't really work because the 'enumerateDevices' method runs
 			// asynchronously. Need to figure out some other way to check for existence.
 			function cameraExists () {
-				const constraints = {video: {facingMode: "environment"}};
+				var constraints = {video: {facingMode: {exact: "environment"}}};
 				function handleError(error) {
 					//console.error('Reeeejected!', error);
 					console.log ('Device camera not available -- ignoring');
 					exists = false;
 				}
-
 				var exists = false;
 				navigator.mediaDevices.enumerateDevices(constraints)
 					.then(gotDevices).catch(handleError);
 
 				function gotDevices(deviceInfos) {
+					console.log (deviceInfos);
 					for (var i = 0; i !== deviceInfos.length; ++i) {
 						var deviceInfo = deviceInfos[i];
-						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind);
+						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
 						exists = true;
 					}
 				}
@@ -81,7 +81,7 @@ XSeen.Tags.background = {
 			var t = e._xseen.attributes.radius;
 			e._xseen.sphereRadius = (t <= 0) ? 500 : t;
 			e._xseen.sphereDefined = false;
-			e._xseen.videoState = 'undefined';
+			e._xseen.videoState = 'unavailable';
 			
 			// Need to declare photosphere here so that it can be put into the scene graph
 			var geometry = new THREE.SphereBufferGeometry( e._xseen.sphereRadius, 60, 40 );
@@ -99,7 +99,7 @@ XSeen.Tags.background = {
 			e.parentNode._xseen.children.push(e._xseen.sphere);
 			
 			// Define video support
-			if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent && cameraExists()) {
+			if (XSeen.Runtime.allowAR && cameraExists()) {
 				var video = document.createElement( 'video' );
 				video.setAttribute("autoplay", "1"); 
 				video.height			= XSeen.Runtime.SceneDom.height;
@@ -109,6 +109,7 @@ XSeen.Tags.background = {
 				video.style.position	= 'absolute';
 				video.style.top			= '0';
 				video.style.left		= '0';
+				video.style['object-fit'] = 'cover';
 				video.style.zIndex		= -1;
 				e._xseen.video			= video;
 				XSeen.Runtime.RootTag.appendChild (video);
@@ -132,8 +133,8 @@ XSeen.Tags.background = {
 			e._xseen.src = e._xseen.attributes.src;
 			e._xseen.srcType = XSeen.Tags.background._checkSrc (e._xseen.src);
 			if (type == 'camera') {
-				if (e._xseen.videoState == 'undefined') {			// Rollback mechanism
-					console.log ('Device camera requested, but not available or defined.');
+				if (e._xseen.videoState == 'unavailable') {			// Rollback mechanism
+					console.log ('Device camera requested, but AR mode is not available.');
 					type = 'sky';
 				} else if (e._xseen.videoState == 'running') {
 					console.log ('Device camera requested, but it is already running.');
@@ -162,12 +163,18 @@ XSeen.Tags.background = {
 				e._xseen.sphere.material.transparent = true;
 				e._xseen.sphere.material.opacity = 0.0;
 				e._xseen.sceneInfo.SCENE.background = e._xseen.color;
+				XSeen.Runtime._deviceCameraElement = 0;
 			
 			} else if (e._xseen.backgroundType == 'camera') {
 				e._xseen.sphere.material.transparent = true;
 				e._xseen.sphere.material.opacity = 0.0;
 				e._xseen.sceneInfo.SCENE.background = null;
-				XSeen.Tags.background._setupCamera(e);
+				if (document.documentElement._isFullScreen()) {		// Running full-screen, connect camera
+					XSeen.IW.connectCamera (e);
+				} else {											// Not full-screen, save element for later
+					XSeen.Runtime._deviceCameraElement = e;
+				}
+				//XSeen.Tags.background._setupCamera(e);
 
 			} else if (e._xseen.backgroundType == 'fixed') {
 				e._xseen.sphere.material.transparent = true;
@@ -176,9 +183,11 @@ XSeen.Tags.background = {
 				e._xseen.loadTexture.wrapS = THREE.ClampToEdgeWrapping;
 				e._xseen.loadTexture.wrapT = THREE.ClampToEdgeWrapping;
 				e._xseen.sceneInfo.SCENE.background = e._xseen.loadTexture;
+				XSeen.Runtime._deviceCameraElement = 0;
 
 			} else {
 				XSeen.Tags.background._loadBackground (e);
+				XSeen.Runtime._deviceCameraElement = 0;
 			}
 		},
 		
@@ -189,9 +198,12 @@ XSeen.Tags.background = {
  *	Perhaps impose limitation that a XSeen cannot change to a video background
  *	May require capability to turn on/off background node
  */
+ 
+// This method has been replaced by XSeen.IW.connectCamera and XSeen.IW.disconnectCamera
 	'_setupCamera'		: function (e)
 		{
-			const constraints = {video: {facingMode: "environment"}};
+			var constraints = {video: {facingMode: {exact: "environment"}}};
+			var constraints = {video: {facingMode: "environment"}};
 			if (e._xseen.videoState != 'defined') {
 				console.log ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
 				return;
@@ -199,7 +211,8 @@ XSeen.Tags.background = {
 			function handleSuccess(stream) {
 				e._xseen.video.srcObject = stream;
 				e._xseen.videoState = 'running';
-				console.log ('Camera/video engaged and connected to display.');
+				console.log ('Camera/video (' + stream.id + ') engaged and connected to display.');
+				console.log (stream);
 			}
 			function handleError(error) {
 				//console.error('Reeeejected!', error);

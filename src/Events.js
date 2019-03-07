@@ -33,7 +33,44 @@
  *	User "button" click
  *
  */
-
+ 
+/*
+ * New translation of HTML events to XSeen events
+ #	Treat all "touch" (mousedown, finger, etc.) events the same. The same goes
+ #	for "untouch" (mouseup,...). 
+ #	Is it worthwhile to treat all touch events as a single 'event' type?
+ #	That would require user code to handle all touch events, not just "click" or "touchstart"
+ #	with a resultant impact on performance; however, since XSeen handles all of those that may
+ #	not be significant.
+ #
+ #	Since HTML separates all of them, do the same; except treat mouse* as a single-touch
+ #	equivalent of touch*.
+ #	click & dblclick are a little different. They don't have 'touch*' equivalents.
+ #	All screen interaction events are HTML5 touch* events and include the following:
+ #	* Camera detail (orientation, position, FOV, etc.)
+ #	* Screen position
+ #	* All event payloads need to contain intersected object details IFF the ray implied 
+ #		by the touch intersects an object. Otherwise, the object details are null.
+ #	 - Object details are:
+ #		- Specific element
+ #		- Group element (need to understand this better)
+ #		- Hit point (coordinates)
+ #		- Object/element (?) world position
+ #		- Geometry & appearance details (color, triangle, texture coordinates, normal)
+ 
+ *	HTML5				XSeen (all prefixed with 'xseen-')
+ *	 mousedown			 touchstart
+ *	 touchstart			 touchstart
+ *	 mousemove			 touchmove
+ *	 touchmove			 touchmove
+ *	 mouseup			 touchend
+ *	 touchend			 touchend
+ *	 touchcancel		 touchcancel (?)
+ *	 click				 touchtap
+ *	 dblckick			 touchdbltap
+ *	 deviceorientation	 device
+ */
+ 
 var XSeen = XSeen || {};
 XSeen.Events = {
 		'MODE_NAVIGATE'		: 1,
@@ -46,6 +83,21 @@ XSeen.Events = {
 		'tag'				: {},
 		'raycaster'			: new THREE.Raycaster(),
 		'cursorScreen'		: new THREE.Vector2(),
+		'device'			: {'absolute':true, 'pitch':0, 'roll':0, 'yaw':0},
+		'Translate'			: {
+								'UNKNOWN'		: {event:'xseen-unknown', type:'unknown', source:'unknown'},
+								'mousedown'		: {event:'xseen-touch', type:'start'},
+								'mouseup'		: {event:'xseen-touch', type:'end'},
+								'mousemove'		: {event:'xseen-drag', type:'move'},
+								'mouseover'		: {event:'xseen-hover', type:'hover'},
+								'click'			: {event:'xseen-touch', type:'click'},
+								'dblclick'		: {event:'xseen-touch', type:'click2'},
+								'touchstart'	: {event:'xseen-touch', type:'start'},
+								'touchend'		: {event:'xseen-touch', type:'end'},
+								'touchcancel'	: {event:'xseen-touch', type:'start'},
+								'touchmove'		: {event:'xseen-drag', type:'move'},
+								'deviceorientation'	: {event:'xseen-device', type:'change'},
+								},
 		
 /*
  * General XSeen event handler. All XSeen events get processed here during the CAPTURE phase
@@ -68,11 +120,17 @@ XSeen.Events = {
 						//console.log ('... ' + ev.x + ', ' + ev.y);
 						var xEvents = XSeen.Events;
 						var Runtime = ev.currentTarget._xseen.sceneInfo;
-						if (ev.type == 'mousedown') {
+						var eventName;
+						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
 							xEvents.redispatch = true;
 							xEvents.mode = xEvents.MODE_SELECT;
-							xEvents.cursorScreen.x = ev.clientX * Runtime.Size.iwidth  * 2 - 1;
-							xEvents.cursorScreen.y = -ev.clientY * Runtime.Size.iheight * 2 + 1;
+							if (ev.type == 'mousedown') {
+								xEvents.cursorScreen.x =  ev.clientX * Runtime.Size.iwidth  * 2 - 1;
+								xEvents.cursorScreen.y = -ev.clientY * Runtime.Size.iheight * 2 + 1;
+							} else if (ev.type == 'touchstart') {
+								xEvents.cursorScreen.x =  ev.touches[0].clientX * Runtime.Size.iwidth  * 2 - 1;
+								xEvents.cursorScreen.y = -ev.touches[0].clientY * Runtime.Size.iheight * 2 + 1;
+							}
 
 							xEvents.raycaster.setFromCamera(xEvents.cursorScreen, Runtime.Camera);
 							var hitGeometryList = xEvents.raycaster.intersectObjects (Runtime.selectable, true);
@@ -89,7 +147,10 @@ XSeen.Events = {
 								if (typeof(xEvents.object.object.userData) != 'undefined' && typeof(xEvents.object.object.userData.root) != 'undefined') {
 									xEvents.tag = xEvents.tag.root;
 								}
-								// TODO: Create mousemove listener on root tag
+								// TODO: Create mousemove listener on root tag (DONE?)
+								XSeen.Runtime.RootTag.addEventListener ('mousemove', XSeen.Events.xseen, true);
+								XSeen.Runtime.RootTag.addEventListener ('touchmove', XSeen.Events.xseen, true);
+
 							} else {
 								xEvents.object = {};
 								xEvents.redispatch = false;
@@ -100,29 +161,47 @@ XSeen.Events = {
 						if ((xEvents.redispatch || ev.type == 'click' || ev.type == 'dblclick') && typeof(xEvents.object.object) !== 'undefined') {
 							//console.log ('Repropigate event');
 							// Generate an XSeen (Custom)Event of the same type and dispatch it
-							var newEv = new CustomEvent('xseen-touch', xEvents.propertiesCursor(ev, xEvents.object));
+							
+							if (typeof(xEvents.Translate[ev.type]) == 'undefined') {
+								console.log ('Unknown event type -- ' + ev.type);
+								eventName = xEvents.Translate.UNKNOWN.event;
+							} else {
+								eventName = xEvents.Translate[ev.type].event;
+							}
+							var newEv = new CustomEvent(eventName, xEvents.propertiesCursor(ev, xEvents.object, xEvents));
 							xEvents.tag.dispatchEvent(newEv);
 							ev.stopPropagation();		// No propagation beyond this tag
 						} else {
 							//console.log ('Navigation mode...');
 						}
-						if (ev.type == 'mouseup') {
+						if (ev.type == 'mouseup' || ev.type == 'touchend' || ev.type == 'touchcancel') {
+							// Cancel mousemove EventListener to reduce event traffic and allow navigation to use it
+							XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
+							XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
 							xEvents.redispatch = false;
 							xEvents.mode = xEvents.MODE_NAVIGATION;
 						}
 					},
 
-		'propertiesCursor'	: function (ev, selectedObject)
+		'propertiesCursor'	: function (ev, selectedObject, xEvents)
 					{
+						//console.log ('Creating event detail for |' + ev.type + '|');
 						var properties = {
 								'detail':		{					// This object contains all of the XSeen data
-										'type':			ev.type,
+										'type':			xEvents.Translate[ev.type].type,
 										'originalType':	ev.type,
-										'originator':	selectedObject.object.userData,
+										//'originator':	selectedObject.object.userData,
+										'originator':	xEvents.tag,
+										'picker':		xEvents.tag._xseen.pickGroup,
 										'name':			selectedObject.object.name,
 										'distance':		selectedObject.distance,
 										'target':		selectedObject,
-										'position': {
+										'position': {				// Deprecated
+												'x': selectedObject.point.x,
+												'y': selectedObject.point.y,
+												'z': selectedObject.point.z,
+												},
+										'hitPosition': {			// Touch point on target
 												'x': selectedObject.point.x,
 												'y': selectedObject.point.y,
 												'z': selectedObject.point.z,
@@ -136,16 +215,66 @@ XSeen.Events = {
 												'x': 0.0,		// selectedObject.uv.x,
 												'y': 0.0,		// selectedObject.uv.y,
 												},
-										'screenX':	ev.screenX,
-										'screenY':	ev.screenY,
-										'clientX':	ev.clientX,
-										'clientY':	ev.clientY,
+										'targetWorldPosition': selectedObject.object.getWorldPosition(),
+										'pickerWorldPosition': xEvents.tag._xseen.pickGroup._xseen.tagObject.getWorldPosition(),
+										'cameraNormal': {		// Where the camera is pointing
+												'x': 0,
+												'y': 0,
+												'z': -1,
+												},
+										//'cameraPosition': selectedObject.object.userData._xseen.sceneInfo.Camera.getWorldPosition(),
+										'cameraPosition': xEvents.tag._xseen.sceneInfo.Camera.getWorldPosition(),
+										'deviceOrientation': {	// Device orientation from the browser
+												'pitch': 	xEvents.device.pitch,
+												'roll':		xEvents.device.roll,
+												'yaw':		xEvents.device.yaw,
+												},
+										'screenX':	0,			// Filled in below
+										'screenY':	0,
+										'clientX':	0,
+										'clientY':	0,
 										'ctrlKey':	ev.ctrlKey,
 										'shiftKey':	ev.shiftKey,
 										'altKey': 	ev.altKey,
 										'metaKey':	ev.metaKey,
 										'button':	ev.button,
 										'buttons':	ev.buttons,
+												},
+								'bubbles':		ev.bubbles,
+								'cancelable':	ev.cancelable,
+								'composed':		ev.composed,
+							};
+						if (typeof(ev.clientX) != 'undefined' && !isNaN(ev.clientX)) {
+							properties.detail.clientX = ev.clientX;
+							properties.detail.clientY = ev.clientY;
+							properties.detail.screenX = ev.screenX;
+							properties.detail.screenY = ev.screenY;
+						} else if (typeof(ev.touches) != 'undefined' && typeof(ev.touches[0]) != 'undefined' && typeof(ev.touches[0].clientX) != 'undefined' && !isNaN(ev.touches[0].clientX)) {
+							properties.detail.clientX = ev.touches[0].clientX;
+							properties.detail.clientY = ev.touches[0].clientY;
+							properties.detail.screenX = ev.touches[0].screenX;
+							properties.detail.screenY = ev.touches[0].screenY;
+						}
+//						selectedObject.object.getWorldPosition (properties.detail.targetWorldPosition);
+//						properties.detail.targetWorldPosition = selectedObject.object.getWorldPosition();
+						return  properties;
+					},
+/*
+ *	Events for device state changes
+ *	Mostly this is deviceorientation events
+ */
+		'propertiesDevice'	: function (ev)
+					{
+						//console.log ('Creating event detail for |' + ev.type + '|');
+						var properties = {
+								'detail':		{					// This object contains all of the XSeen data
+										'type':			XSeen.Events.Translate[ev.type].type,
+										'originalType':	ev.type,
+										'deviceOrientation': {	// Device orientation from the browser
+												'pitch': 	XSeen.Events.device.pitch,
+												'roll':		XSeen.Events.device.roll,
+												'yaw':		XSeen.Events.device.yaw,
+												},
 												},
 								'bubbles':		ev.bubbles,
 								'cancelable':	ev.cancelable,
@@ -193,6 +322,42 @@ XSeen.Events = {
 						return  properties;
 					},
 };
+/*
+ *	The phone's coordinate system has bad breakpoints. The calculations here
+ *	convert everything to a RHS with Y-Up with breakpoints at the nadir and zenith.
+ *	This assumes that the phone is held landscape. Portrait orientation needs to
+ *	be further examined. Most phones are set to auto-rotate so that the top of the
+ *	application display is at the current top of the screen.
+ *
+ *	ev.* units are degrees
+ *	XSeen.Events.device units are radians
+ */
+window.addEventListener('deviceorientation', function(ev) {
+	XSeen.Events.device.absolute	= ev.absolute;
+	//XSeen.Events.device.alpha		= ev.alpha * 0.0174533;
+	//XSeen.Events.device.beta		= ev.beta * 0.0174533;
+	//XSeen.Events.device.gamma		= ev.gamma * 0.0174533;
+	if (ev.gamma >= 180) {			// phone looking up. 0 is zenith
+		XSeen.Events.device.yaw			= ev.alpha * 0.0174533;
+		XSeen.Events.device.roll		= ev.beta * 0.0174533;
+		XSeen.Events.device.pitch		= (ev.gamma-180) * 0.0174533;
+	} else if (ev.gamma >= 0) {			// phone looking up. 0 is zenith
+		XSeen.Events.device.yaw			= ev.alpha * 0.0174533;
+		XSeen.Events.device.roll		= ev.beta * 0.0174533;
+		XSeen.Events.device.pitch		= ev.gamma * 0.0174533;
+	} else {
+		XSeen.Events.device.yaw			= (180+ev.alpha) * 0.0174533;
+		XSeen.Events.device.roll		= ev.beta * 0.0174533;
+		XSeen.Events.device.pitch		= (180+ev.gamma) * 0.0174533;
+	}
+
+	var newEv = new CustomEvent(XSeen.Events.Translate[ev.type].event, XSeen.Events.propertiesDevice(ev));
+//	XSeen.Events.tag.dispatchEvent(newEv);
+	ev.currentTarget.dispatchEvent(newEv);
+	XSeen.Runtime.RootTag.dispatchEvent(newEv);
+	//console.log ("Created '" + XSeen.Events.Translate[ev.type].event + "' event");
+	//ev.stopPropagation();		// Allow propagation beyond this tag
+	});
 /*
 Events
 

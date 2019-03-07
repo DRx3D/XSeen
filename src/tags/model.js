@@ -29,9 +29,13 @@ XSeen.Tags.model = {
 			e._xseen.loadGroup.add (e._xseen.tmpGroup);
 			//XSeen.Tags._setSpace (e._xseen.loadGroup, e._xseen.attributes);
 			XSeen.Tags._setSpace (e._xseen.tmpGroup, e._xseen.attributes);
+
 			//console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
 			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
 			e._xseen.requestedUrl = true;
+			var pickingId = e._xseen.attributes['picking-group'];
+			var pickEle = (pickingId == '') ? null : document.getElementById(pickingId);
+			e._xseen.pickGroup = pickEle;		// TODO: Really should go into mesh.userData, but need standardized method to create that entry
 			e._xseen.tagObject = e._xseen.loadGroup;
 			p._xseen.children.push(e._xseen.loadGroup);
 			//console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
@@ -101,6 +105,7 @@ XSeen.Tags.model = {
 
 	'addReferenceToRoot' : function (ele, root)
 		{
+			// See above TODO referencing pickGroup
 			//console.log ('addReferenceToRoot -- |' + ele.name + '|');
 			//if (ele.isObject) {
 				ele.userData.root = root;
@@ -121,6 +126,7 @@ XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.model.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'hint', dataType:'string', 'defaultValue':''})	// loader hint - typically version #
 		.defineAttribute ({'name':'playonload', dataType:'string', 'defaultValue':''})

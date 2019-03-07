@@ -89,10 +89,13 @@ XSeen.onLoad = function() {
 									'type'		: 'string',
 									'case'		: 'sensitive' ,
 										},
-								'usecamera'	: {						// deprecated
-									'name'		: 'usecamera',
-									'default'	: 'false',
-									'type'		: 'boolean',
+		// Sets the operation mode. AR ==> (transparent, fullscreen) & allows use of device camera
+								'mode'	: {
+									'name'		: 'mode',
+									'default'	: 'vr',
+									'type'		: 'string',
+									'case'		: 'insensitive' ,
+									'enumeration': ['ar', 'vr'],
 										},
 								'showstat'	: {
 									'name'		: 'showstat',
@@ -118,11 +121,18 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+		// TESTing mode only
 								'cubetest'	: {
 									'name'		: 'cubetest',
 									'default'	: 'false',
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
+										},
+		// Deprecated
+								'usecamera'	: {						// deprecated
+									'name'		: 'usecamera',
+									'default'	: 'false',
+									'type'		: 'boolean',
 										},
 								};
 								
@@ -146,13 +156,31 @@ XSeen.onLoad = function() {
 
 	
 
-/** Setup/define various characteristics for the runtime or display
+/*
+ * Setup/define various characteristics for the runtime or display
+ *
+ * IF AR mode is requested, make sure device has sufficient capabilities before entering; otherwise, ignore request
  *
  * Define Renderer and StereoRenderer
  *	This was formerly in XSeen, but moved here to support a transparent
  *	background request either by style or explicit attribute
  */
 	var Renderer;
+	if (XSeen.Runtime.Attributes.mode == 'ar') {
+		XSeen.Runtime.mediaAvailable = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);	// flag for device media availability
+		if (XSeen.Runtime.mediaAvailable) {
+			XSeen.Runtime.allowAR = true;
+			XSeen.Runtime.Attributes.transparent = true;
+			XSeen.Runtime.Attributes.fullscreen = true;
+		} else {
+			XSeen.Runtime.allowAR = false;
+		}
+		// TODO: A permission/notification screen may be needed here
+	} else {
+		XSeen.Runtime.mediaAvailable = false;
+		XSeen.Runtime.allowAR = false;
+	}
+
 	if (XSeen.Runtime.Attributes.transparent) {
 		XSeen.Runtime.isTransparent = true;
 	} else {
@@ -179,7 +207,6 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.appendChild (XSeen.Runtime.SceneDom);
 //	document.body.appendChild (XSeen.Runtime.SceneDom);
 	
-	XSeen.Runtime.mediaAvailable = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);	// flag for device media availability
 
 	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
 	} else {
@@ -223,7 +250,7 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:25%; max-width:50%; background-color:white; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	
@@ -253,6 +280,9 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('touchstart', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('touchend', XSeen.Events.xseen, true);
+	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
 
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 //	<x-scene> tag but bubbles up so it can be caught.

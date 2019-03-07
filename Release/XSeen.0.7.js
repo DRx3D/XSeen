@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.7.44+7_9f7b1bf
- *  Built Mon Nov 12 17:11:30 2018
+ *  XSeen V0.7.44+7_c43a13b
+ *  Built Sun Dec 30 08:19:37 2018
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -1766,7 +1766,7 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:0; " width="'+XSeen.Runtime.Size.width+'">';
+	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:25%; max-width:50%; background-color:white; " width="'+XSeen.Runtime.Size.width+'">';
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	
@@ -1928,7 +1928,7 @@ XSeen.Parser = {
  */
 	'ChildObserver'	: new MutationObserver(function(list) {
 				for (var mutation of list) {
-					console.log ('Child mutation element');
+					//console.log ('Child mutation element');
                               		mutation.addedNodes[0]._xseen = {
                                                            'children'              : [],   // Children of this tag
                                                            'Metadata'              : [],   // Metadata for this tag
@@ -2713,13 +2713,18 @@ XSeen.Parser = {
  *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
  *	0.7.43:	Added mutation control of active, near, far in fog.
  *	0.7.44:	Removed a number of console log debug output statements from XSeen
-
+ *
+ *	0.8.45:	Created new file ($.js) for general purpose tag support functions
+ *	0.8.46:	Added mutation support to 'group' tag
+ *	0.8.47: Fixed 'animate delay="x" ...' to only introduce a delay on the initial animation
+ *	0.8.48:	Added support for group mutation in 'solids.js'
+ *	0.8.49:	Added support for 'emissive' color in 'solids.js'
+ *	0.8.50: Cleaned up & refined splash screen placement
+ 
  *	
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
- *	Create event to start animation loop (xseen-readyanimate). This happens after multi-parse parsing is complete.
- *	Create XSeen logo
+ *	Create event to start animation loop (xseen-readyanimate). This happens after multi-pass parsing is complete.
  *	Resolve CAD positioning issue
- *	Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
  *	--	Above is desired for 0.7 release
  *	Additional PBR
@@ -2731,6 +2736,8 @@ XSeen.Parser = {
  *	Fog needs mutation functionality
  *	Camera needs fixing when multiple cameras with different controls are in use
  *	Add Orthographic camera
+ * xx Create XSeen logo
+ * xx Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  * 
  */
 
@@ -2899,6 +2906,75 @@ window.document.addEventListener('DOMContentLoaded', XSeen.onLoad);
 
 //window.document.addEventListener('DOMContentLoaded', XSeen.onLoadStartProcessing);
 window.document.addEventListener('xseen-initialize', XSeen.onLoadStartProcessing);
+// File: tags/$.js
+// General Tag support functions
+
+XSeen.Tags._changeAttribute = function (e, attributeName, value) {
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+
+// Set standard reference for base object based on stored type
+				var baseMaterial, baseGeometry, baseMesh, baseType='';
+				if (e._xseen.tagObject.isMesh) {
+					baseMaterial	= e._xseen.tagObject.material;
+					baseGeometry	= e._xseen.tagObject.geometry;
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'mesh';
+				} else if (e._xseen.tagObject.isMaterial) {
+					baseMaterial	= e._xseen.tagObject;
+					baseType		= 'material';
+				} else if (e._xseen.tagObject.isGeometry) {
+					baseGeometry	= e._xseen.tagObject;
+					baseType		= 'geometry';
+				} else if (e._xseen.tagObject.isGroup) {
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'group';
+				}
+					
+				if (attributeName == 'color') {				// Different operation for each attribute
+					baseMaterial.color.setHex(value);	// Solids are stored in a 'group' of the tagObject
+					baseMaterial.needsUpdate = true;
+				} else if (attributeName == 'env-map') {				// Different operation for each attribute
+					//console.log ('Changing envMap to |' + value + '|');
+					e._xseen.properties.envMap = XSeen.Tags.Solids._envMap(e, value);
+				} else if (attributeName == 'metalness') {
+					//console.log ('Setting metalness to ' + value);
+					baseMaterial.metalness = value;
+				} else if (attributeName == 'roughness') {
+					//console.log ('Setting roughness to ' + value);
+					baseMaterial.roughness = value;
+				} else if (attributeName == 'position') {
+					//console.log ('Setting position to ' + value);
+					baseMesh.position.x = value.x;
+					baseMesh.position.y = value.y;
+					baseMesh.position.z = value.z;
+				} else if (attributeName == 'rotation') {
+					//console.log ('Setting rotation to ' + value);
+					if (typeof(value.w) != 'undefinedd') {
+						baseMesh.setRotationFromQuaternion (value);
+					} else {
+						baseMesh.rotation.x = value.x;
+						baseMesh.rotation.y = value.y;
+						baseMesh.rotation.z = value.z;
+					}
+				} else if (attributeName == 'material') {
+					var ele = document.getElementById (value);
+					if (typeof(ele) != 'undefined') {
+						console.log ('Changing to asset material: ' + value);
+						e._xseen.tagObject.material = ele._xseen.tagObject;
+					} else {
+						console.log ('No material asset: |'+value+'|');
+					}
+				} else if (attributeName == 'visible') {
+					baseMesh.visible = value;
+				} else {
+					XSeen.LogWarn('No support for updating ' + attributeName);
+				}
+			} else {
+				XSeen.LogWarn("Reparse of " + attributeName + " is invalid -- no change")
+			}
+};
 // File: tags/animate.js
 /*
  * XSeen JavaScript library
@@ -3030,7 +3106,7 @@ XSeen.Tags.animate = {
 
 	'fin'	: function (e,p)
 		{
-			console.log ('Check e._xseen.key for correct values');
+			//console.log ('Check e._xseen.key for correct values');
 
 			var duration = e._xseen.attributes.duration * 1000;	// TEMP: Convert to milliseconds
 			var delay = e._xseen.attributes.delay * 1000;		// Convert to milliseconds
@@ -3052,7 +3128,7 @@ XSeen.Tags.animate = {
 			var interpolation, startingValue;
 			var attrObject = e._xseen.attrObject;
 			var toAttribute = e._xseen.attributes.attribute;
-			console.log ('Check for keyframes ... count: ' + e._xseen.key.length);
+			//console.log ('Check for keyframes ... count: ' + e._xseen.key.length);
 			if (e._xseen.key.length == 0) {		// Block handles no key frames
 				var target = XSeen.Tags.animate._getTo (e, e._xseen.attrObject, e._xseen.attributes.attribute);
 				if (target.to === null) {return; }
@@ -3091,6 +3167,7 @@ XSeen.Tags.animate = {
 
 			
 				tween	.delay(delay)
+						.repeatDelay(0)
 						.repeat(repeat)
 						.interpolation(target.interpolation)
 						.yoyo(yoyo);
@@ -3122,6 +3199,7 @@ XSeen.Tags.animate = {
 				tween0 = new TWEEN.Tween(fieldTHREE, e._xseen.tagObject);
 				tween0	.to(e._xseen.key[0].to, duration)
 						.delay(delay)
+						.repeatDelay(0)
 						.interpolation(e._xseen.key[0].interpolation)
 						.easing(TWEEN.Easing[e._xseen.key[0].easingType][e._xseen.key[0].easing]);
 				tweenP = tween0;
@@ -3129,13 +3207,14 @@ XSeen.Tags.animate = {
 					tween = new TWEEN.Tween(fieldTHREE, e._xseen.tagObject);
 					tween	.to(e._xseen.key[ii].to, duration)
 							.delay(delay)
+							.repeatDelay(0)
 							.interpolation(e._xseen.key[ii].interpolation)
 							.easing(TWEEN.Easing[e._xseen.key[ii].easingType][e._xseen.key[ii].easing]);
 					tweenP.chain(tween);
 					tweenP = tween;
 				}
 				if (repeat === Infinity) {
-					console.log ('test');
+					//console.log ('test');
 					tween.chain(tween0);
 				}
 				tween0.start();
@@ -3153,7 +3232,7 @@ XSeen.Tags.animate = {
  *	All handlers (goes into .handlers)
  *	TWEEN object
  */
-			console.log ('Close up shop for animate...');
+			//console.log ('Close up shop for animate...');
 			e._xseen.handlers = {};
 			e._xseen.handlers.setstart = XSeen.Tags.animate.setstart;
 			e._xseen.handlers.setstop = XSeen.Tags.animate.setstop;
@@ -3163,18 +3242,18 @@ XSeen.Tags.animate = {
 
 	'event'	: function (ev, attr)
 		{
-			console.log ('Handling event ... for ' + attr);
+			//console.log ('Handling event ... for ' + attr);
 		},
 
 
 	'setstart'	: function (ev)
 		{
-			console.log ('Starting animation');
+			//console.log ('Starting animation');
 			XSeen.Tags.animate.destination._xseen.animating.start();
 		},
 	'setstop'	: function (ev) 
 		{
-			console.log ('Stopping animation');
+			//console.log ('Stopping animation');
 			XSeen.Tags.animate.destination._xseen.animating.stop();
 		},
 /*
@@ -3184,12 +3263,12 @@ XSeen.Tags.animate = {
  */
 	'setpause'	: function (ev) 
 		{
-			console.log ('Pausing (really stopping) animation');
+			//console.log ('Pausing (really stopping) animation');
 			XSeen.Tags.animate.destination._xseen.animating.stop();
 		},
 	'setresetstart'	: function (ev) 	// TODO: Create seperate 'reset' method
 		{
-			console.log ('Reset and start animation');
+			//console.log ('Reset and start animation');
 			XSeen.Tags.animate.destination._xseen.animatingField = XSeen.Tags.animate.destination._xseen.initialValue;
 			XSeen.Tags.animate.destination._xseen.animating.start();
 		},
@@ -3265,7 +3344,7 @@ XSeen.Tags.key = {
 	'fin'	: function (e,p) {},
 	'event'	: function (ev, attr)
 		{
-			console.log ('Handling event ... for ' + attr);
+			//console.log ('Handling event ... for ' + attr);
 		},
 };
 
@@ -4042,6 +4121,7 @@ XSeen.Tags.group = {
 			var rotation = {'x':0, 'y':0, 'z':0, 'w':0};
 			//var rotation = XSeen.types.Rotation2Quat(e._XSeen.attributes.rotation);	TODO: Figure out rotations
 			group.name = 'Transform children [' + e.id + ']';
+			group.visible		= e._xseen.attributes.visible;
 			group.position.x	= e._xseen.attributes.position.x;
 			group.position.y	= e._xseen.attributes.position.y;
 			group.position.z	= e._xseen.attributes.position.z;
@@ -4109,6 +4189,8 @@ XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.group.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'visible', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})	// render contents
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags._changeAttribute}]})
 		.addTag();
 
 /*
@@ -4885,6 +4967,7 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			// Create mesh, set userData and animateable fields
 			var mesh = new THREE.Mesh (geometry, appearance);
 			mesh.userData = e;
+			mesh.visible  = e._xseen.attributes.visible;
 			XSeen.Tags._setSpace(mesh, e._xseen.attributes);
 
 			e._xseen.animate['position']			= mesh.position;
@@ -4904,8 +4987,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.animate['specular']			= mesh.material.specular;
 			e._xseen.animate['displacementScale']	= mesh.material.displacementScale;
 			e._xseen.animate['displacementBias']	= mesh.material.displacementBias;
-			e._xseen.animate['emissive']			= mesh.material.emissive;
-			e._xseen.animate['normalScale']			= mesh.material.normalScale;
 			e._xseen.animate['metalness']			= mesh.material.metalness;
 			e._xseen.animate['roughness']			= mesh.material.roughness;
 
@@ -4970,6 +5051,9 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				} else if (e._xseen.tagObject.isGeometry) {
 					baseGeometry	= e._xseen.tagObject;
 					baseType		= 'geometry';
+				} else if (e._xseen.tagObject.isGroup) {
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'group';
 				}
 					
 				if (attributeName == 'color') {				// Different operation for each attribute
@@ -4985,7 +5069,7 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					//console.log ('Setting roughness to ' + value);
 					baseMaterial.roughness = value;
 				} else if (attributeName == 'position') {
-					console.log ('Setting position to ' + value);
+					//console.log ('Setting position to ' + value);
 					baseMesh.position.x = value.x;
 					baseMesh.position.y = value.y;
 					baseMesh.position.z = value.z;
@@ -5451,6 +5535,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['wireframe', 'phong','pbr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
+		.defineAttribute ({'name':'visible', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})	// render contents
 
 // General material properties
 		.defineAttribute ({'name':'emissive-intensity', dataType:'float', 'defaultValue':1.0})

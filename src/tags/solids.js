@@ -114,6 +114,14 @@ XSeen.Tags._appearance = function (e) {
 			}
 			return appearance;
 }
+
+/*
+ * Handle creation of solid (including flat) objects.
+ * Parameters:
+ *	e			Current DOM node
+ *	p			Parent (of e) DOM node
+ *	geometry	THREE geometry structure for creating an object
+ */
 XSeen.Tags._solid = function (e, p, geometry) {
 			var appearance = XSeen.Tags._appearance (e);
 
@@ -122,7 +130,12 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			// Create mesh, set userData and animateable fields
 			var mesh = new THREE.Mesh (geometry, appearance);
 			mesh.userData = e;
+			mesh.visible  = e._xseen.attributes.visible;
 			XSeen.Tags._setSpace(mesh, e._xseen.attributes);
+			var pickingId = e._xseen.attributes['picking-group'];
+			var pickEle = (pickingId == '') ? null : document.getElementById(pickingId);
+			e._xseen.pickGroup = pickEle;		// TODO: Really should go into mesh.userData, but need standardized method to create that entry
+
 
 			e._xseen.animate['position']			= mesh.position;
 			e._xseen.animate['scale']				= mesh.scale;
@@ -141,8 +154,6 @@ XSeen.Tags._solid = function (e, p, geometry) {
 			e._xseen.animate['specular']			= mesh.material.specular;
 			e._xseen.animate['displacementScale']	= mesh.material.displacementScale;
 			e._xseen.animate['displacementBias']	= mesh.material.displacementBias;
-			e._xseen.animate['emissive']			= mesh.material.emissive;
-			e._xseen.animate['normalScale']			= mesh.material.normalScale;
 			e._xseen.animate['metalness']			= mesh.material.metalness;
 			e._xseen.animate['roughness']			= mesh.material.roughness;
 
@@ -207,6 +218,9 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 				} else if (e._xseen.tagObject.isGeometry) {
 					baseGeometry	= e._xseen.tagObject;
 					baseType		= 'geometry';
+				} else if (e._xseen.tagObject.isGroup) {
+					baseMesh		= e._xseen.tagObject;
+					baseType		= 'group';
 				}
 					
 				if (attributeName == 'color') {				// Different operation for each attribute
@@ -222,7 +236,7 @@ XSeen.Tags.Solids._changeAttribute = function (e, attributeName, value) {
 					//console.log ('Setting roughness to ' + value);
 					baseMaterial.roughness = value;
 				} else if (attributeName == 'position') {
-					console.log ('Setting position to ' + value);
+					//console.log ('Setting position to ' + value);
 					baseMesh.position.x = value.x;
 					baseMesh.position.y = value.y;
 					baseMesh.position.z = value.z;
@@ -688,6 +702,7 @@ XSeen.Parser._addStandardAppearance = function (tag) {
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'phong', enumeration:['wireframe', 'phong','pbr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'geometry', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
 		.defineAttribute ({'name':'material', dataType:'string', 'defaultValue':'', isCaseInsensitive:false})
+		.defineAttribute ({'name':'visible', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})	// render contents
 
 // General material properties
 		.defineAttribute ({'name':'emissive-intensity', dataType:'float', 'defaultValue':1.0})
@@ -755,6 +770,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.box.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'depth', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})
@@ -771,6 +787,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.cone.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'open-ended', dataType:'boolean', 'defaultValue':false})
@@ -788,6 +805,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.cylinder.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'open-ended', dataType:'boolean', 'defaultValue':false})
 		.defineAttribute ({'name':'radius-bottom', dataType:'float', 'defaultValue':1.0})
@@ -806,6 +824,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.dodecahedron.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0});
 XSeen.Parser._addStandardAppearance (tag);
@@ -818,6 +837,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.icosahedron.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0});
 XSeen.Parser._addStandardAppearance (tag);
@@ -830,6 +850,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.octahedron.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0});
 XSeen.Parser._addStandardAppearance (tag);
@@ -842,6 +863,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.sphere.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':0.0})
 		.defineAttribute ({'name':'theta-length', dataType:'float', 'defaultValue':180.0})
@@ -859,6 +881,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.tetrahedron.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'detail', dataType:'float', 'defaultValue':0.0});
 XSeen.Parser._addStandardAppearance (tag);
@@ -871,6 +894,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.torus.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':2.0})
 		.defineAttribute ({'name':'tube', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'arc', dataType:'float', 'defaultValue':360})
@@ -885,6 +909,7 @@ tag = XSeen.Parser.defineTag ({
 						'event'	: XSeen.Tags.tknot.event
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'tube', dataType:'float', 'defaultValue':0.4})
 		.defineAttribute ({'name':'segments-radial', dataType:'integer', 'defaultValue':8})
@@ -901,6 +926,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.plane.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'height', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'width', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'segments-height', dataType:'integer', 'defaultValue':1})
@@ -915,6 +941,7 @@ tag = XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.ring.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'picking-group', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'radius-inner', dataType:'float', 'defaultValue':0.5})
 		.defineAttribute ({'name':'radius-outer', dataType:'float', 'defaultValue':1.0})
 		.defineAttribute ({'name':'theta-start', dataType:'float', 'defaultValue':0.0})

@@ -68,7 +68,7 @@ XSeen.Parser = {
  */
 	'ChildObserver'	: new MutationObserver(function(list) {
 				for (var mutation of list) {
-					console.log ('Child mutation element');
+					//console.log ('Child mutation element');
                               		mutation.addedNodes[0]._xseen = {
                                                            'children'              : [],   // Children of this tag
                                                            'Metadata'              : [],   // Metadata for this tag

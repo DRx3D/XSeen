@@ -84,7 +84,7 @@ XSeen.DisplayControl = {
 	'stylizeElement'	: function (button) {
 		button.style.backgroundColor	= '#212214';
 		button.style.height				= '24px';
-		button.style.backgroundImage	= 'url(../Logo/xseen-symbol-color.svg)';
+		button.style.backgroundImage	= 'url(https://XSeen.org/Logo/xseen-symbol-color.svg)';
 		button.style.backgroundRepeat	= 'no-repeat';
 		button.style.paddingLeft		= '70px';
 		button.style.borderRadius		= '4px';
@@ -99,7 +99,8 @@ XSeen.DisplayControl = {
 		button.dataset._active			= false;			// button not active
 		button.style.color				= button.dataset._colorDefault;
 		button.style.position			= 'fixed';
-		button.style.bottom				= '66px';
+		//button.style.bottom				= '66px';
+		button.style.top				= '80%';
 		button.style.left				= '45%';
 	},
 
@@ -189,11 +190,23 @@ XSeen.DisplayControl = {
 
 	},
 	
-	'buttonFullScreen'		: function (button, node) {
+/*
+ *	Add full screen button to display. Certain characteristics are set.
+ *
+ *	Parameters:
+ *		button	A shadow-DOM HTML button that will be used as the 'Enter/Exit' full screen button. This
+ *				includes display placement.
+ *		node	The HTML tag to go full-screen. Only this tag and its children will be visible
+ *		turnOffFull	An optional boolean that indicates that button should not be visible during full-screen. D=false
+ */
+	'buttonFullScreen'		: function (button, node, turnOffFull) {
+		turnOffFull = (typeof(turnOffFull) == 'undefined') ? false : turnOffFull;
+		turnOffFull = true;
 		button.innerHTML		= "Enter FullScreen";
 		button.style.width		= '9em';
 		button.dataset._active	= true;			// button active
 		button._fullScreenNode 	= node;
+		button._offWhenFull		= turnOffFull;
 		node._requestFullscreen	= this._requestFullscreen;
 		node._exitFullscreen	= this._exitFullscreen;
 		node._fullscreenButton	= button;
@@ -225,13 +238,24 @@ XSeen.DisplayControl = {
  */
 		document.addEventListener( this._fullscreenEventName, function ( event ) {
 			if ( document.documentElement._isFullScreen() ) {
-				console.log('Need to exit');
+				//console.log('Need to exit');
+				// Check ._XSeenButton._offWhenFull to see if button needs to be not displayed
+				if (document.documentElement._XSeenButton._offWhenFull) {
+					document.documentElement._XSeenButton.style.display = 'hidden';
+				}
 				document.documentElement._XSeenButton.innerHTML = 'Exit FullScreen';
+				if (XSeen.Runtime._deviceCameraElement != 0) {		// Connect camera
+					XSeen.IW.connectCamera (XSeen.Runtime._deviceCameraElement);
+				}
 			
 			} else {	// Exit from full screen
-				console.log('Need to enter');
+				//console.log('Need to enter');
+				document.documentElement._XSeenButton.style.display = 'block';
 				document.documentElement._XSeenButton.innerHTML = 'Enter FullScreen';
 				document.documentElement._XSeenButton = null;
+				if (XSeen.Runtime._deviceCameraElement != 0) {		// Disconnect camera
+					XSeen.IW.disconnectCamera (XSeen.Runtime._deviceCameraElement);
+				}
 			}
 		}, false );
 	},

@@ -20,6 +20,7 @@ XSeen.Tags.group = {
 			var rotation = {'x':0, 'y':0, 'z':0, 'w':0};
 			//var rotation = XSeen.types.Rotation2Quat(e._XSeen.attributes.rotation);	TODO: Figure out rotations
 			group.name = 'Transform children [' + e.id + ']';
+			group.visible		= e._xseen.attributes.visible;
 			group.position.x	= e._xseen.attributes.position.x;
 			group.position.y	= e._xseen.attributes.position.y;
 			group.position.z	= e._xseen.attributes.position.z;
@@ -87,6 +88,8 @@ XSeen.Parser.defineTag ({
 						'tick'	: XSeen.Tags.group.tick
 						})
 		.addSceneSpace()
+		.defineAttribute ({'name':'visible', dataType:'boolean', 'defaultValue':true, enumeration:[true,false], isCaseInsensitive:true})	// render contents
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags._changeAttribute}]})
 		.addTag();
 
 /*

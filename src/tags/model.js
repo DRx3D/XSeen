@@ -21,6 +21,10 @@ XSeen.Tags.model = {
 	'init'	: function (e, p) 
 		{
 			e._xseen.processedUrl = false;
+			e._xseen.loaded = {'envmap':false, 'model':false, }
+			if (e._xseen.attributes['env-map'] != '') {
+				e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
+			}
 			e._xseen.tmpGroup = new THREE.Group();
 			e._xseen.tmpGroup.name = 'External Model [' + e.id + ']';
 			e._xseen.loadGroup = new THREE.Group();
@@ -35,6 +39,7 @@ XSeen.Tags.model = {
 			e._xseen.requestedUrl = true;
 			var pickingId = e._xseen.attributes['picking-group'];
 			var pickEle = (pickingId == '') ? null : document.getElementById(pickingId);
+			var pickEle = document.getElementById(pickingId) || e;
 			e._xseen.pickGroup = pickEle;		// TODO: Really should go into mesh.userData, but need standardized method to create that entry
 			e._xseen.tagObject = e._xseen.loadGroup;
 			p._xseen.children.push(e._xseen.loadGroup);
@@ -44,6 +49,45 @@ XSeen.Tags.model = {
 	'event'	: function (ev, attr) {},
 	'tick'	: function (systemTime, deltaTime) {},
 	
+/*
+ * Once the environent map and model are loaded, add the envmap to all Meshes
+ */
+	'applyEnvMap'	: function (e) {
+			if (e._xseen.loaded.envmap && e._xseen.loaded.model) {
+				e._xseen.tmpGroup.traverse (function(child) {
+					if (child.isMesh) child.material.envMap = e._xseen.properties.envMap;
+				});
+				console.log ('Successful load of environment textures to glTF model.');
+			}
+	},
+
+/*
+ * Start load process for environment map image cube
+ *	Taken from solids
+ */
+	'_envMap'	: function (e, envMapUrl) {
+			var envMap, basePath = 'Resources/textures/';
+			envMap = null;
+			console.log ('Loading textures from ' + envMapUrl);
+			XSeen.Loader.TextureCube (envMapUrl, [], '.jpg', XSeen.Tags.model.envLoadSuccess({'e':e}));
+			return envMap;
+	},
+
+/*
+ * This method assumes that the target is an environment map in a material in a mesh. It won't
+ * for a material-only node. Perhaps I need a new field that is a reference to the environment map
+ * location
+ */
+	'envLoadSuccess'	: function (userdata) {
+			var thisEle = userdata.e;
+			return function (textureCube)
+			{
+				thisEle._xseen.properties.envMap = textureCube;
+				thisEle._xseen.loaded.envmap = true;
+				XSeen.Tags.model.applyEnvMap(thisEle);
+			}
+	},
+
 					// Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
 	'loadProgress' : function (a1) {
 		if (a1.total == 0) {
@@ -68,6 +112,10 @@ XSeen.Tags.model = {
 							console.log("Successful download for |"+e.id+'|');
 							//e._xseen.loadGroup.add(response.scene);		// This works for glTF
 							e._xseen.tmpGroup.add(response.scene);		// This works for glTF
+							e._xseen.loaded.model = true;
+							XSeen.Tags.model.applyEnvMap(e);
+							//e._xseen.applyEnvMap();
+							
 							//p._xseen.children.push(e._xseen.loadGroup);
 							console.log ('glTF loading complete and inserted into parent');
 							//p._xseen.children.push(mesh);
@@ -109,6 +157,7 @@ XSeen.Tags.model = {
 			//console.log ('addReferenceToRoot -- |' + ele.name + '|');
 			//if (ele.isObject) {
 				ele.userData.root = root;
+				ele.userData.pick = root._xseen.pickGroup;
 			//}
 			ele.children.forEach (function(elm) {
 				//p._xseen.sceneInfo.selectable.push(elm);
@@ -131,4 +180,5 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'hint', dataType:'string', 'defaultValue':''})	// loader hint - typically version #
 		.defineAttribute ({'name':'playonload', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'duration', dataType:'float', 'defaultValue':-1, 'isAnimatable':false})
+		.defineAttribute ({'name':'env-map', dataType:'string', 'defaultValue':''})
 		.addTag();

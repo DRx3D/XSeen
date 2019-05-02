@@ -121,6 +121,12 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'fullscreenid'	: {
+									'name'		: 'fullscreenid',
+									'default'	: '',
+									'type'		: 'string',
+									'case'		: 'sensitive' ,
+										},
 		// TESTing mode only
 								'cubetest'	: {
 									'name'		: 'cubetest',
@@ -256,8 +262,15 @@ XSeen.onLoad = function() {
 	
 // Set up control screen (FullScreen / Splitscreen / VR) buttons
 	if (XSeen.Runtime.Attributes.fullscreen) {
-		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
-		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+		fullscreenElement = XSeen.Runtime.RootTag;
+		if (XSeen.Runtime.Attributes.fullscreenid != '') {
+			var ele = document.getElementById(XSeen.Runtime.Attributes.fullscreenid);
+			if (ele !== null) fullscreenElement = ele;
+		}
+//		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
+//		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
+		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', fullscreenElement, null);
+		var result = fullscreenElement.appendChild (fs_button);
 	}
 
 	
@@ -274,6 +287,9 @@ XSeen.onLoad = function() {
 	}
 	
 // Create XSeen event listeners
+//	*move events are not included because they are added after the initiating event (touchstart/mousedown)
+	XSeen.Events.enableEventHandling();
+/*
 	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
@@ -283,10 +299,11 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.addEventListener ('touchstart', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('touchend', XSeen.Events.xseen, true);
 	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
+*/
 
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 //	<x-scene> tag but bubbles up so it can be caught.
-	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesInitialize(XSeen.Runtime));
+	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'initialize'));
 	XSeen.Runtime.RootTag.dispatchEvent(newEv);
 	return;
 }
@@ -317,6 +334,9 @@ XSeen.onLoadStartProcessing = function() {
 	console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
+	var newEv = new CustomEvent('xseen-go', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'render'));
+	XSeen.Runtime.RootTag.dispatchEvent(newEv);
+
 	return;
 };
 

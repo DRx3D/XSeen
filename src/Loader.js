@@ -127,8 +127,8 @@ XSeen.Loader = {
 				console.log ('Loading background textures...');
 			};
 			var _Failure = function (a) {
-				console.log ('Load failure');
-				console.log ('Failure to load background textures.');
+				console.log ('Failure to load background texture.');
+				console.log (a);
 			};
 
 			if (typeof(filetypes) == 'string') {
@@ -148,6 +148,7 @@ XSeen.Loader = {
 			urls[5] = pathUri + ((filenames.length >= 6 && filenames[5] != '') ? filenames[5] : 'nz') + urlTypes[5];
 
 			console.log('Loading cube-map texture...');
+			console.log (urls);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 //									.setPath ('./')

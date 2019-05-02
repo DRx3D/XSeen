@@ -103,6 +103,9 @@ XSeen.CameraManager = {
 							var size = xRuntime.Renderer.getSize();
 							xRuntime.Renderer.setScissor( 0, 0, size.width, size.height );
 							xRuntime.Renderer.setViewport( 0, 0, size.width, size.height );
+							if (cameraElement._xseen.track == 'orbit') {
+								cameraElement._xseen.sceneInfo.CameraControl.enabled = true;	// Enable ORBIT controls access to events
+							}
 							//xRuntime.Renderer.render( scene, xRuntime.Camera );
 							// Need to remove any 'full screen' button
 						}
@@ -112,6 +115,8 @@ XSeen.CameraManager = {
 									cameraElement._xseen.attributes.position.y,
 									cameraElement._xseen.attributes.position.z);
 						xRuntime.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
+						xRuntime.Camera.fov = cameraElement._xseen.attributes.fov;
+
 
 						// TODO: A number of other things need to be set/changed (tracking, type, etc.)
 						xRuntime.useDeviceOrientation = cameraElement._xseen.useDeviceOrientation;
@@ -138,6 +143,7 @@ XSeen.CameraManager = {
 								}
 							}
 						}
+						xRuntime.Camera.updateProjectionMatrix();
 						console.log ('Setting active camera to ' + cameraElement.id);
 						this.CurrentNode = cameraElement;
 					},

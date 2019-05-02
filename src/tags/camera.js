@@ -170,6 +170,7 @@ XSeen.Tags.camera = {
 				} else {								// No device orientation control. Use something else
 					if (e._xseen.track == 'orbit') {
 						e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
+						e._xseen.sceneInfo.CameraControl.enabled = false;
 					} else if (e._xseen.track == 'trackball') {
 						//console.log ('Trackball');
 					} else if (e._xseen.track == 'none') {
@@ -214,6 +215,7 @@ XSeen.Parser.defineTag ({
 		.addSceneSpace()
 		.defineAttribute ({'name':'type', dataType:'string', 'defaultValue':'perspective', enumeration:['perspective','stereo','orthographic','vr'], isCaseInsensitive:true})
 		.defineAttribute ({'name':'track', dataType:'string', 'defaultValue':'none', enumeration:['none', 'orbit', 'fly', 'examine', 'trackball', 'device'], isCaseInsensitive:true})
+		.defineAttribute ({'name':'fov', dataType:'float', 'defaultValue':50.0})
 		.defineAttribute ({'name':'priority', dataType:'integer', 'defaultValue':1})
 		.defineAttribute ({'name':'available', dataType:'boolean', 'defaultValue':true})
 		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':''})

@@ -58,17 +58,18 @@
  #		- Object/element (?) world position
  #		- Geometry & appearance details (color, triangle, texture coordinates, normal)
  
- *	HTML5				XSeen (all prefixed with 'xseen-')
- *	 mousedown			 touchstart
- *	 touchstart			 touchstart
- *	 mousemove			 touchmove
- *	 touchmove			 touchmove
- *	 mouseup			 touchend
- *	 touchend			 touchend
- *	 touchcancel		 touchcancel (?)
- *	 click				 touchtap
- *	 dblckick			 touchdbltap
- *	 deviceorientation	 device
+ *	HTML5					XSeen (all prefixed with 'xseen-')
+ *	 mousedown				 touchstart
+ *	 touchstart				 touchstart
+ *	 mousemove				 touchmove
+ *	 touchmove				 touchmove
+ *	 mouseup				 touchend
+ *	 touchend				 touchend
+ *	 touchcancel			 touchcancel (?)
+ *	 click					 touchtap
+ *	 dblckick				 touchdbltap
+ *	 deviceorientation		 deviceorientation
+ *							 devicemode (portrait or landscape)
  */
  
 var XSeen = XSeen || {};
@@ -81,24 +82,228 @@ XSeen.Events = {
 		'redispatch'		: false,
 		'object'			: {},
 		'tag'				: {},
+		'isEventsEnabled'	: true,
+		'disableEventHandling' : function () {		// Remove all mouse/touch event listeners
+									console.log ('Disabling XSeen cursor handlers');
+									XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
+
+									XSeen.Runtime.RootTag.removeEventListener ('mouseover', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('mouseout', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('mousedown', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('mouseup', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('click', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('dblclick', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('touchstart', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('touchend', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.removeEventListener ('touchcancel', XSeen.Events.xseen, true);
+
+									this.isEventsEnabled = false;
+									return XSeen.Runtime.RootTag;
+							},
+		'enableEventHandling' : function () {		// Add initial mouse/touch event listeners
+									console.log ('Enabling XSeen cursor handlers');
+									XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('touchstart', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('touchend', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
+									XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
+									this.isEventsEnabled = true;
+							},
+		'eventProperties'	: function (ev) {
+								var properties, type;
+								type = ev.type.substr(0,5);
+								if (type == 'mouse') {
+									properties = XSeen.Events._cursor(ev);
+								} else {
+									properties = XSeen.Events._touch(ev);
+								}
+								return properties;
+							},
+		'_cursor'			: function (ev) {
+								var cX=0, cY=0, sX=0, sY=0;
+								if (typeof(ev.clientX) != 'undefined' && !isNaN(ev.clientX)) {
+									cX = ev.clientX;
+									cY = ev.clientY;
+									sX = ev.screenX;
+									sY = ev.screenY;
+								}
+								var properties = {
+										'detail':		{					// This object contains all of the XSeen data
+												'originalType':	ev.type,
+												'deviceOrientation': {	// Device orientation from the browser
+														'pitch': 	XSeen.Events.device.pitch,
+														'roll':		XSeen.Events.device.roll,
+														'yaw':		XSeen.Events.device.yaw,
+														},
+												'points':	[{
+														'clientX'		: cX,
+														'clientY'		: cY,
+														'force'			: (ev.type == 'mouseup') ? 0 : 1,			// Default is full-force
+														'identifier'	: -1,			// -1 for mouse to deconflict with 'touch'
+														'movementX'		: ev.movementX || 0,
+														'movementY'		: ev.movementY || 0,
+														'offsetX'		: ev.offsetX || 0,
+														'offsetY'		: ev.offsetY || 0,
+														'pageX'			: ev.pageX || 0,
+														'pageY'			: ev.pageY || 0,
+														'radiusX'		: 0.0,		// Unknown quantity
+														'radiusY'		: 0.0,		// Unknown quantity
+														'rotationAngle'	: 0.0,		// Unknown quantity
+														'screenX'		: sX,
+														'screenY'		: sY,
+														'_cursorScreen'	: new THREE.Vector2(
+																			 cX * XSeen.Runtime.Size.iwidth  * 2 - 1,
+																			-cY * XSeen.Runtime.Size.iheight * 2 + 1),
+												}],
+												'getObject'		: function () {			// TODO: Should use a prototype function here!
+													XSeen.Events.raycaster.setFromCamera(this.points[0]._cursorScreen, XSeen.Runtime.Camera);
+													var hitGeometryList = XSeen.Events.raycaster.intersectObjects (XSeen.Runtime.selectable, true);
+													if (hitGeometryList.length != 0) {
+														return XSeen.Events._object(hitGeometryList[0]);
+													} else {
+														return {};
+													}
+												},
+												'ctrlKey':	ev.ctrlKey,
+												'shiftKey':	ev.shiftKey,
+												'altKey': 	ev.altKey,
+												'metaKey':	ev.metaKey,
+												'button':	ev.button,
+												'buttons':	ev.buttons,
+											},
+										'bubbles':		ev.bubbles,
+										'cancelable':	ev.cancelable,
+										'composed':		ev.composed,
+									};
+								return  properties;
+							},
+		'_touch'		: function (ev) {
+								var properties = {
+										'detail':		{					// This object contains all of the XSeen data
+												'originalType':	ev.type,
+												'deviceOrientation': {	// Device orientation from the browser
+														'pitch': 	XSeen.Events.device.pitch,
+														'roll':		XSeen.Events.device.roll,
+														'yaw':		XSeen.Events.device.yaw,
+														},
+												'points':	[],
+												'getObject'		: function () {			// TODO: Should use a prototype function here!
+													XSeen.Events.raycaster.setFromCamera(this.points[0]._cursorScreen, XSeen.Runtime.Camera);
+													var hitGeometryList = XSeen.Events.raycaster.intersectObjects (XSeen.Runtime.selectable, true);
+													if (hitGeometryList.length != 0) {
+														return XSeen.Events._object(hitGeometryList[0]);
+													} else {
+														return {};
+													}
+												},
+												'ctrlKey':	ev.ctrlKey,
+												'shiftKey':	ev.shiftKey,
+												'altKey': 	ev.altKey,
+												'metaKey':	ev.metaKey,
+												'button':	ev.button,
+												'buttons':	ev.buttons,
+											},
+										'bubbles':		ev.bubbles,
+										'cancelable':	ev.cancelable,
+										'composed':		ev.composed,
+									};
+								for (ii=0; ii<ev.touches.length; ii++) {
+									properties.detail.points[ii] = XSeen.Events._populateTouch (ev.touches[ii]);
+								}
+								return  properties;
+							},
+		'_populateTouch'	: function (touchPoint) {
+								var cX=0, cY=0, sX=0, sY=0;
+								if (typeof(touchPoint.clientX) != 'undefined' && !isNaN(touchPoint.clientX)) {
+									cX = touchPoint.clientX;
+									cY = touchPoint.clientY;
+									sX = touchPoint.screenX;
+									sY = touchPoint.screenY;
+								}
+								point = {
+									'clientX'		: cX,
+									'clientY'		: cY,
+									'force'			: touchPoint.force,
+									'identifier'	: touchPoint.identifier,
+									'movementX'		: touchPoint.movementX || 0,
+									'movementY'		: touchPoint.movementY || 0,
+									'offsetX'		: touchPoint.offsetX,
+									'offsetY'		: touchPoint.offsetY,
+									'pageX'			: touchPoint.pageX,
+									'pageY'			: touchPoint.pageY,
+									'radiusX'		: touchPoint.radiusX,
+									'radiusY'		: touchPoint.radiusY,
+									'rotationAngle'	: touchPoint.rotationAngle,
+									'screenX'		: sX,
+									'screenY'		: sY,
+									'_cursorScreen'	: new THREE.Vector2(
+														 cX * XSeen.Runtime.Size.iwidth  * 2 - 1,
+														-cY * XSeen.Runtime.Size.iheight * 2 + 1),
+										};
+								return point;
+							},
+		'_object'			: function (hitObject) {
+								var object3D, tag;
+								tag = hitObject.object.userData;
+								if (typeof(tag) != 'undefined' && typeof(tag.root) != 'undefined') tag = tag.root;
+								object3D = {
+										'originator'			: tag,
+										'picker'				: tag._xseen.pickGroup,
+										'name'					: hitObject.object.name,
+										'distance'				: hitObject.distance,
+										'target'				: hitObject,
+										'hitPosition'			: {			// Touch point on target
+														'x': hitObject.point.x,
+														'y': hitObject.point.y,
+														'z': hitObject.point.z,
+																},
+										'normal'				: {
+														'x': hitObject.face.normal.x,
+														'y': hitObject.face.normal.y,
+														'z': hitObject.face.normal.z,
+																},
+										'uv'					: {
+														'x': 0.0,		// hitObject.uv.x,
+														'y': 0.0,		// hitObject.uv.y,
+																},
+										'targetWorldPosition'	: hitObject.object.getWorldPosition(),
+										'pickerWorldPosition'	: tag._xseen.pickGroup._xseen.tagObject.getWorldPosition(),
+										'cameraNormal'			: {		// Where the camera is pointing
+														'x': 0,
+														'y': 0,
+														'z': -1,
+																},
+										'cameraPosition'		: tag._xseen.sceneInfo.Camera.getWorldPosition(),
+								};
+								return object3D;
+							},
+
 		'raycaster'			: new THREE.Raycaster(),
 		'cursorScreen'		: new THREE.Vector2(),
 		'device'			: {'absolute':true, 'pitch':0, 'roll':0, 'yaw':0},
 		'Translate'			: {
 								'UNKNOWN'		: {event:'xseen-unknown', type:'unknown', source:'unknown'},
-								'mousedown'		: {event:'xseen-touch', type:'start'},
-								'mouseup'		: {event:'xseen-touch', type:'end'},
-								'mousemove'		: {event:'xseen-drag', type:'move'},
+								'mousedown'		: {event:'xseen-touchstart', type:'down'},
+								'mouseup'		: {event:'xseen-touchend', type:'up'},
+								'mousemove'		: {event:'xseen-touchmove', type:'move'},
 								'mouseover'		: {event:'xseen-hover', type:'hover'},
-								'click'			: {event:'xseen-touch', type:'click'},
-								'dblclick'		: {event:'xseen-touch', type:'click2'},
-								'touchstart'	: {event:'xseen-touch', type:'start'},
-								'touchend'		: {event:'xseen-touch', type:'end'},
-								'touchcancel'	: {event:'xseen-touch', type:'start'},
-								'touchmove'		: {event:'xseen-drag', type:'move'},
-								'deviceorientation'	: {event:'xseen-device', type:'change'},
+								'click'			: {event:'xseen-touchtap', type:'click'},
+								'dblclick'		: {event:'xseen-touchdbltap', type:'click2'},
+								'touchstart'	: {event:'xseen-touchstart', type:'start'},
+								'touchend'		: {event:'xseen-touchend', type:'end'},
+								'touchcancel'	: {event:'xseen-touchcancel', type:'start'},
+								'touchmove'		: {event:'xseen-touchmove', type:'move'},
+								// touchtap, touchdbltap, touchlongtap?
+								'deviceorientation'	: {event:'xseen-deviceorientation', type:'change'},
+								'devicemode'		: {event:'xseen-devicemode', type:'change'},
 								},
-		
+	
+
 /*
  * General XSeen event handler. All XSeen events get processed here during the CAPTURE phase
  *	The main types of events are mousedown, mouseup, and mousemove. All click events are proceeded by mousedown
@@ -116,22 +321,79 @@ XSeen.Events = {
  */
 		'xseen'				: function (ev)
 					{
-						//console.log ('XSeen event handler - ' + ev.type);
+						console.log ('XSeen event handler - ' + ev.type);
 						//console.log ('... ' + ev.x + ', ' + ev.y);
+						//console.log ("'xseen' method for handling events");
 						var xEvents = XSeen.Events;
 						var Runtime = ev.currentTarget._xseen.sceneInfo;
-						var eventName;
+						if (ev.type.substr(0,5) == 'touch') {
+							//console.log (ev.type + ': for ' + ev.changedTouches.length + ' touch points');
+							//console.log (ev.changedTouches);
+						} else {
+							//console.log (ev.type + ' event');
+							//console.log(ev);
+						}
+/*
+ *	Brand new (2019-03-26) direction.
+ *	All events are like HTML/DOM events.
+ *	Mouse events are single-point Touch events
+ *	No tracking of all touch points
+ *	No finding the object - that is a separate call details.getObject([id])
+ *	It is necessary to convert mouse events to touch events. 
+ *		Need to figure out what to do with various key presses (Ctrl, Alt, ...)
+ *		Mouse events
+ *	Move listeners are created on call to details.trackObject([id])
+ *	Redispatch causes a DOM event to be redispatched as an XSeen one
+ *	Redispatched events are swallowed
+ *
+ *	TODO:
+ *	* Potential issue with using mouse/touch for navigation as the event is never propagated
+ */
 						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
-							xEvents.redispatch = true;
-							xEvents.mode = xEvents.MODE_SELECT;
-							if (ev.type == 'mousedown') {
-								xEvents.cursorScreen.x =  ev.clientX * Runtime.Size.iwidth  * 2 - 1;
-								xEvents.cursorScreen.y = -ev.clientY * Runtime.Size.iheight * 2 + 1;
-							} else if (ev.type == 'touchstart') {
-								xEvents.cursorScreen.x =  ev.touches[0].clientX * Runtime.Size.iwidth  * 2 - 1;
-								xEvents.cursorScreen.y = -ev.touches[0].clientY * Runtime.Size.iheight * 2 + 1;
+							var newEv = new CustomEvent('xseen-touch', xEvents.eventProperties(ev));
+							//console.log ("Dispatching 'xseen-touch' on 'scene' tag");
+							//console.log (newEv);
+							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							ev.stopPropagation();		// No propagation beyond this tag
+							if (this.isEventsEnabled) {
+								console.log ('Commented out MOVE Listener in Events.js');
+								//XSeen.Runtime.RootTag.addEventListener ('mousemove', XSeen.Events.xseen, true);
+								//XSeen.Runtime.RootTag.addEventListener ('touchmove', XSeen.Events.xseen, true);
 							}
+						}
+						if (ev.type == 'mouseup' || ev.type == 'touchend' || ev.type == 'touchcancel') {
+							var newEv = new CustomEvent('xseen-release', xEvents.eventProperties(ev));
+							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							ev.stopPropagation();		// No propagation beyond this tag
+							XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
+							XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
+						}
+						if (ev.type == 'mousemove' || ev.type == 'touchmove') {
+							//console.log (ev);
+							var newEv = new CustomEvent('xseen-move', xEvents.eventProperties(ev));
+							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							ev.stopPropagation();		// No propagation beyond this tag
+						}
 
+/*
+ *	This works for a single ray (cursor-position). It needs to be expanded
+ *	to work in a multi-touch environment. The casting occurs on a touchstart-type event for 
+ *	each touch point. If the input is a cursor, then there is only one touch-point.
+ *	The array of touch points, hit objects, etc. are put into the event.
+ *	Each array element consists of the following:
+ *		hitObject (reference)
+ *		object-face
+ *		object-normal
+ *		various coordinates
+ *		point/face color
+ *		Object root reference
+ */
+ 
+/*
+ *	Logic changed with .addTouchPoint methods
+ *	That handles hit geometry. The only thing remaining is
+ *	to determine the mode of operation (MODE_NAVIGATION or MODE_SELECT
+ *	It is not sufficient to see if the current event hit a object because it may be part of a multi-touch
 							xEvents.raycaster.setFromCamera(xEvents.cursorScreen, Runtime.Camera);
 							var hitGeometryList = xEvents.raycaster.intersectObjects (Runtime.selectable, true);
 							if (hitGeometryList.length != 0) {
@@ -142,6 +404,12 @@ XSeen.Events = {
  *	unless hitGeometryList[0].object.userdata.root defined
  * Use of xEvents.object is discontinued
  */
+/*
+						var eventName;
+						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
+							xEvents.redispatch = true;
+							xEvents.mode = xEvents.MODE_SELECT;
+							//xEvents.TouchPoints.add (ev);
 								xEvents.object = hitGeometryList[0];
 								xEvents.tag = xEvents.object.object.userData;
 								if (typeof(xEvents.object.object.userData) != 'undefined' && typeof(xEvents.object.object.userData.root) != 'undefined') {
@@ -168,6 +436,7 @@ XSeen.Events = {
 							} else {
 								eventName = xEvents.Translate[ev.type].event;
 							}
+							xEvents.moveTouchPoint (ev);
 							var newEv = new CustomEvent(eventName, xEvents.propertiesCursor(ev, xEvents.object, xEvents));
 							xEvents.tag.dispatchEvent(newEv);
 							ev.stopPropagation();		// No propagation beyond this tag
@@ -176,13 +445,16 @@ XSeen.Events = {
 						}
 						if (ev.type == 'mouseup' || ev.type == 'touchend' || ev.type == 'touchcancel') {
 							// Cancel mousemove EventListener to reduce event traffic and allow navigation to use it
+							xEvents.removeTouchPoint (ev);
 							XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
 							XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
 							xEvents.redispatch = false;
 							xEvents.mode = xEvents.MODE_NAVIGATION;
 						}
+*/
 					},
 
+/*
 		'propertiesCursor'	: function (ev, selectedObject, xEvents)
 					{
 						//console.log ('Creating event detail for |' + ev.type + '|');
@@ -259,6 +531,7 @@ XSeen.Events = {
 //						properties.detail.targetWorldPosition = selectedObject.object.getWorldPosition();
 						return  properties;
 					},
+ */
 /*
  *	Events for device state changes
  *	Mostly this is deviceorientation events
@@ -271,10 +544,10 @@ XSeen.Events = {
 										'type':			XSeen.Events.Translate[ev.type].type,
 										'originalType':	ev.type,
 										'deviceOrientation': {	// Device orientation from the browser
-												'pitch': 	XSeen.Events.device.pitch,
-												'roll':		XSeen.Events.device.roll,
-												'yaw':		XSeen.Events.device.yaw,
-												},
+														'pitch': 	XSeen.Events.device.pitch,
+														'roll':		XSeen.Events.device.roll,
+														'yaw':		XSeen.Events.device.yaw,
+													},
 												},
 								'bubbles':		ev.bubbles,
 								'cancelable':	ev.cancelable,
@@ -303,12 +576,12 @@ XSeen.Events = {
 						return  properties;
 					},
 
-		'propertiesInitialize'	: function (Runtime)
+		'propertiesReadyGo'	: function (Runtime, state)
 					{
 						var properties = {
 								'detail':		{					// This object contains all of the XSeen data
-										'type'			: 'initialize',
-										'originalType'	: 'initialize',
+										'type'			: state,	// State of this event (initialize or render)
+										'originalType'	: state,
 										'originator'	: Runtime.RootTag,			// Reference to scene object
 										'name'			: Runtime.RootTag.name,		// Name of scene object
 										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering

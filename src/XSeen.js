@@ -66,14 +66,18 @@
  *	0.8.51: Added camera and device normals to events
  *	0.8.52: Created XSeen drag (mousemove) event
  *	0.8.53:	Improved support for device camera (see TODO note below) to match W3C Immersive Web concepts (full-screen)
- *		Multi-touch events
+ *	0.8.54:	Multi-touch events
+ *	0.8.55:	Added methods to mark/unmark object as Active
+ *	0.8.56:	Disabled Orbit tracker if camera is not being used (mostly needed for device motion tracking)
+ *	0.8.57:	Added methods to enable/disable cursor/mouse event handling (needed for Gesture handling)
+ *	0.8.58:	Added method to perform Y-axis rotation
+ *	0.8.59:	Added new attribute to XSeen that lets the developer specify a tag for full-screen
+ *	0.8.60:	Added xseen-go event to indicate start of animation loop
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
- *	Create event to start animation loop (xseen-readyanimate). This happens after multi-pass parsing is complete.
  *	Resolve CAD positioning issue
- *	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
  *	Audio (V0.9)
@@ -83,8 +87,10 @@
  *	Fog needs mutation functionality
  *	Scene camera needs fixing when multiple cameras with different controls are in use
  *	Add Orthographic camera
- * xx Create XSeen logo
- * xx Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
+ XX	Create event to start animation loop (xseen-readyanimate). This happens after multi-pass parsing is complete.
+ XX	Check background image cube for proper orientation (done See starburst/[p|n][x|y|z].jpg)
+ XX Create XSeen logo
+ XX Stereo camera automatically adds button to go full screen. Add "text" attribute to allow custom text.
  * 
  */
 
@@ -92,7 +98,7 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,
 					'_Minor'		: 8,
-					'_Patch'		: 53,
+					'_Patch'		: 60,
 					'_PreRelease'	: '',
 					'_Release'		: 7,
 					'_Version'		: '',

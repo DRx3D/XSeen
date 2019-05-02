@@ -258,7 +258,7 @@ XSeen.Parser = {
 				XSeen.LogDebug("Unknown node: " + tagName + '. Skipping all children.');
 				//console.log ("DEBUG: Unknown node: " + tagName + '. Skipping all children.');
 				return;
-			} else if (element._xseen.parseComplete) {	// tag already parsed. Display messge and ignore tag
+			} else if (element._xseen.parseComplete) {	// tag already parsed. Display message and ignore tag
 				XSeen.LogDebug("Tag already parsed: " + tagName + '. Skipping all children.');
 				//console.log ("DEBUG: Tag already parsed: " + tagName + '. Skipping all children.');
 			} else {
@@ -273,10 +273,33 @@ XSeen.Parser = {
 									'animation'		: [],	// array of animations on this tag
 									'properties'	: [],	// array of properties (active attribute values) on this tag
 									'class3d'		: [],	// 3D classes for this tag
-									'parseComplete'	: false,	// tag has benn completely parsed
+									'parseComplete'	: false,	// tag has been completely parsed
 									};
 				}
-			XSeen.Parser.ChildObserver.observe (element, {'childList':true});
+				element.makeActive = function(color) {
+											obj3 = this._xseen.tagObject;
+											if (typeof(obj3.children) != 'undefined' && typeof(obj3.children[0]) != 'undefined') obj3 = obj3.children[0];
+											var boundingBox = new THREE.BoxHelper (obj3, color);
+											var localTransform = new THREE.Matrix4();
+											localTransform.getInverse(this._xseen.tagObject.matrixWorld);
+											boundingBox.applyMatrix(localTransform);
+											this._xseen.tagObject.add(boundingBox);
+											return boundingBox;
+										};
+				element.makeInactive = function(boundingBox) {
+											this._xseen.tagObject.remove(boundingBox);
+											return {};
+										};
+				element.deltaRotateY = function(angle) {
+											var q = new THREE.Quaternion();
+											q.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), angle);
+											element._xseen.tagObject.applyQuaternion(q);
+										};
+				element.getValue = function (attribute) {
+											return element._xseen.attributes[attribute];
+										};
+				XSeen.Parser.ChildObserver.observe (element, {'childList':true});
+				
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
 				//console.log('Calling node: ' + tagName + '. Method: init');
@@ -675,7 +698,7 @@ XSeen.Parser = {
  * Color parsing order
  *	<integer>; Integer [0-16777215]. Key integer within range.
  *	#HHHHHH	24-bit hex value indicating color. Key '#'
- *	rgba(r g b a): where r,g,b are either byte-integers [0,255] or percent [0%-100%]; and a is [0.0-0.1] Key 'rgba(' and '%'
+ *	rgba(r g b a): where r,g,b are either byte-integers [0,255] or percent [0%-100%]; and a is [0.0-1.0] Key 'rgba(' and '%'
  *	rgb(r g b): where r,g,b are either byte-integers [0,255] or percent [0%-100%]. Key 'rgb(' and '%'
  *	f3(r g b): where r,g,b are fraction color values [0,1]. Key 'f3('
  *	f4(r g b a): where r,g,b are fraction color values [0,1]; and a is [0.0-0.1] Key 'f4(' 

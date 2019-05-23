@@ -68,11 +68,13 @@ XSeen.Tags.camera = {
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
+						console.log ('... using device orientation');
 						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
 						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
 						e._xseen.useDeviceOrientation = true;
 						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
+						console.log ('... using orbit controls');
 						e._xseen.track = 'orbit';
 						e._xseen.useDeviceOrientation = false;
 						//e._xseen.sceneInfo.useDeviceOrientation = false;
@@ -168,6 +170,7 @@ XSeen.Tags.camera = {
 					}
 
 				} else {								// No device orientation control. Use something else
+					console.log ('Determining renderer controls with track: ' + e._xseen.track);
 					if (e._xseen.track == 'orbit') {
 						e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 						e._xseen.sceneInfo.CameraControl.enabled = false;

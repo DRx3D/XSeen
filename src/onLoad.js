@@ -97,6 +97,13 @@ XSeen.onLoad = function() {
 									'case'		: 'insensitive' ,
 									'enumeration': ['ar', 'vr'],
 										},
+		// Turns off XSeen button creation (FullScreen, VR)
+								'_no-xseen-buttons' : {
+									'name'		: '_no-xseen-buttons',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'showstat'	: {
 									'name'		: 'showstat',
 									'default'	: 'false',
@@ -261,14 +268,12 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	
 // Set up control screen (FullScreen / Splitscreen / VR) buttons
-	if (XSeen.Runtime.Attributes.fullscreen) {
+	if (!XSeen.Runtime.Attributes['_no-xseen-buttons'] && XSeen.Runtime.Attributes.fullscreen) {
 		fullscreenElement = XSeen.Runtime.RootTag;
 		if (XSeen.Runtime.Attributes.fullscreenid != '') {
 			var ele = document.getElementById(XSeen.Runtime.Attributes.fullscreenid);
 			if (ele !== null) fullscreenElement = ele;
 		}
-//		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
-//		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
 		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', fullscreenElement, null);
 		var result = fullscreenElement.appendChild (fs_button);
 	}

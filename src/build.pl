@@ -49,7 +49,8 @@ my @releaseFile = (
 					$outputFilename);
 my $noOutput = 0;
 
-my (@files, @output, @preamble);
+my (@files, @output, @preamble, @outLineCount, $lineCount);
+$lineCount = 0;
 open (FILE, "<$preambleFile") or die "Unable to open $preambleFile\n$!\n";
 print "Reading $preambleFile\n";
 push @preamble, ("/*", " *  XSeen V".$version{'id'}, " *  Built " . localtime(), " *\n");
@@ -69,9 +70,11 @@ foreach my $dir (@{$directoryOrder{$partialBuild}}) {
 		open (FILE, "<$dir/$file") or die "Unable to open $dir/$file\n$!\n";
 		print "Reading $dir/$file\n";
 		push @output, "// File: $dir/$file";
+		push @outLineCount, {'line'=>$#output, 'file'=>"$dir/$file"};
 		while (<FILE>) {
 			chomp;
 			push @output, $_;
+			$lineCount++;
 		}
 		close FILE;
 	}
@@ -85,12 +88,19 @@ if ($noOutput) {
 	print STDERR "Not creating output file: $releaseFile[0]\n";
 	exit;
 }
+
 foreach my $outDir (@releaseDirectories) {
 	foreach my $outFile (@releaseFile) {
 		open (FILE, ">$outDir$outFile.js") or die "Unable to open $outDir$outFile.js\n$!\n";
 		binmode FILE;
 		print "Writing $outDir$outFile.js\n";
 		print FILE join("\n", @preamble);
+		my $introLines = $#preamble + $#outLineCount + 5;
+		print FILE "/*\n";
+		for (my $ii=0; $ii<=$#outLineCount; $ii++) {
+			print FILE sprintf("#     %5d: %s\n", $outLineCount[$ii]->{'line'}+$introLines, $outLineCount[$ii]->{'file'});
+		}
+		print FILE "*/\n";
 		print FILE join("\n", @output);
 		close FILE;
 		open (FILE, ">$outDir$outFile.min.js") or die "Unable to open $outDir$outFile.min.js\n$!\n";

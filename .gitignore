@@ -4,3 +4,4 @@ _ignore/*
 Resources/*
 Tutorials/*
 tests/*
+src/*._js

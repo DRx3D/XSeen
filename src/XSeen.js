@@ -73,6 +73,10 @@
  *	0.8.58:	Added method to perform Y-axis rotation
  *	0.8.59:	Added new attribute to XSeen that lets the developer specify a tag for full-screen
  *	0.8.60:	Added xseen-go event to indicate start of animation loop
+ *	0.8.61:	Revised control state button handling
+ *	0.8.62:	Added node to handle cubemaps as a resource
+ *	0.8.63:	Fixed camera controls bug. controls broken with 0.8.56
+ *	0.8.64:	Update 'model' and 'background' to use cubemaps with event handlers
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
@@ -96,13 +100,13 @@
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
-					'_Major'		: 0,
+					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 60,
-					'_PreRelease'	: '',
-					'_Release'		: 7,
+					'_Patch'		: 64,
+					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
+					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-03-07',
+					'_RDate'		: '2019-05-22',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

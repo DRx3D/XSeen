@@ -18,10 +18,43 @@
  */
 
 XSeen.Tags.model = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				if (attributeName == 'env-map') {
+					if (e._xseen.attributes['env-map'].substring(0,1) == '#') {
+						var cubeMapNode = document.getElementById(e._xseen.attributes['env-map'].substring(1));
+						cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+					}
+					e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
+					XSeen.Tags.model.applyEnvMap(e);
+				}
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+
 	'init'	: function (e, p) 
 		{
 			e._xseen.processedUrl = false;
 			e._xseen.loaded = {'envmap':false, 'model':false, }
+/*
+ * Event handler for loading new environment map from asset
+ *
+ *	This method handles updating all model nodes that use the texture from the node that generated the event
+ *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ */
+			e._xseen._updateEnvMap = function (ev) {
+				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				eleList.forEach(function(modelEle) {
+					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
+					XSeen.Tags.model.applyEnvMap(modelEle);
+				});
+			};
+
 			if (e._xseen.attributes['env-map'] != '') {
 				e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
 			}
@@ -44,21 +77,38 @@ XSeen.Tags.model = {
 			e._xseen.tagObject = e._xseen.loadGroup;
 			p._xseen.children.push(e._xseen.loadGroup);
 			//console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},
 	'tick'	: function (systemTime, deltaTime) {},
 	
 /*
- * Once the environent map and model are loaded, add the envmap to all Meshes
+ * Once the environment map and model are loaded, add the envmap to all Meshes
  */
 	'applyEnvMap'	: function (e) {
 			if (e._xseen.loaded.envmap && e._xseen.loaded.model) {
 				e._xseen.tmpGroup.traverse (function(child) {
 					if (child.isMesh) child.material.envMap = e._xseen.properties.envMap;
 				});
-				console.log ('Successful load of environment textures to glTF model.');
+				//console.log ('Successful load of environment textures to glTF model.');
 			}
+	},
+
+
+/*
+ * Event handler for loading new environment map from asset
+ *
+ *	This method handles updating all model nodes that use the texture from the node that generated the event
+ *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ */
+	'_updateEnvMap'	: function (ev) {
+				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				eleList.forEach(function(modelEle) {
+					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
+					XSeen.Tags.model.applyEnvMap(modelEle);
+				});
 	},
 
 /*
@@ -66,9 +116,17 @@ XSeen.Tags.model = {
  *	Taken from solids
  */
 	'_envMap'	: function (e, envMapUrl) {
+			if (envMapUrl.substring(0,1) == '#') {
+				var cubeMapNode = document.getElementById(envMapUrl.substring(1));
+				e._xseen.loaded.envmap = true;
+				//console.log ('Adding event listener "XSeen.Tags.model._updateEnvMap" for change to model texture on '+cubeMapNode.id);
+				cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+				//e._xseen.processedUrl = true;
+				return cubeMapNode._xseen.cubemap;
+			}
 			var envMap, basePath = 'Resources/textures/';
 			envMap = null;
-			console.log ('Loading textures from ' + envMapUrl);
+			//console.log ('Loading textures from ' + envMapUrl);
 			XSeen.Loader.TextureCube (envMapUrl, [], '.jpg', XSeen.Tags.model.envLoadSuccess({'e':e}));
 			return envMap;
 	},
@@ -181,4 +239,5 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'playonload', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'duration', dataType:'float', 'defaultValue':-1, 'isAnimatable':false})
 		.defineAttribute ({'name':'env-map', dataType:'string', 'defaultValue':''})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.model._changeAttribute}]})
 		.addTag();

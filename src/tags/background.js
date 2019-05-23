@@ -26,9 +26,13 @@
 
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
+				if (attributeName == 'src' && e._xseen.imageSource.substring(0,1) == '#') {
+					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
+					cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
+				}
 				e._xseen.attributes[attributeName] = value;
 				var type = XSeen.Tags.background._saveAttributes (e);
 				XSeen.Tags.background._processChange (e);
@@ -67,7 +71,7 @@ XSeen.Tags.background = {
 					.then(gotDevices).catch(handleError);
 
 				function gotDevices(deviceInfos) {
-					console.log (deviceInfos);
+					//console.log (deviceInfos);
 					for (var i = 0; i !== deviceInfos.length; ++i) {
 						var deviceInfo = deviceInfos[i];
 						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
@@ -257,63 +261,39 @@ XSeen.Tags.background = {
  *			<full-file> with single '*'. This substitutes (in -turn) ['right', 'left', 'top', 'bottom', 'front', 'back']
  *						for the wild card character to load the 6 cube textures.
  */
- /*
-  *		Old code slated for removal...
-  *
-	'_loadBackground'	: function (attributes, e)
-		{
-			// Parse src according the description above. 
-			if (attributes.backgroundiscube) {
-				var urls=[], files=[], tail='', srcFile='';
-				var src = attributes.src.split('*');
-				var sides = ['right', 'left', 'top', 'bottom', 'front', 'back'];
-				var files = [];
-				if (src.length == 2) {
-					tail = src[src.length-1];
-					srcFile = src[0];
-					files = sides;
-				} else {					// Also requires 'src' ends in '/'
-					tail = '.jpg';
-					srcFile = src;
-					files = ['px', 'nx', 'py', 'ny', 'px', 'nz'];
-				}
-				for (var ii=0;  ii<sides.length; ii++) {
-					urls[sides[ii]] = srcFile + files[ii] + tail;
-					urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
-/*
- * Old code that reflected a very X3D-centric means of specifying textures
-				if (urls[sides[ii]] == '' || urls[sides[ii]] == sides[ii]) {
-					urls[sides[ii]] = null;
-				} else {
-					urls2load ++;
-				}
-* End of even older code...
-				}
 
-				console.log ('Loading background image cube');
-				var dirtyFlag;
-				XSeen.Loader.TextureCube ('./', [urls['right'],
-												urls['left'],
-												urls['top'],
-												urls['bottom'],
-												urls['front'],
-												urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
-*/
+	'_updateBackground'	: function (ev) 
+		{
+			//console.log('Updating background from event');
+			//console.log(ev);
+			ev.detail.Runtime.SCENE.background = ev.target._xseen.cubemap;
+		},
 	'_loadBackground'	: function (e)
 		{
 			// Parse src according the description above. 
 			if (e._xseen.backgroundType == 'cube' && e._xseen.srcType == 'path') {
-				var urls=[], files=[];
-				var files = ['px.', 'nx.', 'py.', 'ny.', 'pz.', 'nz.'];
-				for (var ii=0;  ii<files.length; ii++) {
-					urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
-				}
+				if (e._xseen.imageSource.substring(0,1) == '#') {
+					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
+					e._xseen.processedUrl = true;
+					//console.log ('Using background ');
+					//console.log (cubeMapNode._xseen.cubemap);
+					e._xseen.loadTexture = cubeMapNode._xseen.cubemap;
+					e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
 
-				console.log ('Loading background image cube');
-				var dirtyFlag;
-				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
-				e._xseen.sphere.material.transparent = true;
-				e._xseen.sphere.material.opacity = 0.0;
+				} else {
+					var urls=[], files=[];
+					var files = ['px.', 'nx.', 'py.', 'ny.', 'pz.', 'nz.'];
+					for (var ii=0;  ii<files.length; ii++) {
+						urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
+					}
+
+					//console.log ('Loading background image cube');
+					var dirtyFlag;
+					XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+					e._xseen.sphere.material.transparent = true;
+					e._xseen.sphere.material.opacity = 0.0;
+				}
 
 			} else {		// Sphere-mapped texture. Need to do all of things specified in the above description
 				if (e._xseen.backgroundType == 'sphere' && e._xseen.srcType == 'image') {
@@ -335,7 +315,7 @@ XSeen.Tags.background = {
 						e._xseen.sphere.material.transparent = false;
 						e._xseen.sphere.material.opacity = 1.0;
 						e._xseen.sphere.material.needsUpdate = true;
-						console.log (e._xseen.sphere.material);
+						//console.log (e._xseen.sphere.material);
 					}
 				}
 			}
@@ -351,7 +331,7 @@ XSeen.Tags.background = {
 				thisEle._xseen.processedUrl = true;
 				thisEle._xseen.loadTexture = textureCube;
 				thisEle._xseen.sceneInfo.SCENE.background = textureCube;
-				console.log ('Successful load of background texture cube.');
+				//console.log ('Successful load of background texture cube.');
 			}
 		},
 	'loadProgress' : function (a)

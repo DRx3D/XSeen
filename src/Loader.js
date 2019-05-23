@@ -120,15 +120,15 @@ XSeen.Loader = {
 				return function (textureCube) {
 					texture = textureCube;
 					if (typeof(dirty) !== 'undefined') {dirty = true;}
-					console.log ('Successful load of background textures.');
+					//console.log ('Successful load of texture cube.');
 				}
 			};
 			var _Progress = function (a) {
 				console.log ('Loading background textures...');
 			};
 			var _Failure = function (a) {
-				console.log ('Failure to load background texture.');
-				console.log (a);
+				console.log ('Failure to load texture.');
+				console.error (a);
 			};
 
 			if (typeof(filetypes) == 'string') {
@@ -147,8 +147,8 @@ XSeen.Loader = {
 			urls[4] = pathUri + ((filenames.length >= 5 && filenames[4] != '') ? filenames[4] : 'pz') + urlTypes[4];
 			urls[5] = pathUri + ((filenames.length >= 6 && filenames[5] != '') ? filenames[5] : 'nz') + urlTypes[5];
 
-			console.log('Loading cube-map texture...');
-			console.log (urls);
+			//console.log('Loading cube-map texture...');
+			//console.log (urls);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 //									.setPath ('./')
@@ -161,7 +161,7 @@ XSeen.Loader = {
  *	Sets up for loading an external resource. 
  *	The resource is loaded from a FIFO queue
  *	Loading happens asynchronously. The Loader parameter
- *	MaxRequests determines the maximum number of simoultaneous requests
+ *	MaxRequests determines the maximum number of simultaneous requests
  *
  *	Parameters:
  *		url			The URL of the resource
@@ -281,7 +281,7 @@ XSeen.Loader.onLoad = function() {
 							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(mgr), needHint: false, }, 
 							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(mgr), needHint: false, }, 
 						};
-	console.log ('Created ContentLoaders object');
+	//console.log ('Created ContentLoaders object');
 	mgr.onLoad = function() {XSeen.Loader.loadersComplete = true;}
 };
 XSeen.Loader.loadingComplete = function() {

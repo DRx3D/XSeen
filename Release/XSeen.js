@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.60+7_abcb5bf
- *  Built Mon Apr 29 08:02:05 2019
+ *  XSeen V0.8.64-beta+8_ef308d0
+ *  Built Wed May 22 20:41:38 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -58,6 +58,34 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 ===  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
  */
+/*
+#        88: ./CameraManager.js
+#       248: ./Constants.js
+#       438: ./DisplayControl.js
+#       828: ./Events.js
+#      1366: ./IW.js
+#      1419: ./Loader.js
+#      1715: ./Logging.js
+#      1802: ./onLoad.js
+#      2174: ./Tag.js
+#      2995: ./XSeen.js
+#      3260: tags/$.js
+#      3329: tags/animate.js
+#      3739: tags/asset.js
+#      3767: tags/background.js
+#      4141: tags/camera.js
+#      4367: tags/cubemap.js
+#      4514: tags/fog.js
+#      4597: tags/group.js
+#      4700: tags/label.js
+#      4886: tags/light.js
+#      4991: tags/metadata.js
+#      5100: tags/model.js
+#      5344: tags/scene.js
+#      5456: tags/solids.js
+#      6511: tags/style3d.js
+#      6694: tags/subscene.js
+*/
 // File: ./CameraManager.js
 /*
  * XSeen JavaScript library
@@ -621,11 +649,14 @@ XSeen.DisplayControl = {
 		node._requestFullscreen	= this._requestFullscreen;
 		node._exitFullscreen	= this._exitFullscreen;
 		node._fullscreenButton	= button;
+/*
+ * Defined below
 		document.documentElement._isFullScreen		= function () {
 			var fullScreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 			if (typeof(fullScreenElement) != 'undefined') {return true;}
 			return false;
 		};
+*/
 		document.documentElement._fullScreenElement	= function () {
 			return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 		};
@@ -726,238 +757,75 @@ XSeen.DisplayControl = {
 		return response;
 	},
 };
-		
-/*
-		if ( 'getVRDisplays' in navigator ) {
-
-			var button = document.createElement( 'button' );
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			window.addEventListener( 'vrdisplayconnect', function ( event ) {
-
-				showEnterVR( event.display );
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
-
-				showVRNotFound();
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
-
-				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-
-			}, false );
-
-			navigator.getVRDisplays()
-				.then( function ( displays ) {
-
-					if ( displays.length > 0 ) {
-
-						showEnterVR( displays[ 0 ] );
-
-					} else {
-
-						showVRNotFound();
-
-					}
-
-				} );
-
-			return button;
-
-		} else {
-
-			var message = document.createElement( 'a' );
-			message.href = 'https://webvr.info';
-			message.innerHTML = 'WEBVR NOT SUPPORTED';
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
-
-		}
-	}
-}
-	
-//var WEBVR = {
-
-	createButton: function ( renderer ) {}
-
-		function showEnterVR( display ) {
-
-			button.style.display = '';
-
-			button.style.cursor = 'pointer';
-			button.style.left = 'calc(50% - 50px)';
-			button.style.width = '100px';
-
-			button.textContent = 'ENTER VR';
-
-			button.onmouseenter = function () { button.style.opacity = '1.0'; };
-			button.onmouseleave = function () { button.style.opacity = '0.5'; };
-			(jQuery)('#HUD-text').prepend ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-			console.log ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-			renderer.vr._RequestStart = false;
-
-			button.onclick = function () {
 
 /*
- *	display == VRDisplay object. .displayName: "Google, Inc. Daydream View"
- *	renderer.domElement ==
- *				canvas object (HTML element). .nodeName = 'CANVAS'
+ * Developmental methods for handling button events external to XSeen
+ *	All defined in XSeen. This may not be the best place for these definitions, but
+ *	their function relates to the processing defined here (DisplayControl).
+ *	These functions depend on successful and correct definition of XSeen.DisplayControl
+ *
+ *	isFullScreen	- returns true or false
+ *	goFullScreen	- requests full screen mode. Event handler, no change to buttons
+ *	exitFullScreen	- exits from full screen mode. Event handler, no change to buttons
  */
-//				display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
+document.documentElement._isFullScreen		= function () {
+	var fullScreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+	if (typeof(fullScreenElement) != 'undefined') {return true;}
+	return false;
+};
+document.documentElement._requestFullScreen =
+						document.documentElement.requestFullscreen || 
+						document.documentElement.webkitRequestFullscreen || 
+						document.documentElement.mozRequestFullScreen || 
+						document.documentElement.msRequestFullscreen;
+//document.documentElement._requestFullScreen =
+//						document.documentElement.mozRequestFullScreen;
+document.documentElement._exitFullscreen =
+						document.exitFullscreen || 
+						document.webkitExitFullscreen || 
+						document.mozCancelFullScreen || 
+						document.msExitFullscreen;
+
+
 /*
-				if (display.isPresenting) {
-					(jQuery)('#HUD-text').prepend ('Curently VRpresenting, now exiting<br>');
-					console.log ('Curently VRpresenting, now exiting<br>');
-					display.exitPresent();
-					renderer.vr._RequestStart = false;
-				} else {
-					renderer.vr._RequestStart = true;
-					(jQuery)('#HUD-text').prepend ('Starting VRpresenting<br>');
-					(jQuery)('#HUD-text').prepend (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-					console.log ('Starting VRpresenting<br>');
-					console.log (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-					var st = display.requestPresent( [ { source: renderer.domElement } ] );
-					console.log ('VR request response = ' + st);
-					(jQuery)('#HUD-text').prepend ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
-					console.log ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
-				}
-
-			};
-
-//				display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
-//				renderer.vr.setDevice( display );
-
+ * Define XSeen methods to handle full screen interactions
+ */
+XSeen.nameFullScreenEvent =
+			(typeof(document.documentElement.requestFullscreen)			!= 'undefined') ? 'fullscreenchange' :
+			(typeof(document.documentElement.webkitRequestFullscreen)	!= 'undefined') ? 'webkitfullfullscreenchange' :
+			(typeof(document.documentElement.mozRequestFullScreen)		!= 'undefined') ? 'mozfullscreenchange' :
+			(typeof(document.documentElement.msRequestFullscreen)		!= 'undefined') ? 'msfullscreenchange' : '';
+XSeen.isFullScreen = function() {return document.documentElement._isFullScreen();}
+XSeen.goFullScreen = function(fullScreenNode) {
+	if (fullScreenNode === null) fullScreenNode = XSeen.Runtime.RootTag;
+	document.addEventListener( XSeen.nameFullScreenEvent, function ( event ) {
+		if (XSeen.Runtime._deviceCameraElement != 0) {
+			if ( XSeen.isFullScreen() ) {
+				XSeen.IW.connectCamera (XSeen.Runtime._deviceCameraElement);	// Connect camera
+			} else {
+				XSeen.IW.disconnectCamera (XSeen.Runtime._deviceCameraElement);	// Disconnect camera
+			}
 		}
-
-		function showVRNotFound() {
-
-			button.style.display = '';
-
-			button.style.cursor = 'auto';
-			button.style.left = 'calc(50% - 75px)';
-			button.style.width = '150px';
-
-			button.textContent = 'VR NOT FOUND';
-
-			button.onmouseenter = null;
-			button.onmouseleave = null;
-
-			button.onclick = null;
-
-			renderer.vr.setDevice( null );
-
-		}
-
-		function stylizeElement( element ) {
-
-			element.style.position = 'absolute';
-			element.style.bottom = '20px';
-			element.style.padding = '12px 6px';
-			element.style.border = '1px solid #fff';
-			element.style.borderRadius = '4px';
-			element.style.background = 'transparent';
-			element.style.color = '#fff';
-			element.style.font = 'normal 13px sans-serif';
-			element.style.textAlign = 'center';
-			element.style.opacity = '0.5';
-			element.style.outline = 'none';
-			element.style.zIndex = '999';
-
-		}
-
-		if ( 'getVRDisplays' in navigator ) {
-
-			var button = document.createElement( 'button' );
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			window.addEventListener( 'vrdisplayconnect', function ( event ) {
-
-				showEnterVR( event.display );
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
-
-				showVRNotFound();
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
-
-				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-
-			}, false );
-
-			navigator.getVRDisplays()
-				.then( function ( displays ) {
-
-					if ( displays.length > 0 ) {
-
-						showEnterVR( displays[ 0 ] );
-
-					} else {
-
-						showVRNotFound();
-
-					}
-
-				} );
-
-			return button;
-
-		} else {
-
-			var message = document.createElement( 'a' );
-			message.href = 'https://webvr.info';
-			message.innerHTML = 'WEBVR NOT SUPPORTED';
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
-
-		}
-
-	},
-
-	// DEPRECATED
-
-	checkAvailability: function () {
-		console.warn( 'WEBVR.checkAvailability has been deprecated.' );
-		return new Promise( function () {} );
-	},
-
-	getMessageContainer: function () {
-		console.warn( 'WEBVR.getMessageContainer has been deprecated.' );
-		return document.createElement( 'div' );
-	},
-
-	getButton: function () {
-		console.warn( 'WEBVR.getButton has been deprecated.' );
-		return document.createElement( 'div' );
-	},
-
-	getVRDisplay: function () {
-		console.warn( 'WEBVR.getVRDisplay has been deprecated.' );
+	}, false );
+	_requestFullScreen = 
+						fullScreenNode.requestFullscreen || 
+						fullScreenNode.webkitRequestFullscreen || 
+						fullScreenNode.mozRequestFullScreen || 
+						fullScreenNode.msRequestFullscreen;
+	_requestFullScreen.call(fullScreenNode);
+};
+XSeen.exitFullScreen = function(fullScreenNode) {
+	if (fullScreenNode === null) fullScreenNode = XSeen.Runtime.RootTag;
+	if (document.exitFullscreen !== null) {
+		document.exitFullscreen();
+	} else if (document.webkitExitFullscreen !== null) {
+		document.webkitExitFullscreen();
+	} else if (document.mozCancelFullScreen !== null) {
+		document.mozCancelFullScreen();
+	} else if (document.msExitFullscreen !== null) {
+		document.msExitFullscreen();
 	}
-*/
+};
 // File: ./Events.js
 /*
  * XSeen JavaScript library
@@ -1282,7 +1150,7 @@ XSeen.Events = {
  */
 		'xseen'				: function (ev)
 					{
-						console.log ('XSeen event handler - ' + ev.type);
+						//console.log ('XSeen event handler - ' + ev.type);
 						//console.log ('... ' + ev.x + ', ' + ev.y);
 						//console.log ("'xseen' method for handling events");
 						var xEvents = XSeen.Events;
@@ -1310,14 +1178,17 @@ XSeen.Events = {
  *	TODO:
  *	* Potential issue with using mouse/touch for navigation as the event is never propagated
  */
+						//console.log ('Events:: handling event by type: ' + ev.type + ' with device navigation: ' + XSeen.Runtime.useDeviceOrientation);
+						if (XSeen.Runtime.useDeviceOrientation) {
 						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
 							var newEv = new CustomEvent('xseen-touch', xEvents.eventProperties(ev));
 							//console.log ("Dispatching 'xseen-touch' on 'scene' tag");
 							//console.log (newEv);
 							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							//console.log ('Mouse down. Dispatch xseen-touch and stop propagation');
 							ev.stopPropagation();		// No propagation beyond this tag
 							if (this.isEventsEnabled) {
-								console.log ('Commented out MOVE Listener in Events.js');
+								//console.log ('Commented out MOVE Listener in Events.js');
 								//XSeen.Runtime.RootTag.addEventListener ('mousemove', XSeen.Events.xseen, true);
 								//XSeen.Runtime.RootTag.addEventListener ('touchmove', XSeen.Events.xseen, true);
 							}
@@ -1325,6 +1196,7 @@ XSeen.Events = {
 						if (ev.type == 'mouseup' || ev.type == 'touchend' || ev.type == 'touchcancel') {
 							var newEv = new CustomEvent('xseen-release', xEvents.eventProperties(ev));
 							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							//console.log ('Mouse up. Dispatch xseen-release and stop propagation');
 							ev.stopPropagation();		// No propagation beyond this tag
 							XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
 							XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
@@ -1333,166 +1205,13 @@ XSeen.Events = {
 							//console.log (ev);
 							var newEv = new CustomEvent('xseen-move', xEvents.eventProperties(ev));
 							XSeen.Runtime.RootTag.dispatchEvent(newEv);
+							//console.log ('Mouse move. Dispatch xseen-move and stop propagation');
 							ev.stopPropagation();		// No propagation beyond this tag
 						}
-
-/*
- *	This works for a single ray (cursor-position). It needs to be expanded
- *	to work in a multi-touch environment. The casting occurs on a touchstart-type event for 
- *	each touch point. If the input is a cursor, then there is only one touch-point.
- *	The array of touch points, hit objects, etc. are put into the event.
- *	Each array element consists of the following:
- *		hitObject (reference)
- *		object-face
- *		object-normal
- *		various coordinates
- *		point/face color
- *		Object root reference
- */
- 
-/*
- *	Logic changed with .addTouchPoint methods
- *	That handles hit geometry. The only thing remaining is
- *	to determine the mode of operation (MODE_NAVIGATION or MODE_SELECT
- *	It is not sufficient to see if the current event hit a object because it may be part of a multi-touch
-							xEvents.raycaster.setFromCamera(xEvents.cursorScreen, Runtime.Camera);
-							var hitGeometryList = xEvents.raycaster.intersectObjects (Runtime.selectable, true);
-							if (hitGeometryList.length != 0) {
-/**
- * TODO: Need to correctly handle hit item and object for dispatch
- * xEvents.hitObject = hitGeometryList[0]
- * hitNode = hitGeometryList[0].object
- *	unless hitGeometryList[0].object.userdata.root defined
- * Use of xEvents.object is discontinued
- */
-/*
-						var eventName;
-						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
-							xEvents.redispatch = true;
-							xEvents.mode = xEvents.MODE_SELECT;
-							//xEvents.TouchPoints.add (ev);
-								xEvents.object = hitGeometryList[0];
-								xEvents.tag = xEvents.object.object.userData;
-								if (typeof(xEvents.object.object.userData) != 'undefined' && typeof(xEvents.object.object.userData.root) != 'undefined') {
-									xEvents.tag = xEvents.tag.root;
-								}
-								// TODO: Create mousemove listener on root tag (DONE?)
-								XSeen.Runtime.RootTag.addEventListener ('mousemove', XSeen.Events.xseen, true);
-								XSeen.Runtime.RootTag.addEventListener ('touchmove', XSeen.Events.xseen, true);
-
-							} else {
-								xEvents.object = {};
-								xEvents.redispatch = false;
-								xEvents.mode = xEvents.MODE_NAVIGATION;
-							}
 						}
-						//console.log ('Type, redispatch = ' + ev.type + ', ' + xEvents.redispatch);
-						if ((xEvents.redispatch || ev.type == 'click' || ev.type == 'dblclick') && typeof(xEvents.object.object) !== 'undefined') {
-							//console.log ('Repropigate event');
-							// Generate an XSeen (Custom)Event of the same type and dispatch it
-							
-							if (typeof(xEvents.Translate[ev.type]) == 'undefined') {
-								console.log ('Unknown event type -- ' + ev.type);
-								eventName = xEvents.Translate.UNKNOWN.event;
-							} else {
-								eventName = xEvents.Translate[ev.type].event;
-							}
-							xEvents.moveTouchPoint (ev);
-							var newEv = new CustomEvent(eventName, xEvents.propertiesCursor(ev, xEvents.object, xEvents));
-							xEvents.tag.dispatchEvent(newEv);
-							ev.stopPropagation();		// No propagation beyond this tag
-						} else {
-							//console.log ('Navigation mode...');
-						}
-						if (ev.type == 'mouseup' || ev.type == 'touchend' || ev.type == 'touchcancel') {
-							// Cancel mousemove EventListener to reduce event traffic and allow navigation to use it
-							xEvents.removeTouchPoint (ev);
-							XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
-							XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
-							xEvents.redispatch = false;
-							xEvents.mode = xEvents.MODE_NAVIGATION;
-						}
-*/
 					},
 
-/*
-		'propertiesCursor'	: function (ev, selectedObject, xEvents)
-					{
-						//console.log ('Creating event detail for |' + ev.type + '|');
-						var properties = {
-								'detail':		{					// This object contains all of the XSeen data
-										'type':			xEvents.Translate[ev.type].type,
-										'originalType':	ev.type,
-										//'originator':	selectedObject.object.userData,
-										'originator':	xEvents.tag,
-										'picker':		xEvents.tag._xseen.pickGroup,
-										'name':			selectedObject.object.name,
-										'distance':		selectedObject.distance,
-										'target':		selectedObject,
-										'position': {				// Deprecated
-												'x': selectedObject.point.x,
-												'y': selectedObject.point.y,
-												'z': selectedObject.point.z,
-												},
-										'hitPosition': {			// Touch point on target
-												'x': selectedObject.point.x,
-												'y': selectedObject.point.y,
-												'z': selectedObject.point.z,
-												},
-										'normal': {
-												'x': selectedObject.face.normal.x,
-												'y': selectedObject.face.normal.y,
-												'z': selectedObject.face.normal.z,
-												},
-										'uv': {
-												'x': 0.0,		// selectedObject.uv.x,
-												'y': 0.0,		// selectedObject.uv.y,
-												},
-										'targetWorldPosition': selectedObject.object.getWorldPosition(),
-										'pickerWorldPosition': xEvents.tag._xseen.pickGroup._xseen.tagObject.getWorldPosition(),
-										'cameraNormal': {		// Where the camera is pointing
-												'x': 0,
-												'y': 0,
-												'z': -1,
-												},
-										//'cameraPosition': selectedObject.object.userData._xseen.sceneInfo.Camera.getWorldPosition(),
-										'cameraPosition': xEvents.tag._xseen.sceneInfo.Camera.getWorldPosition(),
-										'deviceOrientation': {	// Device orientation from the browser
-												'pitch': 	xEvents.device.pitch,
-												'roll':		xEvents.device.roll,
-												'yaw':		xEvents.device.yaw,
-												},
-										'screenX':	0,			// Filled in below
-										'screenY':	0,
-										'clientX':	0,
-										'clientY':	0,
-										'ctrlKey':	ev.ctrlKey,
-										'shiftKey':	ev.shiftKey,
-										'altKey': 	ev.altKey,
-										'metaKey':	ev.metaKey,
-										'button':	ev.button,
-										'buttons':	ev.buttons,
-												},
-								'bubbles':		ev.bubbles,
-								'cancelable':	ev.cancelable,
-								'composed':		ev.composed,
-							};
-						if (typeof(ev.clientX) != 'undefined' && !isNaN(ev.clientX)) {
-							properties.detail.clientX = ev.clientX;
-							properties.detail.clientY = ev.clientY;
-							properties.detail.screenX = ev.screenX;
-							properties.detail.screenY = ev.screenY;
-						} else if (typeof(ev.touches) != 'undefined' && typeof(ev.touches[0]) != 'undefined' && typeof(ev.touches[0].clientX) != 'undefined' && !isNaN(ev.touches[0].clientX)) {
-							properties.detail.clientX = ev.touches[0].clientX;
-							properties.detail.clientY = ev.touches[0].clientY;
-							properties.detail.screenX = ev.touches[0].screenX;
-							properties.detail.screenY = ev.touches[0].screenY;
-						}
-//						selectedObject.object.getWorldPosition (properties.detail.targetWorldPosition);
-//						properties.detail.targetWorldPosition = selectedObject.object.getWorldPosition();
-						return  properties;
-					},
- */
+
 /*
  *	Events for device state changes
  *	Mostly this is deviceorientation events
@@ -1545,6 +1264,25 @@ XSeen.Events = {
 										'originalType'	: state,
 										'originator'	: Runtime.RootTag,			// Reference to scene object
 										'name'			: Runtime.RootTag.name,		// Name of scene object
+										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
+										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
+										'Runtime'		: Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						return  properties;
+					},
+
+		'propertiesAssetChanged'	: function (Runtime, assetType)
+					{
+						var properties = {
+								'detail':		{							// This object contains all of the XSeen data
+										'type'			: assetType,		// What asset was changed
+										'originalType'	: assetType,
+										'originator'	: Runtime,					// Reference to tag requesting event
+										'name'			: 'TBD: name',				// Name of scene object
 										'currentTime'	: Runtime.currentTime,		// Current time at start of frame rendering
 										'deltaTime'		: Runtime.deltaTime,		// Time since last frame
 										'Runtime'		: Runtime					// Reference to Runtime object
@@ -1802,15 +1540,15 @@ XSeen.Loader = {
 				return function (textureCube) {
 					texture = textureCube;
 					if (typeof(dirty) !== 'undefined') {dirty = true;}
-					console.log ('Successful load of background textures.');
+					//console.log ('Successful load of texture cube.');
 				}
 			};
 			var _Progress = function (a) {
 				console.log ('Loading background textures...');
 			};
 			var _Failure = function (a) {
-				console.log ('Failure to load background texture.');
-				console.log (a);
+				console.log ('Failure to load texture.');
+				console.error (a);
 			};
 
 			if (typeof(filetypes) == 'string') {
@@ -1829,8 +1567,8 @@ XSeen.Loader = {
 			urls[4] = pathUri + ((filenames.length >= 5 && filenames[4] != '') ? filenames[4] : 'pz') + urlTypes[4];
 			urls[5] = pathUri + ((filenames.length >= 6 && filenames[5] != '') ? filenames[5] : 'nz') + urlTypes[5];
 
-			console.log('Loading cube-map texture...');
-			console.log (urls);
+			//console.log('Loading cube-map texture...');
+			//console.log (urls);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 //									.setPath ('./')
@@ -1843,7 +1581,7 @@ XSeen.Loader = {
  *	Sets up for loading an external resource. 
  *	The resource is loaded from a FIFO queue
  *	Loading happens asynchronously. The Loader parameter
- *	MaxRequests determines the maximum number of simoultaneous requests
+ *	MaxRequests determines the maximum number of simultaneous requests
  *
  *	Parameters:
  *		url			The URL of the resource
@@ -1963,7 +1701,7 @@ XSeen.Loader.onLoad = function() {
 							'gltfCurrent'	: {'loader': new THREE.GLTFLoader(mgr), needHint: false, }, 
 							'gltfLegacy'	: {'loader': new THREE.LegacyGLTFLoader(mgr), needHint: false, }, 
 						};
-	console.log ('Created ContentLoaders object');
+	//console.log ('Created ContentLoaders object');
 	mgr.onLoad = function() {XSeen.Loader.loadersComplete = true;}
 };
 XSeen.Loader.loadingComplete = function() {
@@ -2162,6 +1900,13 @@ XSeen.onLoad = function() {
 									'case'		: 'insensitive' ,
 									'enumeration': ['ar', 'vr'],
 										},
+		// Turns off XSeen button creation (FullScreen, VR)
+								'_no-xseen-buttons' : {
+									'name'		: '_no-xseen-buttons',
+									'default'	: 'false',
+									'type'		: 'boolean',
+									'case'		: 'insensitive' ,
+										},
 								'showstat'	: {
 									'name'		: 'showstat',
 									'default'	: 'false',
@@ -2326,14 +2071,12 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	
 // Set up control screen (FullScreen / Splitscreen / VR) buttons
-	if (XSeen.Runtime.Attributes.fullscreen) {
+	if (!XSeen.Runtime.Attributes['_no-xseen-buttons'] && XSeen.Runtime.Attributes.fullscreen) {
 		fullscreenElement = XSeen.Runtime.RootTag;
 		if (XSeen.Runtime.Attributes.fullscreenid != '') {
 			var ele = document.getElementById(XSeen.Runtime.Attributes.fullscreenid);
 			if (ele !== null) fullscreenElement = ele;
 		}
-//		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', XSeen.Runtime.RootTag, null);
-//		var result = XSeen.Runtime.RootTag.appendChild (fs_button);
 		var fs_button = XSeen.DisplayControl.buttonCreate ('fullscreen', fullscreenElement, null);
 		var result = fullscreenElement.appendChild (fs_button);
 	}
@@ -3326,6 +3069,10 @@ XSeen.Parser = {
  *	0.8.58:	Added method to perform Y-axis rotation
  *	0.8.59:	Added new attribute to XSeen that lets the developer specify a tag for full-screen
  *	0.8.60:	Added xseen-go event to indicate start of animation loop
+ *	0.8.61:	Revised control state button handling
+ *	0.8.62:	Added node to handle cubemaps as a resource
+ *	0.8.63:	Fixed camera controls bug. controls broken with 0.8.56
+ *	0.8.64:	Update 'model' and 'background' to use cubemaps with event handlers
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
@@ -3349,13 +3096,13 @@ XSeen.Parser = {
 
 XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
-					'_Major'		: 0,
+					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 60,
-					'_PreRelease'	: '',
-					'_Release'		: 7,
+					'_Patch'		: 64,
+					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
+					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-03-07',
+					'_RDate'		: '2019-05-22',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -4047,9 +3794,13 @@ XSeen.Parser.defineTag ({
 
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
+				if (attributeName == 'src' && e._xseen.imageSource.substring(0,1) == '#') {
+					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
+					cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
+				}
 				e._xseen.attributes[attributeName] = value;
 				var type = XSeen.Tags.background._saveAttributes (e);
 				XSeen.Tags.background._processChange (e);
@@ -4088,7 +3839,7 @@ XSeen.Tags.background = {
 					.then(gotDevices).catch(handleError);
 
 				function gotDevices(deviceInfos) {
-					console.log (deviceInfos);
+					//console.log (deviceInfos);
 					for (var i = 0; i !== deviceInfos.length; ++i) {
 						var deviceInfo = deviceInfos[i];
 						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
@@ -4278,63 +4029,39 @@ XSeen.Tags.background = {
  *			<full-file> with single '*'. This substitutes (in -turn) ['right', 'left', 'top', 'bottom', 'front', 'back']
  *						for the wild card character to load the 6 cube textures.
  */
- /*
-  *		Old code slated for removal...
-  *
-	'_loadBackground'	: function (attributes, e)
-		{
-			// Parse src according the description above. 
-			if (attributes.backgroundiscube) {
-				var urls=[], files=[], tail='', srcFile='';
-				var src = attributes.src.split('*');
-				var sides = ['right', 'left', 'top', 'bottom', 'front', 'back'];
-				var files = [];
-				if (src.length == 2) {
-					tail = src[src.length-1];
-					srcFile = src[0];
-					files = sides;
-				} else {					// Also requires 'src' ends in '/'
-					tail = '.jpg';
-					srcFile = src;
-					files = ['px', 'nx', 'py', 'ny', 'px', 'nz'];
-				}
-				for (var ii=0;  ii<sides.length; ii++) {
-					urls[sides[ii]] = srcFile + files[ii] + tail;
-					urls[sides[ii]] = (attributes['src'+sides[ii]] != '') ? attributes['src'+sides[ii]] : urls[sides[ii]];
-/*
- * Old code that reflected a very X3D-centric means of specifying textures
-				if (urls[sides[ii]] == '' || urls[sides[ii]] == sides[ii]) {
-					urls[sides[ii]] = null;
-				} else {
-					urls2load ++;
-				}
-* End of even older code...
-				}
 
-				console.log ('Loading background image cube');
-				var dirtyFlag;
-				XSeen.Loader.TextureCube ('./', [urls['right'],
-												urls['left'],
-												urls['top'],
-												urls['bottom'],
-												urls['front'],
-												urls['back']], '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
-*/
+	'_updateBackground'	: function (ev) 
+		{
+			//console.log('Updating background from event');
+			//console.log(ev);
+			ev.detail.Runtime.SCENE.background = ev.target._xseen.cubemap;
+		},
 	'_loadBackground'	: function (e)
 		{
 			// Parse src according the description above. 
 			if (e._xseen.backgroundType == 'cube' && e._xseen.srcType == 'path') {
-				var urls=[], files=[];
-				var files = ['px.', 'nx.', 'py.', 'ny.', 'pz.', 'nz.'];
-				for (var ii=0;  ii<files.length; ii++) {
-					urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
-				}
+				if (e._xseen.imageSource.substring(0,1) == '#') {
+					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
+					e._xseen.processedUrl = true;
+					//console.log ('Using background ');
+					//console.log (cubeMapNode._xseen.cubemap);
+					e._xseen.loadTexture = cubeMapNode._xseen.cubemap;
+					e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
 
-				console.log ('Loading background image cube');
-				var dirtyFlag;
-				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
-				e._xseen.sphere.material.transparent = true;
-				e._xseen.sphere.material.opacity = 0.0;
+				} else {
+					var urls=[], files=[];
+					var files = ['px.', 'nx.', 'py.', 'ny.', 'pz.', 'nz.'];
+					for (var ii=0;  ii<files.length; ii++) {
+						urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
+					}
+
+					//console.log ('Loading background image cube');
+					var dirtyFlag;
+					XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
+					e._xseen.sphere.material.transparent = true;
+					e._xseen.sphere.material.opacity = 0.0;
+				}
 
 			} else {		// Sphere-mapped texture. Need to do all of things specified in the above description
 				if (e._xseen.backgroundType == 'sphere' && e._xseen.srcType == 'image') {
@@ -4356,7 +4083,7 @@ XSeen.Tags.background = {
 						e._xseen.sphere.material.transparent = false;
 						e._xseen.sphere.material.opacity = 1.0;
 						e._xseen.sphere.material.needsUpdate = true;
-						console.log (e._xseen.sphere.material);
+						//console.log (e._xseen.sphere.material);
 					}
 				}
 			}
@@ -4372,7 +4099,7 @@ XSeen.Tags.background = {
 				thisEle._xseen.processedUrl = true;
 				thisEle._xseen.loadTexture = textureCube;
 				thisEle._xseen.sceneInfo.SCENE.background = textureCube;
-				console.log ('Successful load of background texture cube.');
+				//console.log ('Successful load of background texture cube.');
 			}
 		},
 	'loadProgress' : function (a)
@@ -4483,11 +4210,13 @@ XSeen.Tags.camera = {
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
+						console.log ('... using device orientation');
 						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
 						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
 						e._xseen.useDeviceOrientation = true;
 						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
+						console.log ('... using orbit controls');
 						e._xseen.track = 'orbit';
 						e._xseen.useDeviceOrientation = false;
 						//e._xseen.sceneInfo.useDeviceOrientation = false;
@@ -4583,6 +4312,7 @@ XSeen.Tags.camera = {
 					}
 
 				} else {								// No device orientation control. Use something else
+					console.log ('Determining renderer controls with track: ' + e._xseen.track);
 					if (e._xseen.track == 'orbit') {
 						e._xseen.sceneInfo.CameraControl = new THREE.OrbitControls( e._xseen.sceneInfo.Camera, e._xseen.sceneInfo.RendererStandard.domElement );
 						e._xseen.sceneInfo.CameraControl.enabled = false;
@@ -4634,6 +4364,153 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'priority', dataType:'integer', 'defaultValue':1})
 		.defineAttribute ({'name':'available', dataType:'boolean', 'defaultValue':true})
 		.defineAttribute ({'name':'target', dataType:'string', 'defaultValue':''})
+		.addTag();
+// File: tags/cubemap.js
+/*
+ * XSeen JavaScript library
+ *
+ * (c)2019, Daly Realism, Los Angeles
+ *
+ *
+ */
+
+ // Control Node definitions
+
+/*
+ * Loads an image texture from one or more files and constructs an internal cubemap for use
+ *	by other nodes. For this to be used by other nodes, the value of 'id' attribute must be specified.
+ *
+ *	Both a cubemap and sphercal image map are created for use
+ */ 
+
+XSeen.Tags.cubemap = {
+	'TextureSize'		: 1024,		// Must be a power of 2
+	
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				var type = XSeen.Tags.cubemap._saveAttributes (e);
+				XSeen.Tags.cubemap._processChange (e);
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+
+/*
+ *	The photosphere geometry is set up, but made transparent. This ensures that it is in the 
+ *	render tree
+ *
+ *	The method _processChange is called every time there is a change, either to the initial state
+ *	or on attribute change.
+ */
+	'init'	: function (e, p) 
+		{
+			XSeen.Tags.cubemap._saveAttributes (e);
+			e._xseen.cubemap = new THREE.CubeTexture();
+			XSeen.Tags.cubemap._processChange (e);
+		},
+		
+// Move modifyable attribute values to main node store
+	'_saveAttributes'	: function (e)
+		{
+			e._xseen.format = e._xseen.attributes.format;
+			e._xseen.src = e._xseen.attributes.src;
+		},
+
+	'_checkSrc'			: function (url) 
+		{
+			return (XSeen.isImage(url)) ? 'image' : 'path';
+		},
+
+/*
+ *	Images can either be a cube-map image (1 image for each face of a cube) or
+ *	a single equirectangular (photosphere) image of width = 2 x height. For any image, each dimension
+ *	must be a power of 2. 
+ *
+ *	The attributes 'src' and 'npxyz' determine the image type. If both are present and not empty,
+ *	then 'src' has precedence.
+ *
+ *	src		Specifies the equi-rectangular image that is converted into a cubemap.
+ *	npxz	Specifies the path URL to the six cube-face images. The images must be px, py, pz, nx, ny, nz.
+ *	format	Specified the file format. Must be a web format (JPEG or PNG).
+ *
+ */
+ 
+	'_processChange'	: function (e)
+		{
+			// Parse src according the description above. 
+			if (e._xseen.attributes.src != '') {
+				e._xseen.equirectangular = new THREE.TextureLoader().load(e._xseen.src);
+				var loader = new THREE.TextureLoader();
+				loader.load(e._xseen.src, XSeen.Tags.cubemap.cubeLoadSuccess({'e':e, 'cube':false}));
+
+			} else if (e._xseen.attributes.npxyz != '') {
+				var urls=[], files=[];
+				var files = ['px', 'nx', 'py', 'ny', 'pz', 'nz'];
+				for (var ii=0;  ii<files.length; ii++) {
+					urls[ii] = e._xseen.attributes.npxyz + '/' + files[ii] + '.' + e._xseen.format;
+				}
+				console.log ('Loading image cubemap');
+				var dirtyFlag;
+				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.cubemap.cubeLoadSuccess({'e':e, 'cube':true}));
+			} else {
+				console.log ('No valid image specified for cubemap');
+				return;
+			}
+		},
+	'fin'	: function (e, p) {},
+	'event'	: function (ev, attr) {},
+	'tick'	: function (systemTime, deltaTime) {},
+	'cubeLoadSuccess' : function (userdata)
+		{
+			var thisEle = userdata.e;
+			var cube = userdata.cube;
+			return function (texture)
+			{
+				if (cube) {
+					console.log ('Successful load of cubemap to texture cube.');
+				} else {
+					console.log ('Successful load of cubemap to spherical texture.');
+					var equiToCube = new EquirectangularToCubemap( XSeen.Runtime.Renderer );
+					console.log ('Class for converter...');
+					console.log (equiToCube);
+					texture = equiToCube.convert( texture, XSeen.Tags.cubemap.TextureSize );
+					console.log ('Converted texture');
+					console.log (texture);
+				}
+				thisEle._xseen.processedUrl = true;
+				thisEle._xseen.cubemap = texture;
+				// Create event to indicate the XSeen has fully loaded. It is dispatched on the 
+				//	this tag but bubbles up so it can be caught.
+				var newEv = new CustomEvent('xseen-assetchange', XSeen.Events.propertiesAssetChanged(XSeen.Runtime, 'texturecube'));
+				thisEle.dispatchEvent(newEv);
+				//thisEle._xseen.sceneInfo.SCENE.background = textureCube;
+			}
+		},
+	'loadProgress' : function (a)
+		{
+			console.log ('Loading cubemap textures...');
+		},
+	'loadFailure' : function (a)
+		{
+			//a._xseen.processedUrl = false;
+			console.log ('Load failure - Failure to load cubemap textures.');
+		},
+};
+
+// Add tag and attributes to Parsing table
+XSeen.Parser.defineTag ({
+						'name'	: 'cubemap',
+						'init'	: XSeen.Tags.cubemap.init,
+						'fin'	: XSeen.Tags.cubemap.fin,
+						'event'	: XSeen.Tags.cubemap.event,
+						'tick'	: XSeen.Tags.cubemap.tick
+						})
+		.defineAttribute ({'name':'src', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'npxyz', dataType:'string', 'defaultValue':'', 'isAnimatable':false})
+		.defineAttribute ({'name':'format', dataType:'string', 'defaultValue':'jpg', 'isAnimatable':false})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.cubemap._changeAttribute}]})
 		.addTag();
 // File: tags/fog.js
 /*
@@ -5242,10 +5119,43 @@ XSeen.Parser.defineTag ({
  */
 
 XSeen.Tags.model = {
+	'_changeAttribute'	: function (e, attributeName, value) {
+			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
+			if (value !== null) {
+				e._xseen.attributes[attributeName] = value;
+				if (attributeName == 'env-map') {
+					if (e._xseen.attributes['env-map'].substring(0,1) == '#') {
+						var cubeMapNode = document.getElementById(e._xseen.attributes['env-map'].substring(1));
+						cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+					}
+					e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
+					XSeen.Tags.model.applyEnvMap(e);
+				}
+			} else {
+				XSeen.LogWarn("Re-parse of " + attributeName + " is invalid -- no change")
+			}
+		},
+
 	'init'	: function (e, p) 
 		{
 			e._xseen.processedUrl = false;
 			e._xseen.loaded = {'envmap':false, 'model':false, }
+/*
+ * Event handler for loading new environment map from asset
+ *
+ *	This method handles updating all model nodes that use the texture from the node that generated the event
+ *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ */
+			e._xseen._updateEnvMap = function (ev) {
+				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				eleList.forEach(function(modelEle) {
+					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
+					XSeen.Tags.model.applyEnvMap(modelEle);
+				});
+			};
+
 			if (e._xseen.attributes['env-map'] != '') {
 				e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
 			}
@@ -5268,21 +5178,38 @@ XSeen.Tags.model = {
 			e._xseen.tagObject = e._xseen.loadGroup;
 			p._xseen.children.push(e._xseen.loadGroup);
 			//console.log ('Using Inline Group with UUID ' + e._xseen.loadGroup.uuid);
+
 		},
 	'fin'	: function (e, p) {},
 	'event'	: function (ev, attr) {},
 	'tick'	: function (systemTime, deltaTime) {},
 	
 /*
- * Once the environent map and model are loaded, add the envmap to all Meshes
+ * Once the environment map and model are loaded, add the envmap to all Meshes
  */
 	'applyEnvMap'	: function (e) {
 			if (e._xseen.loaded.envmap && e._xseen.loaded.model) {
 				e._xseen.tmpGroup.traverse (function(child) {
 					if (child.isMesh) child.material.envMap = e._xseen.properties.envMap;
 				});
-				console.log ('Successful load of environment textures to glTF model.');
+				//console.log ('Successful load of environment textures to glTF model.');
 			}
+	},
+
+
+/*
+ * Event handler for loading new environment map from asset
+ *
+ *	This method handles updating all model nodes that use the texture from the node that generated the event
+ *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ */
+	'_updateEnvMap'	: function (ev) {
+				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				eleList.forEach(function(modelEle) {
+					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
+					XSeen.Tags.model.applyEnvMap(modelEle);
+				});
 	},
 
 /*
@@ -5290,9 +5217,17 @@ XSeen.Tags.model = {
  *	Taken from solids
  */
 	'_envMap'	: function (e, envMapUrl) {
+			if (envMapUrl.substring(0,1) == '#') {
+				var cubeMapNode = document.getElementById(envMapUrl.substring(1));
+				e._xseen.loaded.envmap = true;
+				//console.log ('Adding event listener "XSeen.Tags.model._updateEnvMap" for change to model texture on '+cubeMapNode.id);
+				cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+				//e._xseen.processedUrl = true;
+				return cubeMapNode._xseen.cubemap;
+			}
 			var envMap, basePath = 'Resources/textures/';
 			envMap = null;
-			console.log ('Loading textures from ' + envMapUrl);
+			//console.log ('Loading textures from ' + envMapUrl);
 			XSeen.Loader.TextureCube (envMapUrl, [], '.jpg', XSeen.Tags.model.envLoadSuccess({'e':e}));
 			return envMap;
 	},
@@ -5405,6 +5340,7 @@ XSeen.Parser.defineTag ({
 		.defineAttribute ({'name':'playonload', dataType:'string', 'defaultValue':''})
 		.defineAttribute ({'name':'duration', dataType:'float', 'defaultValue':-1, 'isAnimatable':false})
 		.defineAttribute ({'name':'env-map', dataType:'string', 'defaultValue':''})
+		.addEvents ({'mutation':[{'attributes':XSeen.Tags.model._changeAttribute}]})
 		.addTag();
 // File: tags/scene.js
 /*

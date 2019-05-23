@@ -210,11 +210,14 @@ XSeen.DisplayControl = {
 		node._requestFullscreen	= this._requestFullscreen;
 		node._exitFullscreen	= this._exitFullscreen;
 		node._fullscreenButton	= button;
+/*
+ * Defined below
 		document.documentElement._isFullScreen		= function () {
 			var fullScreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 			if (typeof(fullScreenElement) != 'undefined') {return true;}
 			return false;
 		};
+*/
 		document.documentElement._fullScreenElement	= function () {
 			return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 		};
@@ -315,235 +318,72 @@ XSeen.DisplayControl = {
 		return response;
 	},
 };
-		
-/*
-		if ( 'getVRDisplays' in navigator ) {
-
-			var button = document.createElement( 'button' );
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			window.addEventListener( 'vrdisplayconnect', function ( event ) {
-
-				showEnterVR( event.display );
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
-
-				showVRNotFound();
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
-
-				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-
-			}, false );
-
-			navigator.getVRDisplays()
-				.then( function ( displays ) {
-
-					if ( displays.length > 0 ) {
-
-						showEnterVR( displays[ 0 ] );
-
-					} else {
-
-						showVRNotFound();
-
-					}
-
-				} );
-
-			return button;
-
-		} else {
-
-			var message = document.createElement( 'a' );
-			message.href = 'https://webvr.info';
-			message.innerHTML = 'WEBVR NOT SUPPORTED';
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
-
-		}
-	}
-}
-	
-//var WEBVR = {
-
-	createButton: function ( renderer ) {}
-
-		function showEnterVR( display ) {
-
-			button.style.display = '';
-
-			button.style.cursor = 'pointer';
-			button.style.left = 'calc(50% - 50px)';
-			button.style.width = '100px';
-
-			button.textContent = 'ENTER VR';
-
-			button.onmouseenter = function () { button.style.opacity = '1.0'; };
-			button.onmouseleave = function () { button.style.opacity = '0.5'; };
-			(jQuery)('#HUD-text').prepend ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-			console.log ('in showEnterVR. renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-			renderer.vr._RequestStart = false;
-
-			button.onclick = function () {
 
 /*
- *	display == VRDisplay object. .displayName: "Google, Inc. Daydream View"
- *	renderer.domElement ==
- *				canvas object (HTML element). .nodeName = 'CANVAS'
+ * Developmental methods for handling button events external to XSeen
+ *	All defined in XSeen. This may not be the best place for these definitions, but
+ *	their function relates to the processing defined here (DisplayControl).
+ *	These functions depend on successful and correct definition of XSeen.DisplayControl
+ *
+ *	isFullScreen	- returns true or false
+ *	goFullScreen	- requests full screen mode. Event handler, no change to buttons
+ *	exitFullScreen	- exits from full screen mode. Event handler, no change to buttons
  */
-//				display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
+document.documentElement._isFullScreen		= function () {
+	var fullScreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+	if (typeof(fullScreenElement) != 'undefined') {return true;}
+	return false;
+};
+document.documentElement._requestFullScreen =
+						document.documentElement.requestFullscreen || 
+						document.documentElement.webkitRequestFullscreen || 
+						document.documentElement.mozRequestFullScreen || 
+						document.documentElement.msRequestFullscreen;
+//document.documentElement._requestFullScreen =
+//						document.documentElement.mozRequestFullScreen;
+document.documentElement._exitFullscreen =
+						document.exitFullscreen || 
+						document.webkitExitFullscreen || 
+						document.mozCancelFullScreen || 
+						document.msExitFullscreen;
+
+
 /*
-				if (display.isPresenting) {
-					(jQuery)('#HUD-text').prepend ('Curently VRpresenting, now exiting<br>');
-					console.log ('Curently VRpresenting, now exiting<br>');
-					display.exitPresent();
-					renderer.vr._RequestStart = false;
-				} else {
-					renderer.vr._RequestStart = true;
-					(jQuery)('#HUD-text').prepend ('Starting VRpresenting<br>');
-					(jQuery)('#HUD-text').prepend (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-					console.log ('Starting VRpresenting<br>');
-					console.log (' renderer.vr.custom = |' + renderer.vr.custom + '|<br>');
-					var st = display.requestPresent( [ { source: renderer.domElement } ] );
-					console.log ('VR request response = ' + st);
-					(jQuery)('#HUD-text').prepend ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
-					console.log ('Start requestPresent return = |' + JSON.stringify(st) + '|<br>');
-				}
-
-			};
-
-//				display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
-//				renderer.vr.setDevice( display );
-
+ * Define XSeen methods to handle full screen interactions
+ */
+XSeen.nameFullScreenEvent =
+			(typeof(document.documentElement.requestFullscreen)			!= 'undefined') ? 'fullscreenchange' :
+			(typeof(document.documentElement.webkitRequestFullscreen)	!= 'undefined') ? 'webkitfullfullscreenchange' :
+			(typeof(document.documentElement.mozRequestFullScreen)		!= 'undefined') ? 'mozfullscreenchange' :
+			(typeof(document.documentElement.msRequestFullscreen)		!= 'undefined') ? 'msfullscreenchange' : '';
+XSeen.isFullScreen = function() {return document.documentElement._isFullScreen();}
+XSeen.goFullScreen = function(fullScreenNode) {
+	if (fullScreenNode === null) fullScreenNode = XSeen.Runtime.RootTag;
+	document.addEventListener( XSeen.nameFullScreenEvent, function ( event ) {
+		if (XSeen.Runtime._deviceCameraElement != 0) {
+			if ( XSeen.isFullScreen() ) {
+				XSeen.IW.connectCamera (XSeen.Runtime._deviceCameraElement);	// Connect camera
+			} else {
+				XSeen.IW.disconnectCamera (XSeen.Runtime._deviceCameraElement);	// Disconnect camera
+			}
 		}
-
-		function showVRNotFound() {
-
-			button.style.display = '';
-
-			button.style.cursor = 'auto';
-			button.style.left = 'calc(50% - 75px)';
-			button.style.width = '150px';
-
-			button.textContent = 'VR NOT FOUND';
-
-			button.onmouseenter = null;
-			button.onmouseleave = null;
-
-			button.onclick = null;
-
-			renderer.vr.setDevice( null );
-
-		}
-
-		function stylizeElement( element ) {
-
-			element.style.position = 'absolute';
-			element.style.bottom = '20px';
-			element.style.padding = '12px 6px';
-			element.style.border = '1px solid #fff';
-			element.style.borderRadius = '4px';
-			element.style.background = 'transparent';
-			element.style.color = '#fff';
-			element.style.font = 'normal 13px sans-serif';
-			element.style.textAlign = 'center';
-			element.style.opacity = '0.5';
-			element.style.outline = 'none';
-			element.style.zIndex = '999';
-
-		}
-
-		if ( 'getVRDisplays' in navigator ) {
-
-			var button = document.createElement( 'button' );
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			window.addEventListener( 'vrdisplayconnect', function ( event ) {
-
-				showEnterVR( event.display );
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaydisconnect', function ( event ) {
-
-				showVRNotFound();
-
-			}, false );
-
-			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
-
-				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-
-			}, false );
-
-			navigator.getVRDisplays()
-				.then( function ( displays ) {
-
-					if ( displays.length > 0 ) {
-
-						showEnterVR( displays[ 0 ] );
-
-					} else {
-
-						showVRNotFound();
-
-					}
-
-				} );
-
-			return button;
-
-		} else {
-
-			var message = document.createElement( 'a' );
-			message.href = 'https://webvr.info';
-			message.innerHTML = 'WEBVR NOT SUPPORTED';
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
-
-		}
-
-	},
-
-	// DEPRECATED
-
-	checkAvailability: function () {
-		console.warn( 'WEBVR.checkAvailability has been deprecated.' );
-		return new Promise( function () {} );
-	},
-
-	getMessageContainer: function () {
-		console.warn( 'WEBVR.getMessageContainer has been deprecated.' );
-		return document.createElement( 'div' );
-	},
-
-	getButton: function () {
-		console.warn( 'WEBVR.getButton has been deprecated.' );
-		return document.createElement( 'div' );
-	},
-
-	getVRDisplay: function () {
-		console.warn( 'WEBVR.getVRDisplay has been deprecated.' );
+	}, false );
+	_requestFullScreen = 
+						fullScreenNode.requestFullscreen || 
+						fullScreenNode.webkitRequestFullscreen || 
+						fullScreenNode.mozRequestFullScreen || 
+						fullScreenNode.msRequestFullscreen;
+	_requestFullScreen.call(fullScreenNode);
+};
+XSeen.exitFullScreen = function(fullScreenNode) {
+	if (fullScreenNode === null) fullScreenNode = XSeen.Runtime.RootTag;
+	if (document.exitFullscreen !== null) {
+		document.exitFullscreen();
+	} else if (document.webkitExitFullscreen !== null) {
+		document.webkitExitFullscreen();
+	} else if (document.mozCancelFullScreen !== null) {
+		document.mozCancelFullScreen();
+	} else if (document.msExitFullscreen !== null) {
+		document.msExitFullscreen();
 	}
-*/
+};

@@ -19,10 +19,12 @@ x-attribute {display:none; }
 /* Logging */
 .xseen-log {margin:0; }
 .xseen-logContainer {font-size:78%; }
+.xseen-logContainer {font-size:78%; z-index:1000; border:2px red dashed; background-color:#222; color:white; position:absolute; min-height:6em; min-width:50%; }
 .xseen-logContainer p {margin:0; }
-.xseen-logINFO {color:#009900; }
-.xseen-logWARNING {color:#cd853f; }
-.xseen-logERROR {color:#ff4500; }
+.xseen-logInfo {color:#009900; }
+.xseen-logLoad {color:#FFFF00; }
+.xseen-logWarning {color:#cd853f; }
+.xseen-logError {color:#ff4500; }
 .xseen-logEXCEPTION {color:#ffff00; }
 .xseen-logContainer {color:#009900; }
 

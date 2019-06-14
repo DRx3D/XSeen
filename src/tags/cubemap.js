@@ -115,11 +115,13 @@ XSeen.Tags.cubemap = {
 				thisEle._xseen.cubemap = texture;
 				// Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 				//	this tag but bubbles up so it can be caught.
-				var newEv = new CustomEvent('xseen-assetchange', XSeen.Events.propertiesAssetChanged(XSeen.Runtime, 'texturecube'));
-				thisEle.dispatchEvent(newEv);
+				////var newEv = new CustomEvent('xseen-assetchange', XSeen.Events.propertiesAssetChanged(XSeen.Runtime, 'texturecube'));
+				////thisEle.dispatchEvent(newEv);
+				XSeen.Events.loadComplete ('texturecube', thisEle);
 				//thisEle._xseen.sceneInfo.SCENE.background = textureCube;
 			}
 		},
+/*
 	'loadProgress' : function (a)
 		{
 			console.log ('Loading cubemap textures...');
@@ -129,6 +131,7 @@ XSeen.Tags.cubemap = {
 			//a._xseen.processedUrl = false;
 			console.log ('Load failure - Failure to load cubemap textures.');
 		},
+*/
 };
 
 // Add tag and attributes to Parsing table

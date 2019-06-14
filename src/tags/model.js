@@ -19,14 +19,14 @@
 
 XSeen.Tags.model = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'env-map') {
 					if (e._xseen.attributes['env-map'].substring(0,1) == '#') {
 						var cubeMapNode = document.getElementById(e._xseen.attributes['env-map'].substring(1));
-						cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+						cubeMapNode.removeEventListener ('xseen-loadcomplete', XSeen.Tags.model._updateEnvMap, true);
 					}
 					e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
 					XSeen.Tags.model.applyEnvMap(e);
@@ -68,7 +68,8 @@ XSeen.Tags.model = {
 			XSeen.Tags._setSpace (e._xseen.tmpGroup, e._xseen.attributes);
 
 			//console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
-			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
+			//XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
+			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}));
 			e._xseen.requestedUrl = true;
 			var pickingId = e._xseen.attributes['picking-group'];
 			var pickEle = (pickingId == '') ? null : document.getElementById(pickingId);
@@ -101,8 +102,10 @@ XSeen.Tags.model = {
  *
  *	This method handles updating all model nodes that use the texture from the node that generated the event
  *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ *	LoadComplete event must have loaded a texturecube
  */
 	'_updateEnvMap'	: function (ev) {
+				if (ev.detail.type != 'texturecube') return;
 				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
 				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
 				eleList.forEach(function(modelEle) {
@@ -120,7 +123,7 @@ XSeen.Tags.model = {
 				var cubeMapNode = document.getElementById(envMapUrl.substring(1));
 				e._xseen.loaded.envmap = true;
 				//console.log ('Adding event listener "XSeen.Tags.model._updateEnvMap" for change to model texture on '+cubeMapNode.id);
-				cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+				cubeMapNode.addEventListener ('xseen-loadcomplete', XSeen.Tags.model._updateEnvMap, true);
 				//e._xseen.processedUrl = true;
 				return cubeMapNode._xseen.cubemap;
 			}
@@ -161,6 +164,7 @@ XSeen.Tags.model = {
 						var e = userdata.e;
 						var p  = userdata.p;
 						return function (response) {
+							XSeen.Events.loadComplete ('glTF model', e);
 							e._xseen.processedUrl = true;
 							e._xseen.requestedUrl = false;
 							e._xseen.loadText = response;

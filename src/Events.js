@@ -114,6 +114,28 @@ XSeen.Events = {
 									XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
 									this.isEventsEnabled = true;
 							},
+		'loadStart'			: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadstart', XSeen.Events.propertiesLoad('start', loadType));
+								node.dispatchEvent(newEv);
+							},
+		'loadComplete'		: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadcomplete', XSeen.Events.propertiesLoad('complete', loadType));
+								node.dispatchEvent(newEv);
+							},
+		'loadProgress'		: function (loadType, node, progressEvent) {
+								var extra = {
+												'lengthComputable'	: progressEvent.lengthComputable,
+												'loaded'			: progressEvent.loaded,
+												'total'				: progressEvent.total,
+											};
+								var newEv = new CustomEvent('xseen-loadprogress', XSeen.Events.propertiesLoad('progress', loadType, extra));
+								node.dispatchEvent(newEv);
+							},
+		'loadFail'		: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadfail', XSeen.Events.propertiesLoad('fail', loadType));
+								node.dispatchEvent(newEv);
+							},
+
 		'eventProperties'	: function (ev) {
 								var properties, type;
 								type = ev.type.substr(0,5);
@@ -443,6 +465,29 @@ XSeen.Events = {
 								'cancelable':	true,
 								'composed':		true,
 							};
+						return  properties;
+					},
+
+		'propertiesLoad'	: function (state, loadType, extra)
+					{
+						var properties = {
+								'detail':		{									// This object contains all of the XSeen data
+										'type'			: loadType,						// What asset was changed
+										'originalType'	: loadType,
+										'state'			: state,						// Loading state (start, complete, progress, fail)
+										//'originator'	: XSeen.Runtime,				// Reference to tag requesting event
+										'name'			: 'TBD: name',					// Name of scene object
+										'currentTime'	: XSeen.Runtime.currentTime,	// Current time at start of frame rendering
+										'deltaTime'		: XSeen.Runtime.deltaTime,		// Time since last frame
+										'Runtime'		: XSeen.Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						for (var xta in extra) {
+							properties.detail[xta] = extra[xta];
+						}
 						return  properties;
 					},
 

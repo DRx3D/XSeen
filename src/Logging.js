@@ -20,10 +20,11 @@ XSeen.definitions.Logging = {
 	'levels'	: ['Info', 'Debug', 'Warn', 'Error'],
 	'Data'		: {
 					'Levels' : {
-						'Info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
-						'Debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
-						'Warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
-						'Error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
+						'debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
+						'warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
+						'error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'load'	: {'class':'xseen-log xseen-logLoad', 'level':4, label:'LOAD'},
 					},
 					'maximumLevel'		: 9,
 					'defaultLevel'		: 'Error',
@@ -49,15 +50,24 @@ XSeen.definitions.Logging = {
 			this.Data.logContainer = document.getElementById('XSeenLog');
 			this.Data.logContainer.classList.add ("xseen-logContainer");
 		}
+		if (show) {
+			//this.Data.logContainer.style.display = 'block';
+			this.LogOn();
+		} else {
+			this.Data.logContainer.style.display = 'none';
+		}
 		this.Data.init = true;
-		if (!show) {this.LogOff()}
 		return this;
 	},
 	
-	'LogOn'		: function () {this.active = true;},
+	'LogOn'		: function () {
+					this.active = true;
+					this.Data.logContainer.style.display = 'block';
+				},
 	'LogOff'	: function () {this.active = false;},
 
 	'logLog'	: function (message, level) {
+		if (!this.Data.init) {return this; }
 		if (this.Data.active && this.Data.Levels[level].level <= this.Data.maximumLevel) {
 			if (this.Data.lineCount >= this.Data.maxLinesLogged) {
 				message = "Maximum number of log lines (=" + this.Data.maxLinesLogged + ") reached. Deactivating logging...";
@@ -71,16 +81,37 @@ XSeen.definitions.Logging = {
 			this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
 			console.log (node.innerHTML);
 		}
+		return this;
 	},
 
-	'logInfo'	: function (string) {this.logLog (string, 'Info');},
-	'logDebug'	: function (string) {this.logLog (string, 'Debug');},
+	'logInfo'	: function (string) {this.logLog (string, 'info');},
+	'logDebug'	: function (string) {this.logLog (string, 'debug');},
 	'logWarn'	: function (string) {
-		this.logLog (string, 'Warn');
+		this.logLog (string, 'warn');
 		console.log ('Warning: ' + string);
 	},
 	'logError'	: function (string) {
-		this.logLog (string, 'Error');
+		this.logLog (string, 'error');
 		console.log ('*** Error: ' + string);
+	},
+	'logLoad'	: function (ev) {
+		var node = document.createElement("p");
+		var that = XSeen.definitions.Logging;
+		node.setAttribute("class", that.Data.Levels['load'].class);
+		node.innerHTML = that.Data.Levels['load'].label + ": " + ev.detail.state + ' for ' + ev.target.localName + '#' + ev.target.id;
+		that.Data.logContainer.insertBefore(node, that.Data.logContainer.firstChild);
+	},
+	
+	'initLoad'	: function (root) {
+		root.addEventListener ('xseen-loadstart', this.logLoad, true);
+		root.addEventListener ('xseen-loadcomplete', this.logLoad, true);
+		root.addEventListener ('xseen-loadfail', this.logLoad, true);
+	},
+	'setLoggingLevel'	: function(newLevel, root) {
+		if (typeof (this.Data.Levels[newLevel]) != 'undefined') {
+			this.Data.maximumLevel = this.Data.Levels[newLevel].level;
+			if (this.Data.maximumLevel >= this.Data.Levels['load'].level) this.initLoad(root);
+			if (this.Data.maximumLevel >= this.Data.Levels['error'].level) this.LogOn();
+		}
 	},
 }

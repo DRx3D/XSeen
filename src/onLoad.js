@@ -104,6 +104,13 @@ XSeen.onLoad = function() {
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
 										},
+								'_debug'	: {
+									'name'		: '_debug',
+									'default'	: 'none',
+									'type'		: 'string',
+									'case'		: 'insensitive' ,
+									'enumeration': ['', 'url', 'none', 'load', 'info', 'debug', 'warn', 'error'],
+										},
 								'showstat'	: {
 									'name'		: 'showstat',
 									'default'	: 'false',
@@ -253,6 +260,17 @@ XSeen.onLoad = function() {
 	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
 	
 /*
+ * Handle debug settings.
+ *	Most are done through event handlers to a specific output target
+ */
+	var _debug = XSeen.Runtime.Attributes._debug;
+	if (_debug == 'url') {
+		let params = new URLSearchParams(document.location.search.substring(1));
+		_debug = params.get("xseen_debug") || '';
+	}
+	if (_debug != '') XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+
+/*
  * Create XSeen default elements
  *	Default camera by adding a first-child node to x-scene
  *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
@@ -306,6 +324,17 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
 */
 
+/*
+ * Define event handlers for content loading
+ *	These uniformly handle the display of asynchronous loading of all content
+ */
+XSeen.Runtime.RootTag.addEventListener('xseen-loadstart', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadcomplete', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadprogress', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting);
+
+
+
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 //	<x-scene> tag but bubbles up so it can be caught.
 	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'initialize'));
@@ -336,7 +365,7 @@ XSeen.onLoadStartProcessing = function() {
 	}
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	console.log ('Starting Parse...');
+	//console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 	var newEv = new CustomEvent('xseen-go', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'render'));
@@ -366,6 +395,47 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
-	console.log ('Display size: ' + size.width + ' x ' + size.height);
+	//console.log ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
-}
+};
+
+/*
+ * Return a frame of camera data
+ *
+ *	If the camera is running (XSeen.Runtime._deviceCameraElement._xseen.videoState  defined and == 'running')
+ *	return an ImageData object from a canvas read operation. This does not interfere with the usual 3D display
+ *
+ *	If the camera is not running, then return null
+ */
+XSeen.getVideoFrame = function() {
+	if (XSeen.Runtime._deviceCameraElement !== null &&
+		XSeen.Runtime._deviceCameraElement != 0 &&
+		typeof(XSeen.Runtime._deviceCameraElement._xseen.videoState) != 'undefined' &&
+		XSeen.Runtime._deviceCameraElement._xseen.videoState == 'running') {
+			var qrImage, canvas, context, height, width;
+			canvas = document.createElement('canvas');
+			context = canvas.getContext('2d');
+
+			video = (jQuery)('x-scene video')[0];
+			//video = (jQuery)('#TEST')[0];
+			height = video.height;
+			width = video.width;
+			canvas.width = width;
+			canvas.height = height;
+			//sh = Math.floor(height/4);
+			//sw = Math.floor(width/4);
+			//eh = Math.floor(3*height/4);
+			//ew = Math.floor(3*width/4);
+			sh = 0;
+			sw = 0;
+			eh = height;
+			ew = width;
+			context.drawImage(video, 0, 0 );
+			var dataUrl = canvas.toDataURL('image/png');
+			//return dataUrl;
+			qrImage = context.getImageData(sw, sh, ew, eh);
+			
+			return qrImage;
+		}
+};
+

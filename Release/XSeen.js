@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.64-beta+8_ef308d0
- *  Built Wed May 22 20:41:38 2019
+ *  XSeen V0.8.68-beta+8_a78f6b7
+ *  Built Thu Jun 13 20:57:15 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -63,28 +63,28 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 #       248: ./Constants.js
 #       438: ./DisplayControl.js
 #       828: ./Events.js
-#      1366: ./IW.js
-#      1419: ./Loader.js
-#      1715: ./Logging.js
-#      1802: ./onLoad.js
-#      2174: ./Tag.js
-#      2995: ./XSeen.js
-#      3260: tags/$.js
-#      3329: tags/animate.js
-#      3739: tags/asset.js
-#      3767: tags/background.js
-#      4141: tags/camera.js
-#      4367: tags/cubemap.js
-#      4514: tags/fog.js
-#      4597: tags/group.js
-#      4700: tags/label.js
-#      4886: tags/light.js
-#      4991: tags/metadata.js
-#      5100: tags/model.js
-#      5344: tags/scene.js
-#      5456: tags/solids.js
-#      6511: tags/style3d.js
-#      6694: tags/subscene.js
+#      1411: ./IW.js
+#      1464: ./Loader.js
+#      1811: ./Logging.js
+#      1929: ./onLoad.js
+#      2371: ./Tag.js
+#      3192: ./XSeen.js
+#      3461: tags/$.js
+#      3530: tags/animate.js
+#      3940: tags/asset.js
+#      3968: tags/background.js
+#      4342: tags/camera.js
+#      4568: tags/cubemap.js
+#      4718: tags/fog.js
+#      4801: tags/group.js
+#      4904: tags/label.js
+#      5090: tags/light.js
+#      5195: tags/metadata.js
+#      5304: tags/model.js
+#      5552: tags/scene.js
+#      5664: tags/solids.js
+#      6719: tags/style3d.js
+#      6902: tags/subscene.js
 */
 // File: ./CameraManager.js
 /*
@@ -943,6 +943,28 @@ XSeen.Events = {
 									XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
 									this.isEventsEnabled = true;
 							},
+		'loadStart'			: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadstart', XSeen.Events.propertiesLoad('start', loadType));
+								node.dispatchEvent(newEv);
+							},
+		'loadComplete'		: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadcomplete', XSeen.Events.propertiesLoad('complete', loadType));
+								node.dispatchEvent(newEv);
+							},
+		'loadProgress'		: function (loadType, node, progressEvent) {
+								var extra = {
+												'lengthComputable'	: progressEvent.lengthComputable,
+												'loaded'			: progressEvent.loaded,
+												'total'				: progressEvent.total,
+											};
+								var newEv = new CustomEvent('xseen-loadprogress', XSeen.Events.propertiesLoad('progress', loadType, extra));
+								node.dispatchEvent(newEv);
+							},
+		'loadFail'		: function (loadType, node) {
+								var newEv = new CustomEvent('xseen-loadfail', XSeen.Events.propertiesLoad('fail', loadType));
+								node.dispatchEvent(newEv);
+							},
+
 		'eventProperties'	: function (ev) {
 								var properties, type;
 								type = ev.type.substr(0,5);
@@ -1275,6 +1297,29 @@ XSeen.Events = {
 						return  properties;
 					},
 
+		'propertiesLoad'	: function (state, loadType, extra)
+					{
+						var properties = {
+								'detail':		{									// This object contains all of the XSeen data
+										'type'			: loadType,						// What asset was changed
+										'originalType'	: loadType,
+										'state'			: state,						// Loading state (start, complete, progress, fail)
+										//'originator'	: XSeen.Runtime,				// Reference to tag requesting event
+										'name'			: 'TBD: name',					// Name of scene object
+										'currentTime'	: XSeen.Runtime.currentTime,	// Current time at start of frame rendering
+										'deltaTime'		: XSeen.Runtime.deltaTime,		// Time since last frame
+										'Runtime'		: XSeen.Runtime					// Reference to Runtime object
+												},
+								'bubbles':		true,
+								'cancelable':	true,
+								'composed':		true,
+							};
+						for (var xta in extra) {
+							properties.detail[xta] = extra[xta];
+						}
+						return  properties;
+					},
+
 		'propertiesAssetChanged'	: function (Runtime, assetType)
 					{
 						var properties = {
@@ -1514,6 +1559,21 @@ XSeen.Loader = {
 			this.urlQueue.push( {'url':url, 'type':type, 'hint':hint, 'userdata':userdata, 'success':success, 'failure':failed, 'progress':progress} );
 			this.loadNextUrl();
 		},
+		
+/*
+ * Standardized reporting of loading
+ */
+	'Reporting'		: function (ev)
+		{
+			var msg = 'Loading of ' + ev.detail.type + ': ' + ev.detail.state;
+			if (ev.detail.lengthComputable && ev.detail.total != 0) {
+				msg += ' (' + 100 * ev.detail.loaded / ev.detail.total + '% [' + ev.detail.loaded + ' of ' + ev.detail.total + '])';
+			}
+			console.log (msg);
+			console.log (ev);
+		},
+
+		
 /*
  * Asynchronously loads a texture cube and saves the result
  *	Arguments:
@@ -1544,11 +1604,14 @@ XSeen.Loader = {
 				}
 			};
 			var _Progress = function (a) {
-				console.log ('Loading background textures...');
+				console.log ('Load PROGRESS for cubemap');
+				console.log (a);
+				XSeen.Events.loadProgress ('cubemap', a.target);
 			};
 			var _Failure = function (a) {
-				console.log ('Failure to load texture.');
-				console.error (a);
+				console.log ('Load FAILURE for cubemap');
+				console.log (a);
+				XSeen.Events.loadFail ('cubemap', a.target);
 			};
 
 			if (typeof(filetypes) == 'string') {
@@ -1571,7 +1634,6 @@ XSeen.Loader = {
 			//console.log (urls);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
-//									.setPath ('./')
 									.load (urls, Success, _Progress, _Failure);
 		},
 
@@ -1590,17 +1652,21 @@ XSeen.Loader = {
  *					file extensions may be used for incompatible file formats (e.x., glTF V1.0, V1.1, and V2.0).
  *					The hint should contain the version number without 'V'.
  *		success		The callback function to call on successful load
+ *			The remaining arguments are optional. If any are present, then following process is used
+ *			One argument ==> userdata
+ *			Two arguments ==> failure, progress
+ *			Three arguments ==> failure, progress, userdata
  *		failure		The callback function to call on when the loading fails
  *		progress	The callback function to call while the loading is occurring
  *		userdata	A object to be included with all of the callbacks.
  */
-	'load'		: function (url='', hint='', success, failure, progress, userdata)
+	'load'		: function (url='', hint='', success, optArg1, optArg2, optArg3)
 		{
 			var uri = XSeen.parseUrl (url);
 			var type = (typeof(this.ContentType[uri.extension]) === 'undefined') ? this.ContentType['txt'] : this.ContentType[uri.extension];
 			var MimeLoader = this.ContentLoaders[type];
 			if (MimeLoader.needHint === true && hint == '') {
-				console.log ('Hint require to load content type ' + type);
+				console.log ('Hint required to load content type ' + type);
 				return false;
 			}
 			
@@ -1611,15 +1677,45 @@ XSeen.Loader = {
 					MimeLoader = this.ContentLoaders[type];
 				}		// Other types go here
 			}
+			
+			var _userdata, _failure, _progress;
+			if (arguments.length < 4) {
+				_userdata = {};
+				_failure = XSeen.Loader._Failure;
+				_progress = XSeen.Loader._Progress;
+			} else if (arguments.length == 4) {
+				_userdata = optArg1;
+				_failure = XSeen.Loader._Failure;
+				_progress = XSeen.Loader._Progress;
+			} else if (arguments.length == 5) {
+				_userdata = {};
+				_failure = optArg1;
+				_progress = optArg2;
+			} else if (arguments.length >= 6) {
+				_failure = optArg1;
+				_progress = optArg2;
+				_userdata = optArg3;
+			}
 
 			if (typeof(MimeLoader.loader) === 'undefined') {
-				this.internalLoader (url, success, failure, progress, userdata, type);
+				this.internalLoader (url, success, _failure, _progress, _userdata, type);
 			} else {
-				MimeLoader.loader.load (url, success, progress, failure);
+				MimeLoader.loader.load (url, success, _progress, _failure);
 				XSeen.Loader.loadersComplete = false;
 			}
 		},
 	
+	'_Progress'	: function (ev)
+		{
+			console.log (ev);
+			XSeen.Events.loadProgress ('content', XSeen.Runtime.RootTag, ev);
+		},
+	'_Failure'	: function (a)
+		{
+			console.log (a);
+			XSeen.Events.loadFailure ('content', XSeen.Runtime.RootTag);
+		},
+
 
 
 // TODO: These are copied from previous Loader. Need to make sure they still work & meet the right needs		
@@ -1736,10 +1832,11 @@ XSeen.definitions.Logging = {
 	'levels'	: ['Info', 'Debug', 'Warn', 'Error'],
 	'Data'		: {
 					'Levels' : {
-						'Info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
-						'Debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
-						'Warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
-						'Error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
+						'debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
+						'warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
+						'error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'load'	: {'class':'xseen-log xseen-logLoad', 'level':4, label:'LOAD'},
 					},
 					'maximumLevel'		: 9,
 					'defaultLevel'		: 'Error',
@@ -1765,15 +1862,24 @@ XSeen.definitions.Logging = {
 			this.Data.logContainer = document.getElementById('XSeenLog');
 			this.Data.logContainer.classList.add ("xseen-logContainer");
 		}
+		if (show) {
+			//this.Data.logContainer.style.display = 'block';
+			this.LogOn();
+		} else {
+			this.Data.logContainer.style.display = 'none';
+		}
 		this.Data.init = true;
-		if (!show) {this.LogOff()}
 		return this;
 	},
 	
-	'LogOn'		: function () {this.active = true;},
+	'LogOn'		: function () {
+					this.active = true;
+					this.Data.logContainer.style.display = 'block';
+				},
 	'LogOff'	: function () {this.active = false;},
 
 	'logLog'	: function (message, level) {
+		if (!this.Data.init) {return this; }
 		if (this.Data.active && this.Data.Levels[level].level <= this.Data.maximumLevel) {
 			if (this.Data.lineCount >= this.Data.maxLinesLogged) {
 				message = "Maximum number of log lines (=" + this.Data.maxLinesLogged + ") reached. Deactivating logging...";
@@ -1787,17 +1893,38 @@ XSeen.definitions.Logging = {
 			this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
 			console.log (node.innerHTML);
 		}
+		return this;
 	},
 
-	'logInfo'	: function (string) {this.logLog (string, 'Info');},
-	'logDebug'	: function (string) {this.logLog (string, 'Debug');},
+	'logInfo'	: function (string) {this.logLog (string, 'info');},
+	'logDebug'	: function (string) {this.logLog (string, 'debug');},
 	'logWarn'	: function (string) {
-		this.logLog (string, 'Warn');
+		this.logLog (string, 'warn');
 		console.log ('Warning: ' + string);
 	},
 	'logError'	: function (string) {
-		this.logLog (string, 'Error');
+		this.logLog (string, 'error');
 		console.log ('*** Error: ' + string);
+	},
+	'logLoad'	: function (ev) {
+		var node = document.createElement("p");
+		var that = XSeen.definitions.Logging;
+		node.setAttribute("class", that.Data.Levels['load'].class);
+		node.innerHTML = that.Data.Levels['load'].label + ": " + ev.detail.state + ' for ' + ev.target.localName + '#' + ev.target.id;
+		that.Data.logContainer.insertBefore(node, that.Data.logContainer.firstChild);
+	},
+	
+	'initLoad'	: function (root) {
+		root.addEventListener ('xseen-loadstart', this.logLoad, true);
+		root.addEventListener ('xseen-loadcomplete', this.logLoad, true);
+		root.addEventListener ('xseen-loadfail', this.logLoad, true);
+	},
+	'setLoggingLevel'	: function(newLevel, root) {
+		if (typeof (this.Data.Levels[newLevel]) != 'undefined') {
+			this.Data.maximumLevel = this.Data.Levels[newLevel].level;
+			if (this.Data.maximumLevel >= this.Data.Levels['load'].level) this.initLoad(root);
+			if (this.Data.maximumLevel >= this.Data.Levels['error'].level) this.LogOn();
+		}
 	},
 }
 // File: ./onLoad.js
@@ -1906,6 +2033,13 @@ XSeen.onLoad = function() {
 									'default'	: 'false',
 									'type'		: 'boolean',
 									'case'		: 'insensitive' ,
+										},
+								'_debug'	: {
+									'name'		: '_debug',
+									'default'	: 'none',
+									'type'		: 'string',
+									'case'		: 'insensitive' ,
+									'enumeration': ['', 'url', 'none', 'load', 'info', 'debug', 'warn', 'error'],
 										},
 								'showstat'	: {
 									'name'		: 'showstat',
@@ -2056,6 +2190,17 @@ XSeen.onLoad = function() {
 	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
 	
 /*
+ * Handle debug settings.
+ *	Most are done through event handlers to a specific output target
+ */
+	var _debug = XSeen.Runtime.Attributes._debug;
+	if (_debug == 'url') {
+		let params = new URLSearchParams(document.location.search.substring(1));
+		_debug = params.get("xseen_debug") || '';
+	}
+	if (_debug != '') XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+
+/*
  * Create XSeen default elements
  *	Default camera by adding a first-child node to x-scene
  *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
@@ -2109,6 +2254,17 @@ XSeen.onLoad = function() {
 	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
 */
 
+/*
+ * Define event handlers for content loading
+ *	These uniformly handle the display of asynchronous loading of all content
+ */
+XSeen.Runtime.RootTag.addEventListener('xseen-loadstart', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadcomplete', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadprogress', XSeen.Loader.Reporting);
+XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting);
+
+
+
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 //	<x-scene> tag but bubbles up so it can be caught.
 	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'initialize'));
@@ -2139,7 +2295,7 @@ XSeen.onLoadStartProcessing = function() {
 	}
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	console.log ('Starting Parse...');
+	//console.log ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 	var newEv = new CustomEvent('xseen-go', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'render'));
@@ -2169,9 +2325,50 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
-	console.log ('Display size: ' + size.width + ' x ' + size.height);
+	//console.log ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
-}
+};
+
+/*
+ * Return a frame of camera data
+ *
+ *	If the camera is running (XSeen.Runtime._deviceCameraElement._xseen.videoState  defined and == 'running')
+ *	return an ImageData object from a canvas read operation. This does not interfere with the usual 3D display
+ *
+ *	If the camera is not running, then return null
+ */
+XSeen.getVideoFrame = function() {
+	if (XSeen.Runtime._deviceCameraElement !== null &&
+		XSeen.Runtime._deviceCameraElement != 0 &&
+		typeof(XSeen.Runtime._deviceCameraElement._xseen.videoState) != 'undefined' &&
+		XSeen.Runtime._deviceCameraElement._xseen.videoState == 'running') {
+			var qrImage, canvas, context, height, width;
+			canvas = document.createElement('canvas');
+			context = canvas.getContext('2d');
+
+			video = (jQuery)('x-scene video')[0];
+			//video = (jQuery)('#TEST')[0];
+			height = video.height;
+			width = video.width;
+			canvas.width = width;
+			canvas.height = height;
+			//sh = Math.floor(height/4);
+			//sw = Math.floor(width/4);
+			//eh = Math.floor(3*height/4);
+			//ew = Math.floor(3*width/4);
+			sh = 0;
+			sw = 0;
+			eh = height;
+			ew = width;
+			context.drawImage(video, 0, 0 );
+			var dataUrl = canvas.toDataURL('image/png');
+			//return dataUrl;
+			qrImage = context.getImageData(sw, sh, ew, eh);
+			
+			return qrImage;
+		}
+};
+
 // File: ./Tag.js
 /*
  * XSeen JavaScript library
@@ -3073,6 +3270,10 @@ XSeen.Parser = {
  *	0.8.62:	Added node to handle cubemaps as a resource
  *	0.8.63:	Fixed camera controls bug. controls broken with 0.8.56
  *	0.8.64:	Update 'model' and 'background' to use cubemaps with event handlers
+ *	0.8.65:	Added getVideoFrame method to XSeen
+ *	0.8.66:	Added events for asynchronous content loading (start, progress, complete, fail)
+ *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
+ *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
@@ -3098,11 +3299,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 64,
+					'_Patch'		: 68,
 					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-05-22',
+					'_RDate'		: '2019-06-13',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -4483,11 +4684,13 @@ XSeen.Tags.cubemap = {
 				thisEle._xseen.cubemap = texture;
 				// Create event to indicate the XSeen has fully loaded. It is dispatched on the 
 				//	this tag but bubbles up so it can be caught.
-				var newEv = new CustomEvent('xseen-assetchange', XSeen.Events.propertiesAssetChanged(XSeen.Runtime, 'texturecube'));
-				thisEle.dispatchEvent(newEv);
+				////var newEv = new CustomEvent('xseen-assetchange', XSeen.Events.propertiesAssetChanged(XSeen.Runtime, 'texturecube'));
+				////thisEle.dispatchEvent(newEv);
+				XSeen.Events.loadComplete ('texturecube', thisEle);
 				//thisEle._xseen.sceneInfo.SCENE.background = textureCube;
 			}
 		},
+/*
 	'loadProgress' : function (a)
 		{
 			console.log ('Loading cubemap textures...');
@@ -4497,6 +4700,7 @@ XSeen.Tags.cubemap = {
 			//a._xseen.processedUrl = false;
 			console.log ('Load failure - Failure to load cubemap textures.');
 		},
+*/
 };
 
 // Add tag and attributes to Parsing table
@@ -5120,14 +5324,14 @@ XSeen.Parser.defineTag ({
 
 XSeen.Tags.model = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
+			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				e._xseen.attributes[attributeName] = value;
 				if (attributeName == 'env-map') {
 					if (e._xseen.attributes['env-map'].substring(0,1) == '#') {
 						var cubeMapNode = document.getElementById(e._xseen.attributes['env-map'].substring(1));
-						cubeMapNode.removeEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+						cubeMapNode.removeEventListener ('xseen-loadcomplete', XSeen.Tags.model._updateEnvMap, true);
 					}
 					e._xseen.properties.envMap = XSeen.Tags.model._envMap(e, e._xseen.attributes['env-map']);
 					XSeen.Tags.model.applyEnvMap(e);
@@ -5169,7 +5373,8 @@ XSeen.Tags.model = {
 			XSeen.Tags._setSpace (e._xseen.tmpGroup, e._xseen.attributes);
 
 			//console.log ('Created Inline Group with UUID ' + e._xseen.loadGroup.uuid);
-			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
+			//XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}), XSeen.Tags.model.loadFailure, XSeen.Tags.model.loadProgress);
+			XSeen.Loader.load (e._xseen.attributes.src, e._xseen.attributes.hint, XSeen.Tags.model.loadSuccess({'e':e, 'p':p}));
 			e._xseen.requestedUrl = true;
 			var pickingId = e._xseen.attributes['picking-group'];
 			var pickEle = (pickingId == '') ? null : document.getElementById(pickingId);
@@ -5202,8 +5407,10 @@ XSeen.Tags.model = {
  *
  *	This method handles updating all model nodes that use the texture from the node that generated the event
  *	It generates a list of all matching nodes for this texture, then updates each one in turn
+ *	LoadComplete event must have loaded a texturecube
  */
 	'_updateEnvMap'	: function (ev) {
+				if (ev.detail.type != 'texturecube') return;
 				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
 				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
 				eleList.forEach(function(modelEle) {
@@ -5221,7 +5428,7 @@ XSeen.Tags.model = {
 				var cubeMapNode = document.getElementById(envMapUrl.substring(1));
 				e._xseen.loaded.envmap = true;
 				//console.log ('Adding event listener "XSeen.Tags.model._updateEnvMap" for change to model texture on '+cubeMapNode.id);
-				cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.model._updateEnvMap, true);
+				cubeMapNode.addEventListener ('xseen-loadcomplete', XSeen.Tags.model._updateEnvMap, true);
 				//e._xseen.processedUrl = true;
 				return cubeMapNode._xseen.cubemap;
 			}
@@ -5262,6 +5469,7 @@ XSeen.Tags.model = {
 						var e = userdata.e;
 						var p  = userdata.p;
 						return function (response) {
+							XSeen.Events.loadComplete ('glTF model', e);
 							e._xseen.processedUrl = true;
 							e._xseen.requestedUrl = false;
 							e._xseen.loadText = response;

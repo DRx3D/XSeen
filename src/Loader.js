@@ -94,6 +94,21 @@ XSeen.Loader = {
 			this.urlQueue.push( {'url':url, 'type':type, 'hint':hint, 'userdata':userdata, 'success':success, 'failure':failed, 'progress':progress} );
 			this.loadNextUrl();
 		},
+		
+/*
+ * Standardized reporting of loading
+ */
+	'Reporting'		: function (ev)
+		{
+			var msg = 'Loading of ' + ev.detail.type + ': ' + ev.detail.state;
+			if (ev.detail.lengthComputable && ev.detail.total != 0) {
+				msg += ' (' + 100 * ev.detail.loaded / ev.detail.total + '% [' + ev.detail.loaded + ' of ' + ev.detail.total + '])';
+			}
+			console.log (msg);
+			console.log (ev);
+		},
+
+		
 /*
  * Asynchronously loads a texture cube and saves the result
  *	Arguments:
@@ -124,11 +139,14 @@ XSeen.Loader = {
 				}
 			};
 			var _Progress = function (a) {
-				console.log ('Loading background textures...');
+				console.log ('Load PROGRESS for cubemap');
+				console.log (a);
+				XSeen.Events.loadProgress ('cubemap', a.target);
 			};
 			var _Failure = function (a) {
-				console.log ('Failure to load texture.');
-				console.error (a);
+				console.log ('Load FAILURE for cubemap');
+				console.log (a);
+				XSeen.Events.loadFail ('cubemap', a.target);
 			};
 
 			if (typeof(filetypes) == 'string') {
@@ -151,7 +169,6 @@ XSeen.Loader = {
 			//console.log (urls);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
-//									.setPath ('./')
 									.load (urls, Success, _Progress, _Failure);
 		},
 
@@ -170,17 +187,21 @@ XSeen.Loader = {
  *					file extensions may be used for incompatible file formats (e.x., glTF V1.0, V1.1, and V2.0).
  *					The hint should contain the version number without 'V'.
  *		success		The callback function to call on successful load
+ *			The remaining arguments are optional. If any are present, then following process is used
+ *			One argument ==> userdata
+ *			Two arguments ==> failure, progress
+ *			Three arguments ==> failure, progress, userdata
  *		failure		The callback function to call on when the loading fails
  *		progress	The callback function to call while the loading is occurring
  *		userdata	A object to be included with all of the callbacks.
  */
-	'load'		: function (url='', hint='', success, failure, progress, userdata)
+	'load'		: function (url='', hint='', success, optArg1, optArg2, optArg3)
 		{
 			var uri = XSeen.parseUrl (url);
 			var type = (typeof(this.ContentType[uri.extension]) === 'undefined') ? this.ContentType['txt'] : this.ContentType[uri.extension];
 			var MimeLoader = this.ContentLoaders[type];
 			if (MimeLoader.needHint === true && hint == '') {
-				console.log ('Hint require to load content type ' + type);
+				console.log ('Hint required to load content type ' + type);
 				return false;
 			}
 			
@@ -191,15 +212,45 @@ XSeen.Loader = {
 					MimeLoader = this.ContentLoaders[type];
 				}		// Other types go here
 			}
+			
+			var _userdata, _failure, _progress;
+			if (arguments.length < 4) {
+				_userdata = {};
+				_failure = XSeen.Loader._Failure;
+				_progress = XSeen.Loader._Progress;
+			} else if (arguments.length == 4) {
+				_userdata = optArg1;
+				_failure = XSeen.Loader._Failure;
+				_progress = XSeen.Loader._Progress;
+			} else if (arguments.length == 5) {
+				_userdata = {};
+				_failure = optArg1;
+				_progress = optArg2;
+			} else if (arguments.length >= 6) {
+				_failure = optArg1;
+				_progress = optArg2;
+				_userdata = optArg3;
+			}
 
 			if (typeof(MimeLoader.loader) === 'undefined') {
-				this.internalLoader (url, success, failure, progress, userdata, type);
+				this.internalLoader (url, success, _failure, _progress, _userdata, type);
 			} else {
-				MimeLoader.loader.load (url, success, progress, failure);
+				MimeLoader.loader.load (url, success, _progress, _failure);
 				XSeen.Loader.loadersComplete = false;
 			}
 		},
 	
+	'_Progress'	: function (ev)
+		{
+			console.log (ev);
+			XSeen.Events.loadProgress ('content', XSeen.Runtime.RootTag, ev);
+		},
+	'_Failure'	: function (a)
+		{
+			console.log (a);
+			XSeen.Events.loadFailure ('content', XSeen.Runtime.RootTag);
+		},
+
 
 
 // TODO: These are copied from previous Loader. Need to make sure they still work & meet the right needs		

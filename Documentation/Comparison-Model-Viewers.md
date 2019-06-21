@@ -14,10 +14,12 @@ Quick comparison guide between a number of different 3D model viewers made on 20
 | Gesture Control | custom with library | Built-in | See Unity |
 | Platform | Web browser (with WebGL) | Web browser (WebGL) + ARCore | Unity |
 | Lighting | Environment map, detailed scene lighting | Environment map, simple scene lighting | See Unity |
-| Shadows | Not yet | Yes | See Unity |
+| Shadows | No | Yes | See Unity |
 | Camera Access | Yes with permission | Through SceneViewer | See Unity |
 | Take Picture | Yes | No | See Unity |
 | Model Animations | glTF built-in, rigid body | Single named built-in animation | See Unity |
+| Auto rotate | Yes | Yes | See Unity |
+| Developer controled model resize | Yes | No | See Unity |
 | License | MIT, GPL | Apache | MIT |
 | Renderer | THREE.js | THREE.js | Unity |
 | AR Usage (Android) | Browser-based | Requires ARCore (SceneViewer app built-in) | See Unity |

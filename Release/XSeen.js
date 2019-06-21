@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.68-beta+8_a78f6b7
- *  Built Thu Jun 13 20:57:15 2019
+ *  XSeen V0.8.69-beta+8_11b18ff
+ *  Built Wed Jun 19 10:46:09 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -67,24 +67,24 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 #      1464: ./Loader.js
 #      1811: ./Logging.js
 #      1929: ./onLoad.js
-#      2371: ./Tag.js
-#      3192: ./XSeen.js
-#      3461: tags/$.js
-#      3530: tags/animate.js
-#      3940: tags/asset.js
-#      3968: tags/background.js
-#      4342: tags/camera.js
-#      4568: tags/cubemap.js
-#      4718: tags/fog.js
-#      4801: tags/group.js
-#      4904: tags/label.js
-#      5090: tags/light.js
-#      5195: tags/metadata.js
-#      5304: tags/model.js
-#      5552: tags/scene.js
-#      5664: tags/solids.js
-#      6719: tags/style3d.js
-#      6902: tags/subscene.js
+#      2372: ./Tag.js
+#      3193: ./XSeen.js
+#      3463: tags/$.js
+#      3532: tags/animate.js
+#      3942: tags/asset.js
+#      3970: tags/background.js
+#      4344: tags/camera.js
+#      4570: tags/cubemap.js
+#      4720: tags/fog.js
+#      4803: tags/group.js
+#      4906: tags/label.js
+#      5092: tags/light.js
+#      5197: tags/metadata.js
+#      5306: tags/model.js
+#      5554: tags/scene.js
+#      5666: tags/solids.js
+#      6721: tags/style3d.js
+#      6904: tags/subscene.js
 */
 // File: ./CameraManager.js
 /*
@@ -2211,7 +2211,8 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<img id="XSeen-Splash" src="https://XSeen.org/Resources/logo.svg" style="z-index:999; position:absolute; top:0; left:25%; max-width:50%; background-color:white; " width="'+XSeen.Runtime.Size.width+'">';
+	var splashScreen = '<div id="XSeen-Splash"><img src="https://XSeen.org/Resources/logo.svg" width="'+XSeen.Runtime.Size.width/2+'"><div><div class="spinner">&ohbar;</div> Loading</div></div>';
+	console.log (splashScreen);
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
 	
@@ -3274,6 +3275,7 @@ XSeen.Parser = {
  *	0.8.66:	Added events for asynchronous content loading (start, progress, complete, fail)
  *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
  *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
+ *	0.8.69:	Added (CSS) animation to initial wait
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
@@ -3299,11 +3301,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 68,
+					'_Patch'		: 69,
 					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-06-13',
+					'_RDate'		: '2019-06-19',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

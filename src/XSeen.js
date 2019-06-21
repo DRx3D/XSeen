@@ -81,6 +81,7 @@
  *	0.8.66:	Added events for asynchronous content loading (start, progress, complete, fail)
  *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
  *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
+ *	0.8.69:	Added (CSS) animation to initial wait
  
  *TODO:
  *	Update to latest THREE and various libraries (V0.9)
@@ -106,11 +107,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 68,
+					'_Patch'		: 69,
 					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-06-13',
+					'_RDate'		: '2019-06-19',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

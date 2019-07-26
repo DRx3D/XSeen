@@ -75,7 +75,7 @@ XSeen.Tags.group = {
 	'animateObject'	: function (x, property, value) 
 		{
 			x.loadGroup[property](value);
-			console.log (value);
+			XSeen.LogDebug (value);
 		},
 };
 

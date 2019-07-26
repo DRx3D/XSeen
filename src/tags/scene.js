@@ -40,9 +40,10 @@ XSeen.Tags.scene = {
 		{
 
 /*
- *	Add an event listener to this node for resize events
+ *	Add an event listener to this node for resize (including orientation change) events
  */
 			window.addEventListener ('resize', XSeen.Runtime.Resize, false);
+			window.addEventListener ('orientationchange', XSeen.Runtime.Resize, false);
 /*
  * TODO: Need to get current top-of-stack for all stack-bound nodes and set them as active.
  *	This only happens the initial time for each XSeen tag in the main HTML file

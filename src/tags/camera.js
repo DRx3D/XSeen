@@ -19,14 +19,6 @@ XSeen.Tags.camera = {
 			e._xseen.rendererHasControls = false;		// Only for renderers with built-in controls (e.g., vr)
 			e._xseen.useDeviceOrientation = false;
 			e._xseen.isStereographic = false;
-/*
- *	These are now set in the Camera Manager
-			e._xseen.sceneInfo.Camera.position.set (
-							e._xseen.attributes.position.x,
-							e._xseen.attributes.position.y,
-							e._xseen.attributes.position.z);
-			e._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
- */
 			e._xseen.priority = e._xseen.attributes.priority;
 			if (e._xseen.priority < 0) {e._xseen.priority = 1;}
 			e._xseen.available = e._xseen.attributes.available;
@@ -61,20 +53,21 @@ XSeen.Tags.camera = {
  *	'device'	==> orbit if !hasDeviceOrientation
  */
  
-			console.log ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+			XSeen.LogVerbose ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+			
  
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
-						console.log ('... using device orientation');
+						XSeen.LogVerbose ('... using device orientation');
 						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
 						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
 						e._xseen.useDeviceOrientation = true;
 						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
-						console.log ('... using orbit controls');
+						XSeen.LogVerbose ('... using orbit controls');
 						e._xseen.track = 'orbit';
 						e._xseen.useDeviceOrientation = false;
 						//e._xseen.sceneInfo.useDeviceOrientation = false;
@@ -98,7 +91,7 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.rendererHasControls = true;
 					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
 				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
-					console.log ("VR requested, but no VR device found. Using 'stereo' instead.");
+					XSeen.LogVerbose ("VR requested, but no VR device found. Using 'stereo' instead.");
 					e._xseen.type = 'stereo';
 					e._xseen.track = 'device';
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
@@ -106,7 +99,7 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.isStereographic = true;
 					// Need to add a button to the display to go full screen & stereo
 				} else {													// Flat screen
-					console.log ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
+					XSeen.LogVerbose ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
 					e._xseen.type = 'perspective';
 					e._xseen.track = 'orbit';
 				}
@@ -186,11 +179,6 @@ XSeen.Tags.camera = {
 			}
 
 			e._xseen.sceneInfo.ViewManager.add (e);
-			//if (typeof(e._xseen.sceneInfo.DefinedCameras[e._xseen.priority]) == 'undefined') {e._xseen.sceneInfo.DefinedCameras[e._xseen.priority] = [];}
-			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push (e);
-			//e._xseen.ndxCamera = e._xseen.sceneInfo.DefinedCameras.length - 1;
-			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
-			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
 	'fin'	: function (e, p) 
 		{

@@ -104,8 +104,8 @@ XSeen.Loader = {
 			if (ev.detail.lengthComputable && ev.detail.total != 0) {
 				msg += ' (' + 100 * ev.detail.loaded / ev.detail.total + '% [' + ev.detail.loaded + ' of ' + ev.detail.total + '])';
 			}
-			console.log (msg);
-			console.log (ev);
+			XSeen.LogInfo (msg);
+			//console.log (ev);
 		},
 
 		
@@ -140,11 +140,11 @@ XSeen.Loader = {
 			};
 			var _Progress = function (a) {
 				console.log ('Load PROGRESS for cubemap');
-				console.log (a);
+				//console.log (a);
 				XSeen.Events.loadProgress ('cubemap', a.target);
 			};
 			var _Failure = function (a) {
-				console.log ('Load FAILURE for cubemap');
+				XSeen.LogError ('Load FAILURE for cubemap');
 				console.log (a);
 				XSeen.Events.loadFail ('cubemap', a.target);
 			};
@@ -167,6 +167,11 @@ XSeen.Loader = {
 
 			//console.log('Loading cube-map texture...');
 			//console.log (urls);
+			var msg = 'Loading textcube from\n';
+			for (var ii=0; ii<=5; ii++) {
+				msg += ' [' + ii + '] ' + urls[ii] + '\n';
+			}
+			XSeen.LogVerbose (msg);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 									.load (urls, Success, _Progress, _Failure);
@@ -201,7 +206,7 @@ XSeen.Loader = {
 			var type = (typeof(this.ContentType[uri.extension]) === 'undefined') ? this.ContentType['txt'] : this.ContentType[uri.extension];
 			var MimeLoader = this.ContentLoaders[type];
 			if (MimeLoader.needHint === true && hint == '') {
-				console.log ('Hint required to load content type ' + type);
+				XSeen.LogError ('Hint required to load content type ' + type);
 				return false;
 			}
 			
@@ -242,13 +247,13 @@ XSeen.Loader = {
 	
 	'_Progress'	: function (ev)
 		{
-			console.log (ev);
+			//console.log (ev);
 			XSeen.Events.loadProgress ('content', XSeen.Runtime.RootTag, ev);
 		},
 	'_Failure'	: function (a)
 		{
-			console.log (a);
-			XSeen.Events.loadFailure ('content', XSeen.Runtime.RootTag);
+			//console.log (a);
+			XSeen.Events.loadFail ('content', XSeen.Runtime.RootTag);
 		},
 
 

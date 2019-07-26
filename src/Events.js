@@ -84,7 +84,7 @@ XSeen.Events = {
 		'tag'				: {},
 		'isEventsEnabled'	: true,
 		'disableEventHandling' : function () {		// Remove all mouse/touch event listeners
-									console.log ('Disabling XSeen cursor handlers');
+									XSeen.LogVerbose ('Disabling XSeen cursor handlers');
 									XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
 
@@ -102,7 +102,7 @@ XSeen.Events = {
 									return XSeen.Runtime.RootTag;
 							},
 		'enableEventHandling' : function () {		// Add initial mouse/touch event listeners
-									console.log ('Enabling XSeen cursor handlers');
+									XSeen.LogVerbose ('Enabling XSeen cursor handlers');
 									XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
@@ -123,11 +123,19 @@ XSeen.Events = {
 								node.dispatchEvent(newEv);
 							},
 		'loadProgress'		: function (loadType, node, progressEvent) {
+								var eventMsg;
 								var extra = {
 												'lengthComputable'	: progressEvent.lengthComputable,
 												'loaded'			: progressEvent.loaded,
 												'total'				: progressEvent.total,
 											};
+								if (progressEvent.lengthComputable) {
+									eventMsg = ': ' + (100 * progressEvent.loaded / progressEvent.total) + '%';
+								} else {
+									eventMsg = '';
+								}
+								eventMsg = 'Load progress on ' + node.localName + '#' + node.id + eventMsg;
+								XSeen.LogInfo (eventMsg);
 								var newEv = new CustomEvent('xseen-loadprogress', XSeen.Events.propertiesLoad('progress', loadType, extra));
 								node.dispatchEvent(newEv);
 							},
@@ -343,9 +351,6 @@ XSeen.Events = {
  */
 		'xseen'				: function (ev)
 					{
-						//console.log ('XSeen event handler - ' + ev.type);
-						//console.log ('... ' + ev.x + ', ' + ev.y);
-						//console.log ("'xseen' method for handling events");
 						var xEvents = XSeen.Events;
 						var Runtime = ev.currentTarget._xseen.sceneInfo;
 						if (ev.type.substr(0,5) == 'touch') {
@@ -371,7 +376,7 @@ XSeen.Events = {
  *	TODO:
  *	* Potential issue with using mouse/touch for navigation as the event is never propagated
  */
-						//console.log ('Events:: handling event by type: ' + ev.type + ' with device navigation: ' + XSeen.Runtime.useDeviceOrientation);
+						XSeen.LogVerbose ('Events:: handling event by type: ' + ev.type + ' with device navigation: ' + XSeen.Runtime.useDeviceOrientation);
 						if (XSeen.Runtime.useDeviceOrientation) {
 						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
 							var newEv = new CustomEvent('xseen-touch', xEvents.eventProperties(ev));
@@ -411,7 +416,7 @@ XSeen.Events = {
  */
 		'propertiesDevice'	: function (ev)
 					{
-						//console.log ('Creating event detail for |' + ev.type + '|');
+						//XSeen.LogVerbose ('Creating event detail for |' + ev.type + '|');
 						var properties = {
 								'detail':		{					// This object contains all of the XSeen data
 										'type':			XSeen.Events.Translate[ev.type].type,
@@ -540,10 +545,10 @@ window.addEventListener('deviceorientation', function(ev) {
 	}
 
 	var newEv = new CustomEvent(XSeen.Events.Translate[ev.type].event, XSeen.Events.propertiesDevice(ev));
-//	XSeen.Events.tag.dispatchEvent(newEv);
 	ev.currentTarget.dispatchEvent(newEv);
 	XSeen.Runtime.RootTag.dispatchEvent(newEv);
-	//console.log ("Created '" + XSeen.Events.Translate[ev.type].event + "' event");
+	var rpy = '(' + XSeen.Events.device.roll + ', ' + XSeen.Events.device.pitch + ', ' + XSeen.Events.device.yaw + ')';
+	XSeen.LogRidiculous ("Created '" + XSeen.Events.Translate[ev.type].event + "' event [RPY: " + rpy + ']');
 	//ev.stopPropagation();		// Allow propagation beyond this tag
 	});
 /*

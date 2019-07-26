@@ -82,14 +82,23 @@
  *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
  *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
  *	0.8.69:	Added (CSS) animation to initial wait
+ *	0.8.70:	Added logging levels and cleaned up existing code debug statements
+ *	0.8.71:	Fixed timing condition with loading texture cubes for scene backgrounds
+ 
+ Rewrite code for handling cubemap images to support both x-cubemap and solid geometry nodes
+ Investigate failure of device mode tracking when in portrait mode
+ Figure out screen size when rotating between landscape and portrait (and perhaps vice-versa)
  
  *TODO:
+ *	Fix viewing controls when AR requested but not capable
+ *	Spherical harmonics environment map lighting
  *	Update to latest THREE and various libraries (V0.9)
+ *	Audio (V0.9)
+ * 	WebRTC?
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
  *	Resolve CAD positioning issue
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
- *	Audio (V0.9)
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
@@ -107,11 +116,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 69,
+					'_Patch'		: 71,
 					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-06-19',
+					'_RDate'		: '2019-07-26',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',

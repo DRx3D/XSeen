@@ -83,7 +83,7 @@ XSeen.Tags.cubemap = {
 				for (var ii=0;  ii<files.length; ii++) {
 					urls[ii] = e._xseen.attributes.npxyz + '/' + files[ii] + '.' + e._xseen.format;
 				}
-				console.log ('Loading image cubemap');
+				XSeen.LogDebug ('Loading image cubemap');
 				var dirtyFlag;
 				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.cubemap.cubeLoadSuccess({'e':e, 'cube':true}));
 			} else {

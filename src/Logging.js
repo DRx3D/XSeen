@@ -17,16 +17,20 @@ if (typeof(XSeen.definitions) === 'undefined') {XSeen.definitions = {};}
  */
  
 XSeen.definitions.Logging = {
-	'levels'	: ['Info', 'Debug', 'Warn', 'Error'],
+	'levels'	: ['Ridiculous', 'Verbose', 'Debug', 'Info', 'Load', 'Warn', 'Error'],
 	'Data'		: {
 					'Levels' : {
-						'info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
-						'debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
-						'warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
-						'error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
-						'load'	: {'class':'xseen-log xseen-logLoad', 'level':4, label:'LOAD'},
+						'ridiculous': {'class':'xseen-log xseen-logInfo', 'level':8, label:'+++'},
+						'verbose'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'VERBOSE'},
+						'debug'		: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
+						'info'		: {'class':'xseen-log xseen-logInfo', 'level':4, label:'INFO'},
+						'load'		: {'class':'xseen-log xseen-logLoad', 'level':3, label:'LOAD'},
+						'warn'		: {'class':'xseen-log xseen-logInfo', 'level':2, label:'WARN'},
+						'error'		: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'force'		: {'class':'xseen-log xseen-logInfo', 'level':0, label:'FORCE'},
 					},
 					'maximumLevel'		: 9,
+					'consoleLevel'		: 'Info',
 					'defaultLevel'		: 'Error',
 					'active'			: false,
 					'init'				: false,
@@ -61,40 +65,48 @@ XSeen.definitions.Logging = {
 	},
 	
 	'LogOn'		: function () {
-					this.active = true;
+					this.Data.active = true;
 					this.Data.logContainer.style.display = 'block';
 				},
 	'LogOff'	: function () {this.active = false;},
 
 	'logLog'	: function (message, level) {
 		if (!this.Data.init) {return this; }
-		if (this.Data.active && this.Data.Levels[level].level <= this.Data.maximumLevel) {
+		if (this.Data.active) {
+			var innerText = this.Data.Levels[level].label + ": " + message;
+			if (this.Data.Levels[level].level <= this.Data.maximumLevel) {
+			// if level not in this.levels, then set to this.Data.defaultLevel
+				var node = document.createElement("p");
+				node.setAttribute("class", this.Data.Levels[level].class);
+				node.innerHTML = this.Data.Levels[level].label + ": " + message;
+				this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
+				this.Data.lineCount++;
+			}
+			if (this.Data.Levels[level].level <= this.Data.consoleLevel) {
+				console.log (innerText);
+			}
 			if (this.Data.lineCount >= this.Data.maxLinesLogged) {
 				message = "Maximum number of log lines (=" + this.Data.maxLinesLogged + ") reached. Deactivating logging...";
-				this.Data.active = false;
-				level = 'Error'
+				this.Data.maximumLevel = 9;
+				//this.Data.active = false;
 			}
-			// if level not in this.levels, then set to this.Data.defaultLevel
-			var node = document.createElement("p");
-			node.setAttribute("class", this.Data.Levels[level].class);
-			node.innerHTML = this.Data.Levels[level].label + ": " + message;
-			this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
-			console.log (node.innerHTML);
 		}
 		return this;
 	},
 
-	'logInfo'	: function (string) {this.logLog (string, 'info');},
-	'logDebug'	: function (string) {this.logLog (string, 'debug');},
-	'logWarn'	: function (string) {
+	'logRidiculous'	: function (string) {this.logLog (string, 'ridiculous');},
+	'logVerbose'	: function (string) {this.logLog (string, 'verbose');},
+	'logDebug'		: function (string) {this.logLog (string, 'debug');},
+	'logInfo'		: function (string) {this.logLog (string, 'info');},
+	'logWarn'		: function (string) {
 		this.logLog (string, 'warn');
 		console.log ('Warning: ' + string);
 	},
 	'logError'	: function (string) {
 		this.logLog (string, 'error');
-		console.log ('*** Error: ' + string);
+		console.error ('*** Error: ' + string);
 	},
-	'logLoad'	: function (ev) {
+	'logLoad'	: function (ev) {				// This is really an event handler and belongs in Events.js
 		var node = document.createElement("p");
 		var that = XSeen.definitions.Logging;
 		node.setAttribute("class", that.Data.Levels['load'].class);
@@ -112,6 +124,14 @@ XSeen.definitions.Logging = {
 			this.Data.maximumLevel = this.Data.Levels[newLevel].level;
 			if (this.Data.maximumLevel >= this.Data.Levels['load'].level) this.initLoad(root);
 			if (this.Data.maximumLevel >= this.Data.Levels['error'].level) this.LogOn();
+			this.logLog ('Setting logging to ' + newLevel, 'force');
+		}
+	},
+	'setConsoleLevel'	: function(newLevel) {
+		if (typeof (this.Data.Levels[newLevel]) != 'undefined') {
+			this.Data.consoleLevel = this.Data.Levels[newLevel].level;
+			if (this.Data.consoleLevel >= this.Data.Levels['error'].level) this.LogOn();
+			this.logLog ('Setting console logging to ' + newLevel, 'force');
 		}
 	},
 }

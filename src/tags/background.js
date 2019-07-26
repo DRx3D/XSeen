@@ -26,7 +26,6 @@
 
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				if (attributeName == 'src' && e._xseen.imageSource.substring(0,1) == '#') {
@@ -62,8 +61,7 @@ XSeen.Tags.background = {
 			function cameraExists () {
 				var constraints = {video: {facingMode: {exact: "environment"}}};
 				function handleError(error) {
-					//console.error('Reeeejected!', error);
-					console.log ('Device camera not available -- ignoring');
+					XSeen.LogVerbose ('Device camera not available -- ignoring');
 					exists = false;
 				}
 				var exists = false;
@@ -71,10 +69,9 @@ XSeen.Tags.background = {
 					.then(gotDevices).catch(handleError);
 
 				function gotDevices(deviceInfos) {
-					//console.log (deviceInfos);
 					for (var i = 0; i !== deviceInfos.length; ++i) {
 						var deviceInfo = deviceInfos[i];
-						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
+						XSeen.LogVerbose ('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
 						exists = true;
 					}
 				}
@@ -103,13 +100,16 @@ XSeen.Tags.background = {
 			e.parentNode._xseen.children.push(e._xseen.sphere);
 			
 			// Define video support
+			//	Need global variable indicating that video element has been created and to use that one.
 			if (XSeen.Runtime.allowAR && cameraExists()) {
 				var video = document.createElement( 'video' );
 				video.setAttribute("autoplay", "1"); 
-				video.height			= XSeen.Runtime.SceneDom.height;
-				video.width				= XSeen.Runtime.SceneDom.width;
+				//video.height			= XSeen.Runtime.SceneDom.height;
+				//video.width				= XSeen.Runtime.SceneDom.width;
 				video.style.height		= video.height + 'px';
 				video.style.width		= video.width + 'px';
+				video.style.height		= '100%';
+				video.style.width		= '100%';
 				video.style.position	= 'absolute';
 				video.style.top			= '0';
 				video.style.left		= '0';
@@ -138,14 +138,14 @@ XSeen.Tags.background = {
 			e._xseen.srcType = XSeen.Tags.background._checkSrc (e._xseen.src);
 			if (type == 'camera') {
 				if (e._xseen.videoState == 'unavailable') {			// Rollback mechanism
-					console.log ('Device camera requested, but AR mode is not available.');
+					XSeen.LogVerbose ('Device camera requested, but AR mode is not available.');
 					type = 'sky';
 				} else if (e._xseen.videoState == 'running') {
-					console.log ('Device camera requested, but it is already running.');
+					XSeen.LogVerbose ('Device camera requested, but it is already running.');
 				} else if (e._xseen.videoState == 'defined') {
-					console.log ('Device camera requested, need to engage it.');
+					XSeen.LogVerbose ('Device camera requested, need to engage it.');
 				} else {
-					console.log ('Device camera requested, but it is XSeen cannot handled it -- No change to background.');
+					XSeen.LogVerbose ('Device camera requested, but it is XSeen cannot handled it -- No change to background.');
 				}
 			}
 
@@ -209,36 +209,19 @@ XSeen.Tags.background = {
 			var constraints = {video: {facingMode: {exact: "environment"}}};
 			var constraints = {video: {facingMode: "environment"}};
 			if (e._xseen.videoState != 'defined') {
-				console.log ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
+				XSeen.LogError ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
 				return;
 			}
 			function handleSuccess(stream) {
 				e._xseen.video.srcObject = stream;
 				e._xseen.videoState = 'running';
-				console.log ('Camera/video (' + stream.id + ') engaged and connected to display.');
-				console.log (stream);
+				XSeen.LogVerbose ('Camera/video (' + stream.id + ') engaged and connected to display.');
+				XSeen.LogVerbose (stream);
 			}
 			function handleError(error) {
-				//console.error('Reeeejected!', error);
-				console.log ('Device camera not available -- ignoring');
+				XSeen.LogVerbose ('Device camera not available -- ignoring');
 				e._xseen.videoState = 'error';
 			}
-
-/*
- *	Debugging only. Figure out what media devices are available
-			navigator.mediaDevices.enumerateDevices()
-				.then(gotDevices).catch(handleError);
-
-			function gotDevices(deviceInfos) {
-				var msgs = '';
-				for (var i = 0; i !== deviceInfos.length; ++i) {
-					var deviceInfo = deviceInfos[i];
-					console.log('Found a media device of type: ' + deviceInfo.kind);
-					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
-				}
-				//alert (msgs);
-			}
-*/
 
 			navigator.mediaDevices.getUserMedia(constraints).
 				then(handleSuccess).catch(handleError);
@@ -264,8 +247,6 @@ XSeen.Tags.background = {
 
 	'_updateBackground'	: function (ev) 
 		{
-			//console.log('Updating background from event');
-			//console.log(ev);
 			ev.detail.Runtime.SCENE.background = ev.target._xseen.cubemap;
 		},
 	'_loadBackground'	: function (e)
@@ -275,10 +256,15 @@ XSeen.Tags.background = {
 				if (e._xseen.imageSource.substring(0,1) == '#') {
 					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
 					e._xseen.processedUrl = true;
-					//console.log ('Using background ');
-					//console.log (cubeMapNode._xseen.cubemap);
 					e._xseen.loadTexture = cubeMapNode._xseen.cubemap;
-					e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					if (cubeMapNode._xseen.cubemap.image.length != 6) {
+						e._xseen.sceneInfo.SCENE.background = e._xseen.color;
+						cubeMapNode.addEventListener ('xseen-loadcomplete', function(ev) {
+								XSeen.Runtime.SCENE.background = ev.target._xseen.cubemap;
+						});
+					} else {
+						e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					}
 					cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
 
 				} else {
@@ -288,7 +274,6 @@ XSeen.Tags.background = {
 						urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
 					}
 
-					//console.log ('Loading background image cube');
 					var dirtyFlag;
 					XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
 					e._xseen.sphere.material.transparent = true;
@@ -315,7 +300,6 @@ XSeen.Tags.background = {
 						e._xseen.sphere.material.transparent = false;
 						e._xseen.sphere.material.opacity = 1.0;
 						e._xseen.sphere.material.needsUpdate = true;
-						//console.log (e._xseen.sphere.material);
 					}
 				}
 			}
@@ -331,18 +315,18 @@ XSeen.Tags.background = {
 				thisEle._xseen.processedUrl = true;
 				thisEle._xseen.loadTexture = textureCube;
 				thisEle._xseen.sceneInfo.SCENE.background = textureCube;
-				//console.log ('Successful load of background texture cube.');
 			}
 		},
 	'loadProgress' : function (a)
 		{
-			console.log ('Loading background textures...');
+			XSeen.LogInfo ('Loading background textures...');
+			XSeen.LogInfo (a);
 		},
 	'loadFailure' : function (a)
 		{
 			//a._xseen.processedUrl = false;
-			console.log ('Load failure');
-			console.log ('Failure to load background textures.');
+			XSeen.LogWarn ('Load failure');
+			XSeen.LogWarn ('Failure to load background textures.');
 		},
 };
 

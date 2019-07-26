@@ -49,14 +49,14 @@ XSeen.CameraManager = {
  */
 		'add'				: function (camera)
 					{
-						console.log ('Adding camera#' + camera.id + ' to the list');
+						XSeen.LogVerbose ('Adding camera#' + camera.id + ' to the list');
 						if (typeof(this.DefinedCameras[camera._xseen.priority]) == 'undefined') {this.DefinedCameras[camera._xseen.priority] = [];}
 						this.DefinedCameras[camera._xseen.priority].push (camera);
 						camera._xseen.ndxCamera = this.DefinedCameras[camera._xseen.priority].length - 1;
 						camera.setActive = function() {
 							camera._xseen.sceneInfo.ViewManager.setActive (this);
 						}
-						console.log ('.. returning from camera.add');
+						XSeen.LogVerbose ('.. returning from camera.add');
 					},
 
 /*
@@ -139,12 +139,12 @@ XSeen.CameraManager = {
 									//console.log ('No tracking');
 									xRuntime.rendererHasControls = true;
 								} else {
-									console.log ('Something else');
+									XSeen.LogDebug ('Something else');
 								}
 							}
 						}
 						xRuntime.Camera.updateProjectionMatrix();
-						console.log ('Setting active camera to ' + cameraElement.id);
+						XSeen.LogVerbose ('Setting active camera to ' + cameraElement.id);
 						this.CurrentNode = cameraElement;
 					},
 					
@@ -153,7 +153,7 @@ XSeen.CameraManager = {
 						var camera = this.next();
 						this.setActive (camera);
 						
-						console.log ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
+						XSeen.LogVerbose ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
 						//this.CurrentNode = camera;
 					}
 };

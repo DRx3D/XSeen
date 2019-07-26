@@ -25,9 +25,6 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	//console.log ("onLoad method");
-
-
 	loadExternal = function(url, domElement) {
                                        // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
                                        //
@@ -35,33 +32,31 @@ XSeen.onLoad = function() {
         	loadExternalSuccess = function (userdata) {
                 	var e = userdata.e;
 					return function (response) {
-							console.log('INFO: Loading of external XSeen complete');
+							XSeen.LogDebug ('Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
 							var rootNode = xmlDoc.getElementsByTagName('x-scene');
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
-								//console.log('Info: Adding external node: ' + nodes[0].nodeName);
+								XSeen.LogVerbose ('Adding external node: ' + nodes[0].nodeName);
 								e.appendChild(nodes[0]);
 							}
 					}
 			};
 
-			//if (url != 'test') {
-			//console.log ('External loads not yet supported for ' + url);
 			var loader = new THREE.FileLoader();
 			loader.load (url, 
 						loadExternalSuccess({'e':domElement}),
 						// onProgress callback
 						function ( xhr ) {
-							console.log('External source loader: ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
+							XSeen.LogInfo('External source loader: ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
 						},
 						// onError callback
 						function ( err ) {
-							console.log ('WARN: Response Code: ' + err.target.status);
-							console.log ('WARN: Response URL: ' + err.target.responseURL);
-							console.log ('WARN: Response Text\n' + err.target.responseText);
-							console.error( 'WARN: External source loader: An error happened' );
+							XSeen.LogWarn ('Response Code: ' + err.target.status);
+							XSeen.LogWarn ('Response URL: ' + err.target.responseURL);
+							XSeen.LogWarn ('Response Text\n' + err.target.responseText);
+							XSeen.LogError ('External source loader: An error happened' );
 						}
 			);
 	};
@@ -109,7 +104,7 @@ XSeen.onLoad = function() {
 									'default'	: 'none',
 									'type'		: 'string',
 									'case'		: 'insensitive' ,
-									'enumeration': ['', 'url', 'none', 'load', 'info', 'debug', 'warn', 'error'],
+									'enumeration': ['', 'url', 'none', 'load', 'info', 'verbose', 'debug', 'warn', 'error'],
 										},
 								'showstat'	: {
 									'name'		: 'showstat',
@@ -159,7 +154,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('INFO: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('STARTUP: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -169,8 +164,21 @@ XSeen.onLoad = function() {
 		}
 	});
 
+	// Define a few equivalences
+//	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
+	XSeen._debugLogging = (XSeen.Runtime.Attributes._debug == '' || XSeen.Runtime.Attributes._debug == 'none') ? false : true;
+	XSeen.Logging = XSeen.definitions.Logging.init (XSeen._debugLogging, XSeen.Runtime.RootTag);
+	XSeen.Logging.setLoggingLevel (XSeen.Runtime.Attributes._debug, XSeen.Runtime.RootTag);
+	XSeen.Logging.setConsoleLevel (XSeen.Runtime.Attributes._debug);
+	XSeen.LogRidiculous	= function (string) {XSeen.Logging.logRidiculous (string);}
+	XSeen.LogVerbose	= function (string) {XSeen.Logging.logVerbose (string);}
+	XSeen.LogDebug		= function (string) {XSeen.Logging.logDebug (string);}
+	XSeen.LogInfo		= function (string) {XSeen.Logging.logInfo (string);}
+	XSeen.LogWarn		= function (string) {XSeen.Logging.logWarn (string);}
+	XSeen.LogError		= function (string) {XSeen.Logging.logError (string);}
+
 	if (!(typeof(XSeen.Runtime.Attributes.src) == 'undefined' || XSeen.Runtime.Attributes.src == '')) {
-		console.log ('INFO: *** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
+		XSeen.LogDebug ('*** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
 		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
 	}
 
@@ -208,17 +216,14 @@ XSeen.onLoad = function() {
 	}
 	if (XSeen.Runtime.isTransparent) {
 		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
-		//console.log ('INFO: Creating a transparent rendering canvas.');
 	} else {
 		Renderer = new THREE.WebGLRenderer();
-		//console.log ('INFO: Creating a opaque rendering canvas.');
 	}
 	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
 	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
-	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
 	XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);	// TODO: test
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
@@ -230,7 +235,7 @@ XSeen.onLoad = function() {
 
 	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
 	} else {
-		console.log ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
+		XSeen.LogVerbose ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
 	}
 
 	
@@ -248,16 +253,9 @@ XSeen.onLoad = function() {
 /*
  * Stereo camera effect and device orientation controls are set on each camera
  */
-	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	//XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	XSeen.Runtime.hasDeviceOrientation = (window.DeviceOrientationEvent) ? true : false;
 	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
-
-	
-	// Define a few equivalences
-
-	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
-	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
-	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
-	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
 	
 /*
  * Handle debug settings.
@@ -268,7 +266,10 @@ XSeen.onLoad = function() {
 		let params = new URLSearchParams(document.location.search.substring(1));
 		_debug = params.get("xseen_debug") || '';
 	}
-	if (_debug != '') XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+	if (_debug != '') {
+		XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+		XSeen.Logging.setConsoleLevel (_debug);
+	}
 
 /*
  * Create XSeen default elements
@@ -281,7 +282,7 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<div id="XSeen-Splash"><img src="https://XSeen.org/Resources/logo.svg" width="'+XSeen.Runtime.Size.width/2+'"><div><div class="spinner">&ohbar;</div> Loading</div></div>';
+	var splashScreen = '<div id="XSeen-Splash"><img src="https://XSeen.org/Resources/logo.svg" width="'+XSeen.Runtime.Size.width/2+'"><div><div class="spinner">&ohbar;</div>&nbsp;Loading</div></div>';
 	console.log (splashScreen);
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
@@ -299,11 +300,9 @@ XSeen.onLoad = function() {
 
 	
 // Introduce things
-	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
-	XSeen.LogInfo(XSeen.Version.splashText);
-	//XSeen.LogDebug ("Debug line");
-	//XSeen.LogWarn ("Warn line");
-	//XSeen.LogError ("Error line");
+	//XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo (XSeen.Version.splashText);
 	
 // Load all other onLoad methods
 	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
@@ -313,17 +312,7 @@ XSeen.onLoad = function() {
 // Create XSeen event listeners
 //	*move events are not included because they are added after the initiating event (touchstart/mousedown)
 	XSeen.Events.enableEventHandling();
-/*
-	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchstart', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchend', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
-*/
+
 
 /*
  * Define event handlers for content loading
@@ -349,9 +338,7 @@ XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting)
  */
 XSeen.onLoadStartProcessing = function() {
 
-	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		//console.log ('Defining _xseen');
 		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
 									'children'		: [],	// Children of this tag
 									'Metadata'		: [],	// Metadata for this tag
@@ -366,7 +353,7 @@ XSeen.onLoadStartProcessing = function() {
 	}
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	//console.log ('Starting Parse...');
+	XSeen.LogVerbose ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 	var newEv = new CustomEvent('xseen-go', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'render'));
@@ -396,7 +383,7 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
-	//console.log ('Display size: ' + size.width + ' x ' + size.height);
+	XSeen.LogDebug ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
 };
 

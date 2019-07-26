@@ -126,10 +126,10 @@ XSeen.DisplayControl = {
 			
 			if (display && button) {	// Display & button defined, so go ahead and create event handler
 				button.onclick = function(ev) {
-					console.log ('Currently Presenting VR: |' + display.isPresenting + '|');
+					XSeen.LogVerbose ('Currently Presenting VR: |' + display.isPresenting + '|');
 					display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
 					renderer.vr.setDevice( display );
-					console.log ('VR state changed');
+					XSeen.LogVerbose ('VR state changed');
 				};
 			}
 		}
@@ -174,15 +174,14 @@ XSeen.DisplayControl = {
 		navigator.getVRDisplays()
 			.then( function ( displays ) {
 				if (true ||  displays.length > 0 ) {
-					console.log ("Showing 'Enter VR'");
+					XSeen.LogVerbose ("Showing 'Enter VR'");
 					button.dataset._active	= true;			// button active
 					showEnterVR(button, null);
-					//showEnterVR(button, displays[ 0 ] );
 					return true;
 
 				} else {
 					showVRNotFound ();
-					console.log ("Showing 'VR Not Found'");
+					XSeen.LogVerbose ("Showing 'VR Not Found'");
 					return false;
 				}
 			} );
@@ -241,7 +240,6 @@ XSeen.DisplayControl = {
  */
 		document.addEventListener( this._fullscreenEventName, function ( event ) {
 			if ( document.documentElement._isFullScreen() ) {
-				//console.log('Need to exit');
 				// Check ._XSeenButton._offWhenFull to see if button needs to be not displayed
 				if (document.documentElement._XSeenButton._offWhenFull) {
 					document.documentElement._XSeenButton.style.display = 'hidden';
@@ -252,7 +250,6 @@ XSeen.DisplayControl = {
 				}
 			
 			} else {	// Exit from full screen
-				//console.log('Need to enter');
 				document.documentElement._XSeenButton.style.display = 'block';
 				document.documentElement._XSeenButton.innerHTML = 'Enter FullScreen';
 				document.documentElement._XSeenButton = null;

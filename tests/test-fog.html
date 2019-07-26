@@ -31,9 +31,9 @@ See details at http://xseen.org/license
 			</x-class3d>
 			<x-light type='directional' color='white' intensity='.3' direction='.69 .2 .69'></x-light>
 			<x-light type='directional' color='#422237' direction='0 0 +1'></x-light>
-			<x-camera id='SceneCamera' type='stereo' track='device' position='1 0 -10'></x-camera>
-			<x-background background='cube' skycolor='tan' src='Resources/textures/desert_1/' srcextension='jpg'></x-background>
-			<x-fog near='2' far='40'></x-fog>
+			<x-camera id='SceneCamera' type='stereo' track='orbit' position='1 0 -10'></x-camera>
+			<x-background background='sky' color='tan'></x-background>
+			<x-fog near='2' far='40' color='tan'></x-fog>
 
 			<x-group rotation='0 3.14 0'>
 				<x-cone class3d='geom' color='magenta' position='+2 0 5'></x-cone>

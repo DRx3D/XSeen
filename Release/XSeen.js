@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.69-beta+8_11b18ff
- *  Built Wed Jun 19 10:46:09 2019
+ *  XSeen V0.8.71-beta+8_15e438b
+ *  Built Fri Jul 26 07:25:08 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -62,29 +62,29 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 #        88: ./CameraManager.js
 #       248: ./Constants.js
 #       438: ./DisplayControl.js
-#       828: ./Events.js
-#      1411: ./IW.js
-#      1464: ./Loader.js
-#      1811: ./Logging.js
-#      1929: ./onLoad.js
-#      2372: ./Tag.js
-#      3193: ./XSeen.js
-#      3463: tags/$.js
-#      3532: tags/animate.js
-#      3942: tags/asset.js
-#      3970: tags/background.js
-#      4344: tags/camera.js
-#      4570: tags/cubemap.js
-#      4720: tags/fog.js
-#      4803: tags/group.js
-#      4906: tags/label.js
-#      5092: tags/light.js
-#      5197: tags/metadata.js
-#      5306: tags/model.js
-#      5554: tags/scene.js
-#      5666: tags/solids.js
-#      6721: tags/style3d.js
-#      6904: tags/subscene.js
+#       825: ./Events.js
+#      1413: ./IW.js
+#      1466: ./Loader.js
+#      1818: ./Logging.js
+#      1956: ./onLoad.js
+#      2386: ./Tag.js
+#      3207: ./XSeen.js
+#      3486: tags/$.js
+#      3555: tags/animate.js
+#      3965: tags/asset.js
+#      3993: tags/background.js
+#      4351: tags/camera.js
+#      4565: tags/cubemap.js
+#      4715: tags/fog.js
+#      4798: tags/group.js
+#      4901: tags/label.js
+#      5087: tags/light.js
+#      5192: tags/metadata.js
+#      5301: tags/model.js
+#      5549: tags/scene.js
+#      5662: tags/solids.js
+#      6717: tags/style3d.js
+#      6900: tags/subscene.js
 */
 // File: ./CameraManager.js
 /*
@@ -138,14 +138,14 @@ XSeen.CameraManager = {
  */
 		'add'				: function (camera)
 					{
-						console.log ('Adding camera#' + camera.id + ' to the list');
+						XSeen.LogVerbose ('Adding camera#' + camera.id + ' to the list');
 						if (typeof(this.DefinedCameras[camera._xseen.priority]) == 'undefined') {this.DefinedCameras[camera._xseen.priority] = [];}
 						this.DefinedCameras[camera._xseen.priority].push (camera);
 						camera._xseen.ndxCamera = this.DefinedCameras[camera._xseen.priority].length - 1;
 						camera.setActive = function() {
 							camera._xseen.sceneInfo.ViewManager.setActive (this);
 						}
-						console.log ('.. returning from camera.add');
+						XSeen.LogVerbose ('.. returning from camera.add');
 					},
 
 /*
@@ -228,12 +228,12 @@ XSeen.CameraManager = {
 									//console.log ('No tracking');
 									xRuntime.rendererHasControls = true;
 								} else {
-									console.log ('Something else');
+									XSeen.LogDebug ('Something else');
 								}
 							}
 						}
 						xRuntime.Camera.updateProjectionMatrix();
-						console.log ('Setting active camera to ' + cameraElement.id);
+						XSeen.LogVerbose ('Setting active camera to ' + cameraElement.id);
 						this.CurrentNode = cameraElement;
 					},
 					
@@ -242,7 +242,7 @@ XSeen.CameraManager = {
 						var camera = this.next();
 						this.setActive (camera);
 						
-						console.log ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
+						XSeen.LogVerbose ('Activating camera ID: ' + camera.id + ' with controls: ' + camera._xseen.sceneInfo.rendererHasControls);
 						//this.CurrentNode = camera;
 					}
 };
@@ -565,10 +565,10 @@ XSeen.DisplayControl = {
 			
 			if (display && button) {	// Display & button defined, so go ahead and create event handler
 				button.onclick = function(ev) {
-					console.log ('Currently Presenting VR: |' + display.isPresenting + '|');
+					XSeen.LogVerbose ('Currently Presenting VR: |' + display.isPresenting + '|');
 					display.isPresenting ? display.exitPresent() : display.requestPresent( [ { source: renderer.domElement } ] );
 					renderer.vr.setDevice( display );
-					console.log ('VR state changed');
+					XSeen.LogVerbose ('VR state changed');
 				};
 			}
 		}
@@ -613,15 +613,14 @@ XSeen.DisplayControl = {
 		navigator.getVRDisplays()
 			.then( function ( displays ) {
 				if (true ||  displays.length > 0 ) {
-					console.log ("Showing 'Enter VR'");
+					XSeen.LogVerbose ("Showing 'Enter VR'");
 					button.dataset._active	= true;			// button active
 					showEnterVR(button, null);
-					//showEnterVR(button, displays[ 0 ] );
 					return true;
 
 				} else {
 					showVRNotFound ();
-					console.log ("Showing 'VR Not Found'");
+					XSeen.LogVerbose ("Showing 'VR Not Found'");
 					return false;
 				}
 			} );
@@ -680,7 +679,6 @@ XSeen.DisplayControl = {
  */
 		document.addEventListener( this._fullscreenEventName, function ( event ) {
 			if ( document.documentElement._isFullScreen() ) {
-				//console.log('Need to exit');
 				// Check ._XSeenButton._offWhenFull to see if button needs to be not displayed
 				if (document.documentElement._XSeenButton._offWhenFull) {
 					document.documentElement._XSeenButton.style.display = 'hidden';
@@ -691,7 +689,6 @@ XSeen.DisplayControl = {
 				}
 			
 			} else {	// Exit from full screen
-				//console.log('Need to enter');
 				document.documentElement._XSeenButton.style.display = 'block';
 				document.documentElement._XSeenButton.innerHTML = 'Enter FullScreen';
 				document.documentElement._XSeenButton = null;
@@ -913,7 +910,7 @@ XSeen.Events = {
 		'tag'				: {},
 		'isEventsEnabled'	: true,
 		'disableEventHandling' : function () {		// Remove all mouse/touch event listeners
-									console.log ('Disabling XSeen cursor handlers');
+									XSeen.LogVerbose ('Disabling XSeen cursor handlers');
 									XSeen.Runtime.RootTag.removeEventListener ('mousemove', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.removeEventListener ('touchmove', XSeen.Events.xseen, true);
 
@@ -931,7 +928,7 @@ XSeen.Events = {
 									return XSeen.Runtime.RootTag;
 							},
 		'enableEventHandling' : function () {		// Add initial mouse/touch event listeners
-									console.log ('Enabling XSeen cursor handlers');
+									XSeen.LogVerbose ('Enabling XSeen cursor handlers');
 									XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
 									XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
@@ -952,11 +949,19 @@ XSeen.Events = {
 								node.dispatchEvent(newEv);
 							},
 		'loadProgress'		: function (loadType, node, progressEvent) {
+								var eventMsg;
 								var extra = {
 												'lengthComputable'	: progressEvent.lengthComputable,
 												'loaded'			: progressEvent.loaded,
 												'total'				: progressEvent.total,
 											};
+								if (progressEvent.lengthComputable) {
+									eventMsg = ': ' + (100 * progressEvent.loaded / progressEvent.total) + '%';
+								} else {
+									eventMsg = '';
+								}
+								eventMsg = 'Load progress on ' + node.localName + '#' + node.id + eventMsg;
+								XSeen.LogInfo (eventMsg);
 								var newEv = new CustomEvent('xseen-loadprogress', XSeen.Events.propertiesLoad('progress', loadType, extra));
 								node.dispatchEvent(newEv);
 							},
@@ -1172,9 +1177,6 @@ XSeen.Events = {
  */
 		'xseen'				: function (ev)
 					{
-						//console.log ('XSeen event handler - ' + ev.type);
-						//console.log ('... ' + ev.x + ', ' + ev.y);
-						//console.log ("'xseen' method for handling events");
 						var xEvents = XSeen.Events;
 						var Runtime = ev.currentTarget._xseen.sceneInfo;
 						if (ev.type.substr(0,5) == 'touch') {
@@ -1200,7 +1202,7 @@ XSeen.Events = {
  *	TODO:
  *	* Potential issue with using mouse/touch for navigation as the event is never propagated
  */
-						//console.log ('Events:: handling event by type: ' + ev.type + ' with device navigation: ' + XSeen.Runtime.useDeviceOrientation);
+						XSeen.LogVerbose ('Events:: handling event by type: ' + ev.type + ' with device navigation: ' + XSeen.Runtime.useDeviceOrientation);
 						if (XSeen.Runtime.useDeviceOrientation) {
 						if (ev.type == 'mousedown' || ev.type == 'touchstart') {
 							var newEv = new CustomEvent('xseen-touch', xEvents.eventProperties(ev));
@@ -1240,7 +1242,7 @@ XSeen.Events = {
  */
 		'propertiesDevice'	: function (ev)
 					{
-						//console.log ('Creating event detail for |' + ev.type + '|');
+						//XSeen.LogVerbose ('Creating event detail for |' + ev.type + '|');
 						var properties = {
 								'detail':		{					// This object contains all of the XSeen data
 										'type':			XSeen.Events.Translate[ev.type].type,
@@ -1369,10 +1371,10 @@ window.addEventListener('deviceorientation', function(ev) {
 	}
 
 	var newEv = new CustomEvent(XSeen.Events.Translate[ev.type].event, XSeen.Events.propertiesDevice(ev));
-//	XSeen.Events.tag.dispatchEvent(newEv);
 	ev.currentTarget.dispatchEvent(newEv);
 	XSeen.Runtime.RootTag.dispatchEvent(newEv);
-	//console.log ("Created '" + XSeen.Events.Translate[ev.type].event + "' event");
+	var rpy = '(' + XSeen.Events.device.roll + ', ' + XSeen.Events.device.pitch + ', ' + XSeen.Events.device.yaw + ')';
+	XSeen.LogRidiculous ("Created '" + XSeen.Events.Translate[ev.type].event + "' event [RPY: " + rpy + ']');
 	//ev.stopPropagation();		// Allow propagation beyond this tag
 	});
 /*
@@ -1569,8 +1571,8 @@ XSeen.Loader = {
 			if (ev.detail.lengthComputable && ev.detail.total != 0) {
 				msg += ' (' + 100 * ev.detail.loaded / ev.detail.total + '% [' + ev.detail.loaded + ' of ' + ev.detail.total + '])';
 			}
-			console.log (msg);
-			console.log (ev);
+			XSeen.LogInfo (msg);
+			//console.log (ev);
 		},
 
 		
@@ -1605,11 +1607,11 @@ XSeen.Loader = {
 			};
 			var _Progress = function (a) {
 				console.log ('Load PROGRESS for cubemap');
-				console.log (a);
+				//console.log (a);
 				XSeen.Events.loadProgress ('cubemap', a.target);
 			};
 			var _Failure = function (a) {
-				console.log ('Load FAILURE for cubemap');
+				XSeen.LogError ('Load FAILURE for cubemap');
 				console.log (a);
 				XSeen.Events.loadFail ('cubemap', a.target);
 			};
@@ -1632,6 +1634,11 @@ XSeen.Loader = {
 
 			//console.log('Loading cube-map texture...');
 			//console.log (urls);
+			var msg = 'Loading textcube from\n';
+			for (var ii=0; ii<=5; ii++) {
+				msg += ' [' + ii + '] ' + urls[ii] + '\n';
+			}
+			XSeen.LogVerbose (msg);
 
 			textureCube = new THREE.CubeTextureLoader(XSeen.Loader.manager)
 									.load (urls, Success, _Progress, _Failure);
@@ -1666,7 +1673,7 @@ XSeen.Loader = {
 			var type = (typeof(this.ContentType[uri.extension]) === 'undefined') ? this.ContentType['txt'] : this.ContentType[uri.extension];
 			var MimeLoader = this.ContentLoaders[type];
 			if (MimeLoader.needHint === true && hint == '') {
-				console.log ('Hint required to load content type ' + type);
+				XSeen.LogError ('Hint required to load content type ' + type);
 				return false;
 			}
 			
@@ -1707,13 +1714,13 @@ XSeen.Loader = {
 	
 	'_Progress'	: function (ev)
 		{
-			console.log (ev);
+			//console.log (ev);
 			XSeen.Events.loadProgress ('content', XSeen.Runtime.RootTag, ev);
 		},
 	'_Failure'	: function (a)
 		{
-			console.log (a);
-			XSeen.Events.loadFailure ('content', XSeen.Runtime.RootTag);
+			//console.log (a);
+			XSeen.Events.loadFail ('content', XSeen.Runtime.RootTag);
 		},
 
 
@@ -1829,16 +1836,20 @@ if (typeof(XSeen.definitions) === 'undefined') {XSeen.definitions = {};}
  */
  
 XSeen.definitions.Logging = {
-	'levels'	: ['Info', 'Debug', 'Warn', 'Error'],
+	'levels'	: ['Ridiculous', 'Verbose', 'Debug', 'Info', 'Load', 'Warn', 'Error'],
 	'Data'		: {
 					'Levels' : {
-						'info'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'INFO'},
-						'debug'	: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
-						'warn'	: {'class':'xseen-log xseen-logInfo', 'level':3, label:'WARN'},
-						'error'	: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
-						'load'	: {'class':'xseen-log xseen-logLoad', 'level':4, label:'LOAD'},
+						'ridiculous': {'class':'xseen-log xseen-logInfo', 'level':8, label:'+++'},
+						'verbose'	: {'class':'xseen-log xseen-logInfo', 'level':7, label:'VERBOSE'},
+						'debug'		: {'class':'xseen-log xseen-logInfo', 'level':5, label:'DEBUG'},
+						'info'		: {'class':'xseen-log xseen-logInfo', 'level':4, label:'INFO'},
+						'load'		: {'class':'xseen-log xseen-logLoad', 'level':3, label:'LOAD'},
+						'warn'		: {'class':'xseen-log xseen-logInfo', 'level':2, label:'WARN'},
+						'error'		: {'class':'xseen-log xseen-logInfo', 'level':1, label:'ERROR'},
+						'force'		: {'class':'xseen-log xseen-logInfo', 'level':0, label:'FORCE'},
 					},
 					'maximumLevel'		: 9,
+					'consoleLevel'		: 'Info',
 					'defaultLevel'		: 'Error',
 					'active'			: false,
 					'init'				: false,
@@ -1873,40 +1884,48 @@ XSeen.definitions.Logging = {
 	},
 	
 	'LogOn'		: function () {
-					this.active = true;
+					this.Data.active = true;
 					this.Data.logContainer.style.display = 'block';
 				},
 	'LogOff'	: function () {this.active = false;},
 
 	'logLog'	: function (message, level) {
 		if (!this.Data.init) {return this; }
-		if (this.Data.active && this.Data.Levels[level].level <= this.Data.maximumLevel) {
+		if (this.Data.active) {
+			var innerText = this.Data.Levels[level].label + ": " + message;
+			if (this.Data.Levels[level].level <= this.Data.maximumLevel) {
+			// if level not in this.levels, then set to this.Data.defaultLevel
+				var node = document.createElement("p");
+				node.setAttribute("class", this.Data.Levels[level].class);
+				node.innerHTML = this.Data.Levels[level].label + ": " + message;
+				this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
+				this.Data.lineCount++;
+			}
+			if (this.Data.Levels[level].level <= this.Data.consoleLevel) {
+				console.log (innerText);
+			}
 			if (this.Data.lineCount >= this.Data.maxLinesLogged) {
 				message = "Maximum number of log lines (=" + this.Data.maxLinesLogged + ") reached. Deactivating logging...";
-				this.Data.active = false;
-				level = 'Error'
+				this.Data.maximumLevel = 9;
+				//this.Data.active = false;
 			}
-			// if level not in this.levels, then set to this.Data.defaultLevel
-			var node = document.createElement("p");
-			node.setAttribute("class", this.Data.Levels[level].class);
-			node.innerHTML = this.Data.Levels[level].label + ": " + message;
-			this.Data.logContainer.insertBefore(node, this.Data.logContainer.firstChild);
-			console.log (node.innerHTML);
 		}
 		return this;
 	},
 
-	'logInfo'	: function (string) {this.logLog (string, 'info');},
-	'logDebug'	: function (string) {this.logLog (string, 'debug');},
-	'logWarn'	: function (string) {
+	'logRidiculous'	: function (string) {this.logLog (string, 'ridiculous');},
+	'logVerbose'	: function (string) {this.logLog (string, 'verbose');},
+	'logDebug'		: function (string) {this.logLog (string, 'debug');},
+	'logInfo'		: function (string) {this.logLog (string, 'info');},
+	'logWarn'		: function (string) {
 		this.logLog (string, 'warn');
 		console.log ('Warning: ' + string);
 	},
 	'logError'	: function (string) {
 		this.logLog (string, 'error');
-		console.log ('*** Error: ' + string);
+		console.error ('*** Error: ' + string);
 	},
-	'logLoad'	: function (ev) {
+	'logLoad'	: function (ev) {				// This is really an event handler and belongs in Events.js
 		var node = document.createElement("p");
 		var that = XSeen.definitions.Logging;
 		node.setAttribute("class", that.Data.Levels['load'].class);
@@ -1924,6 +1943,14 @@ XSeen.definitions.Logging = {
 			this.Data.maximumLevel = this.Data.Levels[newLevel].level;
 			if (this.Data.maximumLevel >= this.Data.Levels['load'].level) this.initLoad(root);
 			if (this.Data.maximumLevel >= this.Data.Levels['error'].level) this.LogOn();
+			this.logLog ('Setting logging to ' + newLevel, 'force');
+		}
+	},
+	'setConsoleLevel'	: function(newLevel) {
+		if (typeof (this.Data.Levels[newLevel]) != 'undefined') {
+			this.Data.consoleLevel = this.Data.Levels[newLevel].level;
+			if (this.Data.consoleLevel >= this.Data.Levels['error'].level) this.LogOn();
+			this.logLog ('Setting console logging to ' + newLevel, 'force');
 		}
 	},
 }
@@ -1955,9 +1982,6 @@ XSeen.Convert = {
  * Partially designed to process all scenes; however, only the first one is actually processed
  */
 XSeen.onLoad = function() {
-	//console.log ("onLoad method");
-
-
 	loadExternal = function(url, domElement) {
                                        // Method for adding userdata from https://stackoverflow.com/questions/11997234/three-js-jsonloader-callback
                                        //
@@ -1965,33 +1989,31 @@ XSeen.onLoad = function() {
         	loadExternalSuccess = function (userdata) {
                 	var e = userdata.e;
 					return function (response) {
-							console.log('INFO: Loading of external XSeen complete');
+							XSeen.LogDebug ('Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
 							var rootNode = xmlDoc.getElementsByTagName('x-scene');
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
-								//console.log('Info: Adding external node: ' + nodes[0].nodeName);
+								XSeen.LogVerbose ('Adding external node: ' + nodes[0].nodeName);
 								e.appendChild(nodes[0]);
 							}
 					}
 			};
 
-			//if (url != 'test') {
-			//console.log ('External loads not yet supported for ' + url);
 			var loader = new THREE.FileLoader();
 			loader.load (url, 
 						loadExternalSuccess({'e':domElement}),
 						// onProgress callback
 						function ( xhr ) {
-							console.log('External source loader: ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
+							XSeen.LogInfo('External source loader: ' + (xhr.loaded / xhr.total * 100) + '% loaded' );
 						},
 						// onError callback
 						function ( err ) {
-							console.log ('WARN: Response Code: ' + err.target.status);
-							console.log ('WARN: Response URL: ' + err.target.responseURL);
-							console.log ('WARN: Response Text\n' + err.target.responseText);
-							console.error( 'WARN: External source loader: An error happened' );
+							XSeen.LogWarn ('Response Code: ' + err.target.status);
+							XSeen.LogWarn ('Response URL: ' + err.target.responseURL);
+							XSeen.LogWarn ('Response Text\n' + err.target.responseText);
+							XSeen.LogError ('External source loader: An error happened' );
 						}
 			);
 	};
@@ -2039,7 +2061,7 @@ XSeen.onLoad = function() {
 									'default'	: 'none',
 									'type'		: 'string',
 									'case'		: 'insensitive' ,
-									'enumeration': ['', 'url', 'none', 'load', 'info', 'debug', 'warn', 'error'],
+									'enumeration': ['', 'url', 'none', 'load', 'info', 'verbose', 'debug', 'warn', 'error'],
 										},
 								'showstat'	: {
 									'name'		: 'showstat',
@@ -2089,7 +2111,7 @@ XSeen.onLoad = function() {
 	Object.getOwnPropertyNames(attributeCharacteristics).forEach (function (prop) {
 		value = XSeen.Runtime.RootTag.getAttribute(attributeCharacteristics[prop].name);
 		if (value == '' || value === null || typeof(value) === 'undefined') {value = attributeCharacteristics[prop].default;}
-		//console.log ('INFO: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
+		console.log ('STARTUP: Checking XSEEN attribute: ' + prop + '; with value: ' + value);
 		if (value != '') {
 			if (attributeCharacteristics[prop].case != 'sensitive') {
 				XSeen.Runtime.Attributes[attributeCharacteristics[prop].name] = XSeen.Convert.fromString (value.toLowerCase(), attributeCharacteristics[prop].type);
@@ -2099,8 +2121,21 @@ XSeen.onLoad = function() {
 		}
 	});
 
+	// Define a few equivalences
+//	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
+	XSeen._debugLogging = (XSeen.Runtime.Attributes._debug == '' || XSeen.Runtime.Attributes._debug == 'none') ? false : true;
+	XSeen.Logging = XSeen.definitions.Logging.init (XSeen._debugLogging, XSeen.Runtime.RootTag);
+	XSeen.Logging.setLoggingLevel (XSeen.Runtime.Attributes._debug, XSeen.Runtime.RootTag);
+	XSeen.Logging.setConsoleLevel (XSeen.Runtime.Attributes._debug);
+	XSeen.LogRidiculous	= function (string) {XSeen.Logging.logRidiculous (string);}
+	XSeen.LogVerbose	= function (string) {XSeen.Logging.logVerbose (string);}
+	XSeen.LogDebug		= function (string) {XSeen.Logging.logDebug (string);}
+	XSeen.LogInfo		= function (string) {XSeen.Logging.logInfo (string);}
+	XSeen.LogWarn		= function (string) {XSeen.Logging.logWarn (string);}
+	XSeen.LogError		= function (string) {XSeen.Logging.logError (string);}
+
 	if (!(typeof(XSeen.Runtime.Attributes.src) == 'undefined' || XSeen.Runtime.Attributes.src == '')) {
-		console.log ('INFO: *** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
+		XSeen.LogDebug ('*** external SRC file specified ... |'+XSeen.Runtime.Attributes.src+'|');
 		loadExternal (XSeen.Runtime.Attributes.src, XSeen.Runtime.RootTag);
 	}
 
@@ -2138,17 +2173,14 @@ XSeen.onLoad = function() {
 	}
 	if (XSeen.Runtime.isTransparent) {
 		Renderer = new THREE.WebGLRenderer({'alpha':true,});		// Sets transparent WebGL canvas
-		//console.log ('INFO: Creating a transparent rendering canvas.');
 	} else {
 		Renderer = new THREE.WebGLRenderer();
-		//console.log ('INFO: Creating a opaque rendering canvas.');
 	}
 	XSeen.Runtime.RendererStandard	= Renderer;
 	XSeen.Runtime.RendererStereo	= new THREE.StereoEffect(Renderer);
 	XSeen.Runtime.Renderer			= XSeen.Runtime.RendererStandard;
 	Renderer = null;
 	
-	XSeen.Logging = XSeen.definitions.Logging.init (XSeen.Runtime.Attributes['showlog'], XSeen.Runtime.RootTag);
 	XSeen.Runtime.Size = XSeen.updateDisplaySize (XSeen.Runtime.RootTag);	// TODO: test
 	XSeen.Runtime.Renderer.setSize (XSeen.Runtime.Size.width, XSeen.Runtime.Size.height);
 
@@ -2160,7 +2192,7 @@ XSeen.onLoad = function() {
 
 	if (XSeen.Runtime.mediaAvailable && XSeen.Runtime.isTransparent) {
 	} else {
-		console.log ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
+		XSeen.LogVerbose ('Device Media support is not available or NOT requested ('+XSeen.Runtime.isTransparent+')');
 	}
 
 	
@@ -2178,16 +2210,9 @@ XSeen.onLoad = function() {
 /*
  * Stereo camera effect and device orientation controls are set on each camera
  */
-	XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	//XSeen.Runtime.hasDeviceOrientation = (window.orientation) ? true : false;
+	XSeen.Runtime.hasDeviceOrientation = (window.DeviceOrientationEvent) ? true : false;
 	XSeen.Runtime.hasVrImmersive = XSeen.Runtime.hasDeviceOrientation;
-
-	
-	// Define a few equivalences
-
-	XSeen.LogInfo	= function (string) {XSeen.Logging.logInfo (string);}
-	XSeen.LogDebug	= function (string) {XSeen.Logging.logDebug (string);}
-	XSeen.LogWarn	= function (string) {XSeen.Logging.logWarn (string);}
-	XSeen.LogError	= function (string) {XSeen.Logging.logError (string);}
 	
 /*
  * Handle debug settings.
@@ -2198,7 +2223,10 @@ XSeen.onLoad = function() {
 		let params = new URLSearchParams(document.location.search.substring(1));
 		_debug = params.get("xseen_debug") || '';
 	}
-	if (_debug != '') XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+	if (_debug != '') {
+		XSeen.Logging.setLoggingLevel (_debug, XSeen.Runtime.RootTag);
+		XSeen.Logging.setConsoleLevel (_debug);
+	}
 
 /*
  * Create XSeen default elements
@@ -2211,7 +2239,7 @@ XSeen.onLoad = function() {
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
-	var splashScreen = '<div id="XSeen-Splash"><img src="https://XSeen.org/Resources/logo.svg" width="'+XSeen.Runtime.Size.width/2+'"><div><div class="spinner">&ohbar;</div> Loading</div></div>';
+	var splashScreen = '<div id="XSeen-Splash"><img src="https://XSeen.org/Resources/logo.svg" width="'+XSeen.Runtime.Size.width/2+'"><div><div class="spinner">&ohbar;</div>&nbsp;Loading</div></div>';
 	console.log (splashScreen);
 	tmp.innerHTML = splashScreen;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
@@ -2229,11 +2257,9 @@ XSeen.onLoad = function() {
 
 	
 // Introduce things
-	XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
-	XSeen.LogInfo(XSeen.Version.splashText);
-	//XSeen.LogDebug ("Debug line");
-	//XSeen.LogWarn ("Warn line");
-	//XSeen.LogError ("Error line");
+	//XSeen.Logging.logInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo ("XSeen version " + XSeen.Version.version + ", " + "Date " + XSeen.Version.date);
+	XSeen.LogInfo (XSeen.Version.splashText);
 	
 // Load all other onLoad methods
 	for (var ii=0; ii<XSeen.onLoadCallBack.length; ii++) {
@@ -2243,17 +2269,7 @@ XSeen.onLoad = function() {
 // Create XSeen event listeners
 //	*move events are not included because they are added after the initiating event (touchstart/mousedown)
 	XSeen.Events.enableEventHandling();
-/*
-	XSeen.Runtime.RootTag.addEventListener ('mouseover', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseout', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mousedown', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('mouseup', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('click', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('dblclick', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchstart', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchend', XSeen.Events.xseen, true);
-	XSeen.Runtime.RootTag.addEventListener ('touchcancel', XSeen.Events.xseen, true);
-*/
+
 
 /*
  * Define event handlers for content loading
@@ -2279,9 +2295,7 @@ XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting)
  */
 XSeen.onLoadStartProcessing = function() {
 
-	//console.log ('Checking _xseen');
 	if (typeof(XSeen.Runtime.RootTag._xseen) === 'undefined') {
-		//console.log ('Defining _xseen');
 		XSeen.Runtime.RootTag._xseen = {					// Duplicated from Tag.js\%line202
 									'children'		: [],	// Children of this tag
 									'Metadata'		: [],	// Metadata for this tag
@@ -2296,7 +2310,7 @@ XSeen.onLoadStartProcessing = function() {
 	}
 // Parse the HTML tree starting at scenesToParse[0]. The method returns when there is no more to parse
 	//XSeen.Parser.dumpTable();
-	//console.log ('Starting Parse...');
+	XSeen.LogVerbose ('Starting Parse...');
 	XSeen.Parser.Parse (XSeen.Runtime.RootTag, XSeen.Runtime.RootTag);
 	
 	var newEv = new CustomEvent('xseen-go', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'render'));
@@ -2326,7 +2340,7 @@ XSeen.updateDisplaySize = function (sceneRoot) {
 	size.iwidth = 1.0 / size.width;
 	size.iheight = 1.0 / size.height;
 	size.aspect = size.width * size.iheight;
-	//console.log ('Display size: ' + size.width + ' x ' + size.height);
+	XSeen.LogDebug ('Display size: ' + size.width + ' x ' + size.height);
 	return size;
 };
 
@@ -2676,7 +2690,7 @@ XSeen.Parser = {
 				this.parseAttrs (element, tagEntry);
 				//console.log ('Calling node: ' + tagName + '. Method: ' + tagEntry.init + ' (e,p)');
 				//console.log('Calling node: ' + tagName + '. Method: init');
-				XSeen.LogInfo('Calling node: ' + tagName + '. Method: init');
+				XSeen.LogVerbose('Calling node: ' + tagName + '. Method: init');
 				tagEntry.init (element, parent);
 			}
 
@@ -3276,14 +3290,23 @@ XSeen.Parser = {
  *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
  *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
  *	0.8.69:	Added (CSS) animation to initial wait
+ *	0.8.70:	Added logging levels and cleaned up existing code debug statements
+ *	0.8.71:	Fixed timing condition with loading texture cubes for scene backgrounds
+ 
+ Rewrite code for handling cubemap images to support both x-cubemap and solid geometry nodes
+ Investigate failure of device mode tracking when in portrait mode
+ Figure out screen size when rotating between landscape and portrait (and perhaps vice-versa)
  
  *TODO:
+ *	Fix viewing controls when AR requested but not capable
+ *	Spherical harmonics environment map lighting
  *	Update to latest THREE and various libraries (V0.9)
+ *	Audio (V0.9)
+ * 	WebRTC?
  *	Create event for parsing complete (xseen-parsecomplete). This potentially starts animation loop
  *	Resolve CAD positioning issue
  *	Additional PBR
  *	Fix for style3d (see embedded TODO)
- *	Audio (V0.9)
  *	Editor
  *	Events (add events as needed)
  *	Labeling (add space positioning)
@@ -3301,11 +3324,11 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 69,
+					'_Patch'		: 71,
 					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-06-19',
+					'_RDate'		: '2019-07-26',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
 					'tagPrefix'		: 'x-',
 					'rootTag'		: 'scene',
@@ -3997,7 +4020,6 @@ XSeen.Parser.defineTag ({
 
 XSeen.Tags.background = {
 	'_changeAttribute'	: function (e, attributeName, value) {
-			//console.log ('Changing attribute ' + attributeName + ' of ' + e.localName + '#' + e.id + ' to |' + value + ' (' + e.getAttribute(attributeName) + ')|');
 			// TODO: add handling of change to 'backgroundiscube' attribute. Need to tie this is an image format change.
 			if (value !== null) {
 				if (attributeName == 'src' && e._xseen.imageSource.substring(0,1) == '#') {
@@ -4033,8 +4055,7 @@ XSeen.Tags.background = {
 			function cameraExists () {
 				var constraints = {video: {facingMode: {exact: "environment"}}};
 				function handleError(error) {
-					//console.error('Reeeejected!', error);
-					console.log ('Device camera not available -- ignoring');
+					XSeen.LogVerbose ('Device camera not available -- ignoring');
 					exists = false;
 				}
 				var exists = false;
@@ -4042,10 +4063,9 @@ XSeen.Tags.background = {
 					.then(gotDevices).catch(handleError);
 
 				function gotDevices(deviceInfos) {
-					//console.log (deviceInfos);
 					for (var i = 0; i !== deviceInfos.length; ++i) {
 						var deviceInfo = deviceInfos[i];
-						console.log('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
+						XSeen.LogVerbose ('Found a media device matching constraints of type: ' + deviceInfo.kind + ' (' + deviceInfo.label + ' -- ' + deviceInfo.groupId + ')');
 						exists = true;
 					}
 				}
@@ -4074,13 +4094,16 @@ XSeen.Tags.background = {
 			e.parentNode._xseen.children.push(e._xseen.sphere);
 			
 			// Define video support
+			//	Need global variable indicating that video element has been created and to use that one.
 			if (XSeen.Runtime.allowAR && cameraExists()) {
 				var video = document.createElement( 'video' );
 				video.setAttribute("autoplay", "1"); 
-				video.height			= XSeen.Runtime.SceneDom.height;
-				video.width				= XSeen.Runtime.SceneDom.width;
+				//video.height			= XSeen.Runtime.SceneDom.height;
+				//video.width				= XSeen.Runtime.SceneDom.width;
 				video.style.height		= video.height + 'px';
 				video.style.width		= video.width + 'px';
+				video.style.height		= '100%';
+				video.style.width		= '100%';
 				video.style.position	= 'absolute';
 				video.style.top			= '0';
 				video.style.left		= '0';
@@ -4109,14 +4132,14 @@ XSeen.Tags.background = {
 			e._xseen.srcType = XSeen.Tags.background._checkSrc (e._xseen.src);
 			if (type == 'camera') {
 				if (e._xseen.videoState == 'unavailable') {			// Rollback mechanism
-					console.log ('Device camera requested, but AR mode is not available.');
+					XSeen.LogVerbose ('Device camera requested, but AR mode is not available.');
 					type = 'sky';
 				} else if (e._xseen.videoState == 'running') {
-					console.log ('Device camera requested, but it is already running.');
+					XSeen.LogVerbose ('Device camera requested, but it is already running.');
 				} else if (e._xseen.videoState == 'defined') {
-					console.log ('Device camera requested, need to engage it.');
+					XSeen.LogVerbose ('Device camera requested, need to engage it.');
 				} else {
-					console.log ('Device camera requested, but it is XSeen cannot handled it -- No change to background.');
+					XSeen.LogVerbose ('Device camera requested, but it is XSeen cannot handled it -- No change to background.');
 				}
 			}
 
@@ -4180,36 +4203,19 @@ XSeen.Tags.background = {
 			var constraints = {video: {facingMode: {exact: "environment"}}};
 			var constraints = {video: {facingMode: "environment"}};
 			if (e._xseen.videoState != 'defined') {
-				console.log ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
+				XSeen.LogError ('Camera/video not correctly configured. Current state: ' + e._xseen.videoState);
 				return;
 			}
 			function handleSuccess(stream) {
 				e._xseen.video.srcObject = stream;
 				e._xseen.videoState = 'running';
-				console.log ('Camera/video (' + stream.id + ') engaged and connected to display.');
-				console.log (stream);
+				XSeen.LogVerbose ('Camera/video (' + stream.id + ') engaged and connected to display.');
+				XSeen.LogVerbose (stream);
 			}
 			function handleError(error) {
-				//console.error('Reeeejected!', error);
-				console.log ('Device camera not available -- ignoring');
+				XSeen.LogVerbose ('Device camera not available -- ignoring');
 				e._xseen.videoState = 'error';
 			}
-
-/*
- *	Debugging only. Figure out what media devices are available
-			navigator.mediaDevices.enumerateDevices()
-				.then(gotDevices).catch(handleError);
-
-			function gotDevices(deviceInfos) {
-				var msgs = '';
-				for (var i = 0; i !== deviceInfos.length; ++i) {
-					var deviceInfo = deviceInfos[i];
-					console.log('Found a media device of type: ' + deviceInfo.kind);
-					msgs += 'Found a media device of type: ' + deviceInfo.kind + "(" + deviceInfo.deviceId + '; ' + deviceInfo.groupId + ")\n";
-				}
-				//alert (msgs);
-			}
-*/
 
 			navigator.mediaDevices.getUserMedia(constraints).
 				then(handleSuccess).catch(handleError);
@@ -4235,8 +4241,6 @@ XSeen.Tags.background = {
 
 	'_updateBackground'	: function (ev) 
 		{
-			//console.log('Updating background from event');
-			//console.log(ev);
 			ev.detail.Runtime.SCENE.background = ev.target._xseen.cubemap;
 		},
 	'_loadBackground'	: function (e)
@@ -4246,10 +4250,15 @@ XSeen.Tags.background = {
 				if (e._xseen.imageSource.substring(0,1) == '#') {
 					var cubeMapNode = document.getElementById(e._xseen.imageSource.substring(1));
 					e._xseen.processedUrl = true;
-					//console.log ('Using background ');
-					//console.log (cubeMapNode._xseen.cubemap);
 					e._xseen.loadTexture = cubeMapNode._xseen.cubemap;
-					e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					if (cubeMapNode._xseen.cubemap.image.length != 6) {
+						e._xseen.sceneInfo.SCENE.background = e._xseen.color;
+						cubeMapNode.addEventListener ('xseen-loadcomplete', function(ev) {
+								XSeen.Runtime.SCENE.background = ev.target._xseen.cubemap;
+						});
+					} else {
+						e._xseen.sceneInfo.SCENE.background = cubeMapNode._xseen.cubemap;
+					}
 					cubeMapNode.addEventListener ('xseen-assetchange', XSeen.Tags.background._updateBackground, true);
 
 				} else {
@@ -4259,7 +4268,6 @@ XSeen.Tags.background = {
 						urls[ii] = e._xseen.src + files[ii] + e._xseen.srcExtension;
 					}
 
-					//console.log ('Loading background image cube');
 					var dirtyFlag;
 					XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.background.cubeLoadSuccess({'e':e}));
 					e._xseen.sphere.material.transparent = true;
@@ -4286,7 +4294,6 @@ XSeen.Tags.background = {
 						e._xseen.sphere.material.transparent = false;
 						e._xseen.sphere.material.opacity = 1.0;
 						e._xseen.sphere.material.needsUpdate = true;
-						//console.log (e._xseen.sphere.material);
 					}
 				}
 			}
@@ -4302,18 +4309,18 @@ XSeen.Tags.background = {
 				thisEle._xseen.processedUrl = true;
 				thisEle._xseen.loadTexture = textureCube;
 				thisEle._xseen.sceneInfo.SCENE.background = textureCube;
-				//console.log ('Successful load of background texture cube.');
 			}
 		},
 	'loadProgress' : function (a)
 		{
-			console.log ('Loading background textures...');
+			XSeen.LogInfo ('Loading background textures...');
+			XSeen.LogInfo (a);
 		},
 	'loadFailure' : function (a)
 		{
 			//a._xseen.processedUrl = false;
-			console.log ('Load failure');
-			console.log ('Failure to load background textures.');
+			XSeen.LogWarn ('Load failure');
+			XSeen.LogWarn ('Failure to load background textures.');
 		},
 };
 
@@ -4364,14 +4371,6 @@ XSeen.Tags.camera = {
 			e._xseen.rendererHasControls = false;		// Only for renderers with built-in controls (e.g., vr)
 			e._xseen.useDeviceOrientation = false;
 			e._xseen.isStereographic = false;
-/*
- *	These are now set in the Camera Manager
-			e._xseen.sceneInfo.Camera.position.set (
-							e._xseen.attributes.position.x,
-							e._xseen.attributes.position.y,
-							e._xseen.attributes.position.z);
-			e._xseen.sceneInfo.Camera.lookAt(0,0,0);		// Look at origin. Seems to be required for object type.
- */
 			e._xseen.priority = e._xseen.attributes.priority;
 			if (e._xseen.priority < 0) {e._xseen.priority = 1;}
 			e._xseen.available = e._xseen.attributes.available;
@@ -4406,20 +4405,21 @@ XSeen.Tags.camera = {
  *	'device'	==> orbit if !hasDeviceOrientation
  */
  
-			console.log ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+			XSeen.LogVerbose ("Camera type: '"+e._xseen.type+"' with controls " + e._xseen.track);
+			
  
 			if (e._xseen.type == 'orthographic') {			// TODO: Orthographic projection
 			
 			} else if (e._xseen.type == 'perspective') {	// Perspective camera -- default
 				if (e._xseen.track == 'device') {
 					if (e._xseen.sceneInfo.hasDeviceOrientation) {
-						console.log ('... using device orientation');
+						XSeen.LogVerbose ('... using device orientation');
 						//e._xseen.track = (e._xseen.target === null) ? 'environment' : 'object'
 						e._xseen.track = (e._xseen.target === null) ? e._xseen.track : 'object'
 						e._xseen.useDeviceOrientation = true;
 						//e._xseen.sceneInfo.useDeviceOrientation = true;
 					} else {
-						console.log ('... using orbit controls');
+						XSeen.LogVerbose ('... using orbit controls');
 						e._xseen.track = 'orbit';
 						e._xseen.useDeviceOrientation = false;
 						//e._xseen.sceneInfo.useDeviceOrientation = false;
@@ -4443,7 +4443,7 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.rendererHasControls = true;
 					document.body.appendChild( WEBVR.createButton( e._xseen.sceneInfo.Renderer ) );
 				} else if (e._xseen.sceneInfo.hasDeviceOrientation) {
-					console.log ("VR requested, but no VR device found. Using 'stereo' instead.");
+					XSeen.LogVerbose ("VR requested, but no VR device found. Using 'stereo' instead.");
 					e._xseen.type = 'stereo';
 					e._xseen.track = 'device';
 					e._xseen.sceneInfo.Renderer = e._xseen.sceneInfo.RendererStereo;
@@ -4451,7 +4451,7 @@ XSeen.Tags.camera = {
 					e._xseen.sceneInfo.isStereographic = true;
 					// Need to add a button to the display to go full screen & stereo
 				} else {													// Flat screen
-					console.log ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
+					XSeen.LogVerbose ("VR requested, but no VR device nor device orientation found. Using 'perspective' instead.");
 					e._xseen.type = 'perspective';
 					e._xseen.track = 'orbit';
 				}
@@ -4531,11 +4531,6 @@ XSeen.Tags.camera = {
 			}
 
 			e._xseen.sceneInfo.ViewManager.add (e);
-			//if (typeof(e._xseen.sceneInfo.DefinedCameras[e._xseen.priority]) == 'undefined') {e._xseen.sceneInfo.DefinedCameras[e._xseen.priority] = [];}
-			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push (e);
-			//e._xseen.ndxCamera = e._xseen.sceneInfo.DefinedCameras.length - 1;
-			//e._xseen.sceneInfo.DefinedCameras[e._xseen.priority].push ('Defined ' + e._xseen.type + ' camera#' + e.id + ' at (' + e._xseen.attributes.position.x + ', ' + e._xseen.attributes.position.y + ', ' + e._xseen.attributes.position.z + ')');
-			//console.log ('Adding camera at priority ' + e._xseen.priority);
 		},
 	'fin'	: function (e, p) 
 		{
@@ -4654,7 +4649,7 @@ XSeen.Tags.cubemap = {
 				for (var ii=0;  ii<files.length; ii++) {
 					urls[ii] = e._xseen.attributes.npxyz + '/' + files[ii] + '.' + e._xseen.format;
 				}
-				console.log ('Loading image cubemap');
+				XSeen.LogDebug ('Loading image cubemap');
 				var dirtyFlag;
 				XSeen.Loader.TextureCube ('./', urls, '', XSeen.Tags.cubemap.cubeLoadSuccess({'e':e, 'cube':true}));
 			} else {
@@ -4879,7 +4874,7 @@ XSeen.Tags.group = {
 	'animateObject'	: function (x, property, value) 
 		{
 			x.loadGroup[property](value);
-			console.log (value);
+			XSeen.LogDebug (value);
 		},
 };
 
@@ -5595,9 +5590,10 @@ XSeen.Tags.scene = {
 		{
 
 /*
- *	Add an event listener to this node for resize events
+ *	Add an event listener to this node for resize (including orientation change) events
  */
 			window.addEventListener ('resize', XSeen.Runtime.Resize, false);
+			window.addEventListener ('orientationchange', XSeen.Runtime.Resize, false);
 /*
  * TODO: Need to get current top-of-stack for all stack-bound nodes and set them as active.
  *	This only happens the initial time for each XSeen tag in the main HTML file

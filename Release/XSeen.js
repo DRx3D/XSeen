@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.71-beta+8_15e438b
- *  Built Fri Jul 26 07:25:08 2019
+ *  XSeen V0.8.71-beta+8_9bee4fe
+ *  Built Sun Aug 11 19:38:47 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -69,22 +69,22 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 #      1956: ./onLoad.js
 #      2386: ./Tag.js
 #      3207: ./XSeen.js
-#      3486: tags/$.js
-#      3555: tags/animate.js
-#      3965: tags/asset.js
-#      3993: tags/background.js
-#      4351: tags/camera.js
-#      4565: tags/cubemap.js
-#      4715: tags/fog.js
-#      4798: tags/group.js
-#      4901: tags/label.js
-#      5087: tags/light.js
-#      5192: tags/metadata.js
-#      5301: tags/model.js
-#      5549: tags/scene.js
-#      5662: tags/solids.js
-#      6717: tags/style3d.js
-#      6900: tags/subscene.js
+#      3412: tags/$.js
+#      3481: tags/animate.js
+#      3891: tags/asset.js
+#      3919: tags/background.js
+#      4277: tags/camera.js
+#      4491: tags/cubemap.js
+#      4641: tags/fog.js
+#      4724: tags/group.js
+#      4827: tags/label.js
+#      5013: tags/light.js
+#      5118: tags/metadata.js
+#      5227: tags/model.js
+#      5475: tags/scene.js
+#      5588: tags/solids.js
+#      6643: tags/style3d.js
+#      6826: tags/subscene.js
 */
 // File: ./CameraManager.js
 /*
@@ -3218,84 +3218,10 @@ XSeen.Parser = {
  * Based on code originally provided by
  * Philip Taylor: http://philip.html5.org
  *
- *	0.6.2: Fixed Camera and navigation bug
- *	0.6.3: Added Plane and Ring
- *	0.6.4: Fixed size determination bug
- *	0.6.5: Added Fog
- *	0.6.6: Added Metadata [Release]
- *	0.6.7: Added tknot (torus knot)
- *	0.6.8: Added PBR
- *	0.6.9: Preliminary fix for display size
- *	0.6.10: Fix for background urls not present
- *	0.6.11: Created common routine for loading texture cubes - fixed envMap for PBR.
- *	0.6.12: Simple animation (no way-points)
- *	0.6.13: Way point animation
- *	0.6.14: Mouse event creation
- *	0.6.15: Rotation animation
- *	0.6.16: Added Label tag
- *	0.6.17: Fixed a number of issues - asynchronous model loading, group, scene loading, camera
- *	0.6.18: Allowed user identified non-selectable geometry
- *	0.6.19: Fixed handling of skycolor in background
- *
- *	0.7.20: Added asset capability for Material
- *	0.7.21: Added axis-angle parsing for rotation
- *	0.7.22: Added additional color type f3 (fractional rgb - direct support for X3D)
- *	0.7.23: Added support for external XSeen files in XML format.
- *	0.7.24: Added support for device camera background use.
- *	0.7.25: Support device motion controlling object position
- *	0.7.26: Initial support for multiple cameras
- *	0.7.27: Spherical (photosphere) backgrounds
- *	0.7.28: Change event handling for background attributes
- *	0.7.29: Support indexed triangle sets. 
- *	0.7.30: Changed XSeen custom event names to xseen-touch (for all mouse-click) and xseen-render (for rendering) events
- *	0.7.31: Cleaned up some extra console output statements
- *	0.7.32: Support position attribute mutations for all 'solid' tags. (RC1)
- *	0.7.33: Camera switching API plus fix for leaving stereo camera. (RC1)
- *
- *	0.7.34:	Added geometry to asset tag capabilities
- *	0.7.35:	Added 'attribute' child tag so selected attribute values can be moved to content (TextNode)
- *	0.7.36:	Fix display size wrt browser window size
- *	0.7.37:	Create XSeen splash screen
- *	0.7.38:	Created stereographic/full-screen button and request support function
- *	0.7.39: Added support for wireframe switch to all solids
- *	0.7.40:	Added support for DOM changes to lights
- *	0.7.41:	Fixed use of color in fog
- *	0.7.42:	Fixed bug in label and leader dealing with not handling 'leadercolor' attribute.
- *	0.7.43:	Added mutation control of active, near, far in fog.
- *	0.7.44:	Removed a number of console log debug output statements from XSeen
- *
- *		Mostly events and support W3C Immersive Web AR display concepts
- *	0.8.45:	Created new file ($.js) for general purpose tag support functions
- *	0.8.46:	Added mutation support to 'group' tag
- *	0.8.47: Fixed 'animate delay="x" ...' to only introduce a delay on the initial animation
- *	0.8.48:	Added support for group mutation in 'solids.js'
- *	0.8.49:	Added support for 'emissive' color in 'solids.js'
- *	0.8.50: Cleaned up & refined splash screen placement
- *	0.8.51: Added camera and device normals to events
- *	0.8.52: Created XSeen drag (mousemove) event
- *	0.8.53:	Improved support for device camera (see TODO note below) to match W3C Immersive Web concepts (full-screen)
- *	0.8.54:	Multi-touch events
- *	0.8.55:	Added methods to mark/unmark object as Active
- *	0.8.56:	Disabled Orbit tracker if camera is not being used (mostly needed for device motion tracking)
- *	0.8.57:	Added methods to enable/disable cursor/mouse event handling (needed for Gesture handling)
- *	0.8.58:	Added method to perform Y-axis rotation
- *	0.8.59:	Added new attribute to XSeen that lets the developer specify a tag for full-screen
- *	0.8.60:	Added xseen-go event to indicate start of animation loop
- *	0.8.61:	Revised control state button handling
- *	0.8.62:	Added node to handle cubemaps as a resource
- *	0.8.63:	Fixed camera controls bug. controls broken with 0.8.56
- *	0.8.64:	Update 'model' and 'background' to use cubemaps with event handlers
- *	0.8.65:	Added getVideoFrame method to XSeen
- *	0.8.66:	Added events for asynchronous content loading (start, progress, complete, fail)
- *	0.8.67:	Added reporting of LOAD events with tag attribute (in progress)
- *	0.8.68:	Added ability to control logging from URL (?xseen_debug=<defined-level-string>)
- *	0.8.69:	Added (CSS) animation to initial wait
- *	0.8.70:	Added logging levels and cleaned up existing code debug statements
- *	0.8.71:	Fixed timing condition with loading texture cubes for scene backgrounds
- 
+
+ * NEXT: 
  Rewrite code for handling cubemap images to support both x-cubemap and solid geometry nodes
  Investigate failure of device mode tracking when in portrait mode
- Figure out screen size when rotating between landscape and portrait (and perhaps vice-versa)
  
  *TODO:
  *	Fix viewing controls when AR requested but not capable

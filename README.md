@@ -6,7 +6,7 @@ behavior declaratively, without any low-level JavaScript or GLSL coding.
 
 ## Getting started
 
-The original documentation is at http://tools.realism.com/specification/xseen. Starting with V0.8, the documentation is being moved to [Documentation](Documentation.md) as part of the GitHub repo.
+The original documentation is at http://tools.realism.com/specification/xseen. Starting with V0.8, the documentation is being moved to [Documentation](Documentation/Documentation.md) as part of the GitHub repo.
 
 glTF models with animation (including deformed skin from joint animation) are supported and texture cubes are supported for all uses (backgrounds and environment maps. 
 
@@ -15,12 +15,12 @@ V0.8 now supports AR mode where the device camera (if available) is used as the 
 The release code is in /Release
 Release notes for each minor release
  
- * [0.6](ReleaseNotes-V.6.md)
- * [0.7](ReleaseNotes-V.7.md)
- * [0.8](ReleaseNotes-V.8.md)
+ * [0.6](Documentation/ReleaseNotes-V.6.md)
+ * [0.7](Documentation/ReleaseNotes-V.7.md)
+ * [0.8](Documentation/ReleaseNotes-V.8.md)
 
 
-External libraries are kept for convienence in /ExternalLibraries. These can be updated
+External libraries are kept for convenience in /ExternalLibraries. These can be updated
 and replaced as needed. This directory includes
  * jquery-3.2.1.min.js -- from http://jquery.com/download/
  * three.js R89 -- from https://threejs.org/
@@ -46,7 +46,7 @@ at run-time. It can run as a client in any server environment (Python SimpleServ
 
 ## Next Release
 
-0.9 will contain some major items to be released prior to the first standardized release. The biggest change will be preperation for the new tag prefix. XSeen will use the prefix 'xr-' for all tags. In V0.9, both 'x-' and 'xr-' will be supported with the 'x-' version being deprecated. After that 'x-' will only be supported as a conversion marker. Details will be providing during the release. 
+0.9 will contain some major items to be released prior to the first standardized release. The biggest change will be preparation for the new tag prefix. XSeen will use the prefix 'xr-' for all tags. In V0.9, both 'x-' and 'xr-' will be supported with the 'x-' version being deprecated. After that 'x-' will only be supported as a conversion marker. Details will be providing during the release. 
 
 In addition the following items are planned for the next release (0.9).
 

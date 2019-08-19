@@ -35,7 +35,8 @@ XSeen.onLoad = function() {
 							XSeen.LogDebug ('Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
-							var rootNode = xmlDoc.getElementsByTagName('x-scene');
+							var rootNode = xmlDoc.getElementsByTagName('xr-scene');
+							if (rootNode === null) {rootNode = xmlDoc.getElementsByTagName('x-scene');}
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
 								XSeen.LogVerbose ('Adding external node: ' + nodes[0].nodeName);
@@ -65,6 +66,7 @@ XSeen.onLoad = function() {
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
 
 	sceneOccurrences = document.getElementsByTagName (XSeen.Constants.tagPrefix + XSeen.Constants.rootTag);
+	if (sceneOccurrences.length == 0) {sceneOccurrences = document.getElementsByTagName (XSeen.Constants.tagPrefixAlt + XSeen.Constants.rootTag);}
 	for (ii=0; ii<sceneOccurrences.length; ii++) {
 		if (typeof(sceneOccurrences[ii]._xseen) === 'undefined') {
 			XSeen._Scenes.push(sceneOccurrences[ii]);
@@ -273,12 +275,12 @@ XSeen.onLoad = function() {
 
 /*
  * Create XSeen default elements
- *	Default camera by adding a first-child node to x-scene
- *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ *	Default camera by adding a first-child node to xr-scene
+ *		<xr-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
  *	Splash screen
  *		<img src='logo.svg' width='100%'>
  */
-	var defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var defaultCamera = "<xr-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></xr-camera>";
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
@@ -326,7 +328,7 @@ XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting)
 
 
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
-//	<x-scene> tag but bubbles up so it can be caught.
+//	<xr-scene> tag but bubbles up so it can be caught.
 	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'initialize'));
 	XSeen.Runtime.RootTag.dispatchEvent(newEv);
 	return;
@@ -404,8 +406,8 @@ XSeen.getVideoFrame = function() {
 			canvas = document.createElement('canvas');
 			context = canvas.getContext('2d');
 
-			video = (jQuery)('x-scene video')[0];
-			//video = (jQuery)('#TEST')[0];
+			video = (jQuery)('xr-scene video')[0];
+			if (video.length == 0) {video = (jQuery)('x-scene video')[0];}
 			height = video.height;
 			width = video.width;
 			canvas.width = width;

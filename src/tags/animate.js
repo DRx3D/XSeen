@@ -350,7 +350,7 @@ XSeen.Tags.key = {
 	 */
 	'init'	: function (e,p) 
 		{
-			if (p.nodeName != 'X-ANIMATE') {return; }
+			if (!(p.nodeName == 'XR-ANIMATE' || p.nodeName == 'X-ANIMATE')) {return; }
 			var duration = e._xseen.attributes.duration;
 			if (!p._xseen.keyFraction) {
 				if (duration <= 0) {return; }

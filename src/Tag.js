@@ -53,8 +53,9 @@ XSeen.Tags = {
 					},
 };
 XSeen.Parser = {
-	'Table'		: {},
-	'_prefix'	: 'x-',
+	'Table'			: {},
+	'_prefix'		: 'xr-',
+	'_prefixAlt'	: 'x-',
 	'AttributeObserver'	: new MutationObserver(function(list) {
 							for (var mutation of list) {
 								var value = XSeen.Parser.reparseAttr (mutation.target, mutation.attributeName);
@@ -69,25 +70,25 @@ XSeen.Parser = {
 	'ChildObserver'	: new MutationObserver(function(list) {
 				for (var mutation of list) {
 					//console.log ('Child mutation element');
-                              		mutation.addedNodes[0]._xseen = {
-                                                           'children'              : [],   // Children of this tag
-                                                           'Metadata'              : [],   // Metadata for this tag
-                                                           'tmp'                   : [],   // tmp working space
-                                                           'attributes'    : [],   // attributes for this tag
-                                                           'animate'               : [],   // animatable attributes for this tag
-                                                           'animation'             : [],   // array of animations on this tag
-                                                           'properties'    : [],   // array of properties (active attribute values) on this tag
-                                                           'class3d'               : [],   // 3D classes for this tag
-                                                           'parseComplete' : false,        // tag has been completely parsed
-                                                           'sceneInfo'             : mutation.target._xseen.sceneInfo,     // Runtime...
-                                                                        };
+					mutation.addedNodes[0]._xseen = {
+									'children'          : [],   // Children of this tag
+                                    'Metadata'          : [],   // Metadata for this tag
+                                    'tmp'               : [],   // tmp working space
+                                    'attributes'		: [],   // attributes for this tag
+                                    'animate'           : [],   // animatable attributes for this tag
+                                    'animation'         : [],   // array of animations on this tag
+                                    'properties'    	: [],   // array of properties (active attribute values) on this tag
+                                    'class3d'           : [],   // 3D classes for this tag
+                                    'parseComplete' 	: false,        // tag has been completely parsed
+                                    'sceneInfo'         : mutation.target._xseen.sceneInfo,     // Runtime...
+					};
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
-					if (mutation.target.localName == 'x-scene') {
-						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+					if (mutation.target.localName == 'xr-scene' || mutation.target.localName == 'x-scene') {
+						XSeen.Tags.scene.addScene();			// Not the most elegant way to do this... :-(
 						XSeen.Runtime.ViewManager.setNext();	// Update the camera
 					}
-							}
-						}),
+				}
+			}),
 
 
 	'TypeInfo'		: {
@@ -240,12 +241,15 @@ XSeen.Parser = {
 		
 // TODO: Debug element parse method
 /*
- * This is called recursively starting with the first <x-scene> tag
+ * This is called recursively starting with the first <xr-scene> tag
  */
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			if (tagName.substring(0,2) == XSeen.Parser._prefixAlt) {	// This logic assumes tagPrefixAlt is 2 characters
+				tagName = XSeen.Parser._prefix + tagName.substring(2);
+			}
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,

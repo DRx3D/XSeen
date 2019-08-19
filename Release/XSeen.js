@@ -1,6 +1,6 @@
 /*
- *  XSeen V0.8.71-beta+8_9bee4fe
- *  Built Sun Aug 11 19:38:47 2019
+ *  XSeen V0.8.1+8_29dcffa
+ *  Built Mon Aug 19 15:28:19 2019
  *
 
 Dual licensed under the MIT and GPL licenses.
@@ -67,24 +67,24 @@ Copyright (C) 2017, John Carlson for JSON->XML converter (JSONParser.js)
 #      1466: ./Loader.js
 #      1818: ./Logging.js
 #      1956: ./onLoad.js
-#      2386: ./Tag.js
-#      3207: ./XSeen.js
-#      3412: tags/$.js
-#      3481: tags/animate.js
-#      3891: tags/asset.js
-#      3919: tags/background.js
-#      4277: tags/camera.js
-#      4491: tags/cubemap.js
-#      4641: tags/fog.js
-#      4724: tags/group.js
-#      4827: tags/label.js
-#      5013: tags/light.js
-#      5118: tags/metadata.js
-#      5227: tags/model.js
-#      5475: tags/scene.js
-#      5588: tags/solids.js
-#      6643: tags/style3d.js
-#      6826: tags/subscene.js
+#      2388: ./Tag.js
+#      3213: ./XSeen.js
+#      3419: tags/$.js
+#      3488: tags/animate.js
+#      3898: tags/asset.js
+#      3926: tags/background.js
+#      4284: tags/camera.js
+#      4498: tags/cubemap.js
+#      4648: tags/fog.js
+#      4731: tags/group.js
+#      4834: tags/label.js
+#      5020: tags/light.js
+#      5125: tags/metadata.js
+#      5234: tags/model.js
+#      5482: tags/scene.js
+#      5595: tags/solids.js
+#      6650: tags/style3d.js
+#      6833: tags/subscene.js
 */
 // File: ./CameraManager.js
 /*
@@ -1992,7 +1992,8 @@ XSeen.onLoad = function() {
 							XSeen.LogDebug ('Loading of external XSeen complete');
 							var parser = new DOMParser();
 							var xmlDoc = parser.parseFromString(response,"text/xml");
-							var rootNode = xmlDoc.getElementsByTagName('x-scene');
+							var rootNode = xmlDoc.getElementsByTagName('xr-scene');
+							if (rootNode === null) {rootNode = xmlDoc.getElementsByTagName('x-scene');}
 							var nodes = rootNode[0].children;
 							while (nodes.length > 0) {
 								XSeen.LogVerbose ('Adding external node: ' + nodes[0].nodeName);
@@ -2022,6 +2023,7 @@ XSeen.onLoad = function() {
 	if (typeof(XSeen._Scenes) === 'undefined') {XSeen._Scenes = [];}
 
 	sceneOccurrences = document.getElementsByTagName (XSeen.Constants.tagPrefix + XSeen.Constants.rootTag);
+	if (sceneOccurrences.length == 0) {sceneOccurrences = document.getElementsByTagName (XSeen.Constants.tagPrefixAlt + XSeen.Constants.rootTag);}
 	for (ii=0; ii<sceneOccurrences.length; ii++) {
 		if (typeof(sceneOccurrences[ii]._xseen) === 'undefined') {
 			XSeen._Scenes.push(sceneOccurrences[ii]);
@@ -2230,12 +2232,12 @@ XSeen.onLoad = function() {
 
 /*
  * Create XSeen default elements
- *	Default camera by adding a first-child node to x-scene
- *		<x-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
+ *	Default camera by adding a first-child node to xr-scene
+ *		<xr-camera position='0 0 10' type='perspective' track='orbit' priority='0' active='true' />
  *	Splash screen
  *		<img src='logo.svg' width='100%'>
  */
-	var defaultCamera = "<x-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></x-camera>";
+	var defaultCamera = "<xr-camera id='XSeen__DefaultCamera' position='0 0 10' type='perspective' track='orbit' priority='0' active='true' /></xr-camera>";
 	var tmp = document.createElement('div');
 	tmp.innerHTML = defaultCamera;
 	XSeen.Runtime.RootTag.prepend (tmp.firstChild);
@@ -2283,7 +2285,7 @@ XSeen.Runtime.RootTag.addEventListener('xseen-loadfail', XSeen.Loader.Reporting)
 
 
 // Create event to indicate the XSeen has fully loaded. It is dispatched on the 
-//	<x-scene> tag but bubbles up so it can be caught.
+//	<xr-scene> tag but bubbles up so it can be caught.
 	var newEv = new CustomEvent('xseen-initialize', XSeen.Events.propertiesReadyGo(XSeen.Runtime, 'initialize'));
 	XSeen.Runtime.RootTag.dispatchEvent(newEv);
 	return;
@@ -2361,8 +2363,8 @@ XSeen.getVideoFrame = function() {
 			canvas = document.createElement('canvas');
 			context = canvas.getContext('2d');
 
-			video = (jQuery)('x-scene video')[0];
-			//video = (jQuery)('#TEST')[0];
+			video = (jQuery)('xr-scene video')[0];
+			if (video.length == 0) {video = (jQuery)('x-scene video')[0];}
 			height = video.height;
 			width = video.width;
 			canvas.width = width;
@@ -2440,8 +2442,9 @@ XSeen.Tags = {
 					},
 };
 XSeen.Parser = {
-	'Table'		: {},
-	'_prefix'	: 'x-',
+	'Table'			: {},
+	'_prefix'		: 'xr-',
+	'_prefixAlt'	: 'x-',
 	'AttributeObserver'	: new MutationObserver(function(list) {
 							for (var mutation of list) {
 								var value = XSeen.Parser.reparseAttr (mutation.target, mutation.attributeName);
@@ -2456,25 +2459,25 @@ XSeen.Parser = {
 	'ChildObserver'	: new MutationObserver(function(list) {
 				for (var mutation of list) {
 					//console.log ('Child mutation element');
-                              		mutation.addedNodes[0]._xseen = {
-                                                           'children'              : [],   // Children of this tag
-                                                           'Metadata'              : [],   // Metadata for this tag
-                                                           'tmp'                   : [],   // tmp working space
-                                                           'attributes'    : [],   // attributes for this tag
-                                                           'animate'               : [],   // animatable attributes for this tag
-                                                           'animation'             : [],   // array of animations on this tag
-                                                           'properties'    : [],   // array of properties (active attribute values) on this tag
-                                                           'class3d'               : [],   // 3D classes for this tag
-                                                           'parseComplete' : false,        // tag has been completely parsed
-                                                           'sceneInfo'             : mutation.target._xseen.sceneInfo,     // Runtime...
-                                                                        };
+					mutation.addedNodes[0]._xseen = {
+									'children'          : [],   // Children of this tag
+                                    'Metadata'          : [],   // Metadata for this tag
+                                    'tmp'               : [],   // tmp working space
+                                    'attributes'		: [],   // attributes for this tag
+                                    'animate'           : [],   // animatable attributes for this tag
+                                    'animation'         : [],   // array of animations on this tag
+                                    'properties'    	: [],   // array of properties (active attribute values) on this tag
+                                    'class3d'           : [],   // 3D classes for this tag
+                                    'parseComplete' 	: false,        // tag has been completely parsed
+                                    'sceneInfo'         : mutation.target._xseen.sceneInfo,     // Runtime...
+					};
 					XSeen.Parser.Parse (mutation.addedNodes[0], mutation.target);
-					if (mutation.target.localName == 'x-scene') {
-						XSeen.Tags.scene.addScene();		// Not the most elegant way to do this... :-(
+					if (mutation.target.localName == 'xr-scene' || mutation.target.localName == 'x-scene') {
+						XSeen.Tags.scene.addScene();			// Not the most elegant way to do this... :-(
 						XSeen.Runtime.ViewManager.setNext();	// Update the camera
 					}
-							}
-						}),
+				}
+			}),
 
 
 	'TypeInfo'		: {
@@ -2627,12 +2630,15 @@ XSeen.Parser = {
 		
 // TODO: Debug element parse method
 /*
- * This is called recursively starting with the first <x-scene> tag
+ * This is called recursively starting with the first <xr-scene> tag
  */
 	'Parse'	: function (element, parent)
 		{
 			var tagName = element.localName.toLowerCase();		// Convenience declaration
-			//console.log ('Found ' + tagName);
+			if (tagName.substring(0,2) == XSeen.Parser._prefixAlt) {	// This logic assumes tagPrefixAlt is 2 characters
+				tagName = XSeen.Parser._prefix + tagName.substring(2);
+			}
+			console.log ('Found ' + tagName);
 			/*
 			 *	If tag name is unknown, then print message; otherwise,
 			 *	if element._xseen is defined, then node has already been parsed so ignore; otherwise,
@@ -3250,13 +3256,14 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 71,
-					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
+					'_Patch'		: 1,
+					'_PreRelease'	: '',		// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-07-26',
+					'_RDate'		: '2019-08-19',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
-					'tagPrefix'		: 'x-',
+					'tagPrefix'		: 'xr-',
+					'tagPrefixAlt'	: 'x-',
 					'rootTag'		: 'scene',
 					};
 XSeen.CONST = XSeen.DefineConstants();
@@ -3832,7 +3839,7 @@ XSeen.Tags.key = {
 	 */
 	'init'	: function (e,p) 
 		{
-			if (p.nodeName != 'X-ANIMATE') {return; }
+			if (!(p.nodeName == 'XR-ANIMATE' || p.nodeName == 'X-ANIMATE')) {return; }
 			var duration = e._xseen.attributes.duration;
 			if (!p._xseen.keyFraction) {
 				if (duration <= 0) {return; }
@@ -4411,8 +4418,8 @@ XSeen.Tags.camera = {
  *		checked when the camera is activated. Activating a camera causes the current active camera to deactivate.
  *	 No special processing is required for deactivating a camera.
  *
- *	A viewpoint list can be constructed with the x-class3d tag setting the same camera parameters and each 
- *	x-camera node having different position/rotation attributes.
+ *	A viewpoint list can be constructed with the xr-class3d tag setting the same camera parameters and each 
+ *	xr-camera node having different position/rotation attributes.
  *
  *	None of this should change the animation of a camera, though I don't know if the existing mechanisms
  *	correctly handle orientation change.

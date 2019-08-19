@@ -12,6 +12,7 @@
  */
 
 /* Overall scene info */
+xr-scene {position:absolute; top:0; left:0; width:100%; height:100%; }
 x-scene {position:absolute; top:0; left:0; width:100%; height:100%; }
 canvas {width:100%; height:100%; }
 
@@ -45,8 +46,6 @@ div#XSeen-Splash > div div.spinner {
     }
 }
 
-.xseen-label, .xseen-label-drag {border:1px solid blue; background-color:#ffff99; padding:5px; margin:3px; position:absolute; opacity:.7; border-radius:8px; }
-.xseen-label-drag {border-top-width:10px; border-bottom-width:10px; }
 
 /*
  * Don't think that any of these are needed. Whole block commented out just in case

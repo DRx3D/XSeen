@@ -133,8 +133,8 @@ XSeen.Tags.camera = {
  *		checked when the camera is activated. Activating a camera causes the current active camera to deactivate.
  *	 No special processing is required for deactivating a camera.
  *
- *	A viewpoint list can be constructed with the x-class3d tag setting the same camera parameters and each 
- *	x-camera node having different position/rotation attributes.
+ *	A viewpoint list can be constructed with the xr-class3d tag setting the same camera parameters and each 
+ *	xr-camera node having different position/rotation attributes.
  *
  *	None of this should change the animation of a camera, though I don't know if the existing mechanisms
  *	correctly handle orientation change.

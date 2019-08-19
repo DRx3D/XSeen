@@ -42,13 +42,14 @@ XSeen = (typeof(XSeen) === 'undefined') ? {} : XSeen;
 XSeen.Constants = {
 					'_Major'		: 0,		// Creates version as Major.Minor.Patch
 					'_Minor'		: 8,
-					'_Patch'		: 71,
-					'_PreRelease'	: 'beta',	// Sets pre-release status (usually Greek letters)
+					'_Patch'		: 1,
+					'_PreRelease'	: '',		// Sets pre-release status (usually Greek letters)
 					'_Release'		: 8,		// Release proceeded with '+'
 					'_Version'		: '',
-					'_RDate'		: '2019-07-26',
+					'_RDate'		: '2019-08-19',
 					'_SplashText'	: ["XSeen 3D Language parser.", "XSeen <a href='https://xseen.org/index.php/documentation/' target='_blank'>Documentation</a>."],
-					'tagPrefix'		: 'x-',
+					'tagPrefix'		: 'xr-',
+					'tagPrefixAlt'	: 'x-',
 					'rootTag'		: 'scene',
 					};
 XSeen.CONST = XSeen.DefineConstants();

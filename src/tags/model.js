@@ -47,8 +47,9 @@ XSeen.Tags.model = {
  *	It generates a list of all matching nodes for this texture, then updates each one in turn
  */
 			e._xseen._updateEnvMap = function (ev) {
-				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
-				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				//var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("xr-model[env-map='#"+ev.target.id+"']");
+				if (eleList.length == 0) {eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");}
 				eleList.forEach(function(modelEle) {
 					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
 					XSeen.Tags.model.applyEnvMap(modelEle);
@@ -106,8 +107,9 @@ XSeen.Tags.model = {
  */
 	'_updateEnvMap'	: function (ev) {
 				if (ev.detail.type != 'texturecube') return;
-				var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
-				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");
+				//var cssQuery = "x-model[env-map='#" + ev.target.id + "']";
+				var eleList = ev.detail.Runtime.RootTag.querySelectorAll("xr-model[env-map='#"+ev.target.id+"']");
+				if (eleList.length == 0) {eleList = ev.detail.Runtime.RootTag.querySelectorAll("x-model[env-map='#"+ev.target.id+"']");}
 				eleList.forEach(function(modelEle) {
 					modelEle._xseen.properties.envMap = ev.target._xseen.cubemap;
 					XSeen.Tags.model.applyEnvMap(modelEle);
